@@ -16,6 +16,7 @@ use IEEE.NUMERIC_STD.ALL;
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
+use work.microbasic_package.all;
 
 entity sys_microbasic_basys2 is
     Port ( 
