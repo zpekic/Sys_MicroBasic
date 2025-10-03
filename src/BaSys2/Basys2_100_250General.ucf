@@ -108,3 +108,5 @@ NET "PIO<85>" LOC = "A13"  | DRIVE = 2  | PULLUP ; # Bank = 2, Signal name = JD2
 NET "PIO<86>" LOC = "C13"  | DRIVE = 2  | PULLUP ; # Bank = 1, Signal name = JD3
 NET "PIO<87>" LOC = "D12"  | DRIVE = 2  | PULLUP ; # Bank = 2, Signal name = JD4 
 
+# Supress some errors
+#PIN "baudgen/q_4_BUFG.O" CLOCK_DEDICATED_ROUTE = FALSE;
