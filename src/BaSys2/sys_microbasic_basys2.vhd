@@ -104,29 +104,24 @@ signal freqcnt_in: std_logic;
 
 signal prescale_baud, prescale_power: integer range 0 to 65535;
 
-signal cnt50MHz: std_logic_vector(11 downto 0); -- 12 bit counter driven by 50MHz
-signal cnt307200: std_logic_vector(11 downto 0); -- 12 bit counter driven by 307.2kHz
+signal cnt25MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 50MHz
+signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
 alias freq38400: std_logic is cnt307200(3);
 alias freq19200: std_logic is cnt307200(4);
 alias freq9600: std_logic is cnt307200(5);
 alias freq4800: std_logic is cnt307200(6); 
 alias freq2400: std_logic is cnt307200(7); 
 
-signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 4.096kHz
-alias freq2048: std_logic is cnt4096(1); 
-alias freq32: std_logic is cnt4096(7); 
-alias freq8: std_logic is cnt4096(9);
-alias freq4: std_logic is cnt4096(10); 
+signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
 
--- output path for Intel hex format
-signal TXD_READY: std_logic;
+-- single char UART output
+signal TXD_READY, TXD_SEND: std_logic;
 signal TXD_CHAR: std_logic_vector(7 downto 0);
-signal TXD_SEND: std_logic;
--- input path for Intel hex format
-signal RXD_READY: std_logic;
+-- single char UART input
+signal RXD_READY, RXD_VALID: std_logic;
 signal RXD_CHAR: std_logic_vector(7 downto 0);
---signal txd_send: std_logic;
+signal send_clk: std_logic;
 
 ---
 signal switch: std_logic_vector(7 downto 0);
@@ -149,15 +144,19 @@ OUTGREEN <= "000";
 OUTBLUE <= "00";
 
 -- test the freq generator
-JD1 <= cnt4096(0);
-JD2 <= baudrate_x1;
-JD3 <= baudrate_x2;
-JD4 <= baudrate_x4;
+JD1 <= baudrate_x1;
+JD2 <= cnt307200(0);
+JD3 <= cnt25MHz(0);
+JD4 <= cnt4096(0);
 
-LED <= switch;
+--LED(0) <= TXD_READY;
+--LED(1) <= TXD_SEND;
+--LED(2) <= RXD_READY;
+--LED(3) <= RXD_VALID;
+--LED <= cnt4096(11 downto 4);
 
 -- divide internal clock   	
-clock_int: process(MCLK, cnt307200, cnt4096)
+on_mclk: process(MCLK, cnt307200, cnt4096, cnt25MHz)
 begin
 	if (RESET = '1') then
 		prescale_baud <= 0;
@@ -166,16 +165,16 @@ begin
 		cnt4096 <= (others => '0');
 	else
 		if (rising_edge(MCLK)) then
-			cnt50MHz <= std_logic_vector(unsigned(cnt50MHz) + 1);
+			cnt25MHz <= std_logic_vector(unsigned(cnt25MHz) + 1);
 			if (prescale_baud = 0) then
 				cnt307200 <= std_logic_vector(unsigned(cnt307200) + 1);
-				prescale_baud <= (25000000 / (2 * 153600));
+				prescale_baud <= (25000000 / 307200) - 1;
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
 			if (prescale_power = 0) then
 				cnt4096 <= std_logic_vector(unsigned(cnt4096) + 1);
-				prescale_power <= (25000000 / (2 * 4096));
+				prescale_power <= (25000000 / 4096);
 			else
 				prescale_power <= prescale_power - 1;
 			end if;
@@ -202,8 +201,8 @@ end process;
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.fourdigitsevensegled port map ( 
 			  -- inputs
-			  data => T(15 downto 0),
-			  digsel => cnt4096(7 downto 6),
+			  data => freqcnt_value(15 downto 0),
+			  digsel => cnt4096(6 downto 5),
            showdigit => "0000",	-- all digits on
 			  showdot => "1111",		-- no dots
 			  -- outputs
@@ -220,6 +219,20 @@ begin
 	else
 		if (rising_edge(RXD_READY)) then
 			T <= T(23 downto 0) & RXD_CHAR; 
+			--TXD_CHAR <= RXD_CHAR;
+		end if;
+	end if;
+end process;
+	
+-- RS flip flop
+send_clk <= RXD_READY when (TXD_SEND = '0') else TXD_READY;
+on_sendclk: process(RESET, send_clk)
+begin
+	if (reset = '1') then
+		TXD_SEND <= '0';
+	else
+		if (rising_edge(send_clk)) then
+			TXD_SEND <= not TXD_SEND;
 		end if;
 	end if;
 end process;
@@ -241,19 +254,33 @@ rxdinp: entity work.uart_ser2par Port map (
 			mode => "000",	-- no parity, extra stop bit
 			char => RXD_CHAR,
          ready => RXD_READY,
-			valid => open,
+			valid => RXD_VALID,
          rxd => JA_TXD
 		);
 		
+-- Test ASCII component
+to_upper: entity ascii_toupper Port map ( 
+			ascii_in => RXD_CHAR,
+			ascii_uppercase => TXD_CHAR,
+			isTAB => LED(0),
+			isCR => LED(1),
+			isBS  => LED(2),
+			isDEL  => LED(3),
+			isSPACE  => LED(4),
+			isNUM  => LED(5),
+			isALPHA  => LED(6),
+			isCTRL  => LED(7)
+		);
+		
 -- UART baudrate selection
-baudrate_x1 <= cnt307200(to_integer(10 - unsigned(sw_baudrate)));
-baudrate_x2 <= cnt307200(to_integer(9 - unsigned(sw_baudrate)));
-baudrate_x4 <= cnt307200(to_integer(8 - unsigned(sw_baudrate)));
+baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
+baudrate_x2 <= cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
+baudrate_x4 <= cnt307200(to_integer(8 - unsigned('0' & sw_baudrate)));
 							
 -- count signal frequencies
 freqcnt: entity work.freqcounter Port map ( 
 		reset => RESET,
-		clk => cnt4096(1),
+		clk => freq2,
 		freq => baudrate_x1,
 		bcd => '1',
 		add => X"00000004",
