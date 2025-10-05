@@ -60,7 +60,10 @@ begin
 	isNUM <= '1' when ((unsigned(ascii_in) >= unsigned(c('0'))) and (unsigned(ascii_in) <= unsigned(c('9')))) else '0';
 	isALPHA <= isLowerAlpha or isUpperAlpha;
 	isCTRL <= '1' when (ascii_in(7 downto 5) = "000") else isDelete;
-	--
+	-- Other special chars of possible interest:
+	--isESC <= '1' when (ascii_in = X"1B") else '0';
+	--isBREAK <= '1' when (ascii_in = X"03") else '0'; -- CTRL/C
+	
 	ascii_uppercase <= std_logic_vector(unsigned(ascii_in) - 32) when (isLowerAlpha = '1') else ascii_in;
 	
 end Behavioral;

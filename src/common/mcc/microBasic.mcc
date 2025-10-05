@@ -1,0 +1,127 @@
+//----------------------------------------------------------
+//	MicroBasic Microcode (c) 2025-... zpekic@hotmail.com
+//  Compile with https://github.com/zpekic/MicroCodeCompiler
+//----------------------------------------------------------
+			.code 9, 48, microBasic_code.mif, microBasic_code.cgf, microBasic_code.coe, h2m:microBasic_code.vhd, microBasic_code.hex, microBasic_code.bin, 8;
+			.mapper 8, 9, microBasic_map.mif, microBasic_map.cgf, microBasic_map.coe, h2m:microBasic_map.vhd, microBasic_map.hex, microBasic_map.bin, 2;
+			.controller microBasic_control_unit.vhd, 4;
+			//.symbol 9, 256, microBasic_sym.mif, microBasic_sym.cgf, microBasic_sym.coe, h2m:microBasic_sym.vhd, microBasic_sym.hex, microBasic_sym.bin, 32;
+
+// System interface signals
+nBUSREQ			.valfield 1 values 0, 1 default 1;
+nWR				.valfield 1 values 0, 1 default 1;
+nRD				.valfield 1 values 0, 1 default 1;
+// nWAIT		consumed as condition
+// nBUSACK		consumed as condition
+// A(15..0)		
+// D(7..0)
+
+seq_cond:		.if 4 values 
+				true, 			// hard-code to 1
+				nWAIT,	 		// Z80 bus - 0 to wait for memory
+				nBUSACK,		// z80 bus - 0 if CPU is 
+				IL_ADDRVALID,	// IL address in valid range
+				DBG_READY,		// high if tracer has processed the trace character
+				-,		
+				-,	
+				-,	
+				-,	
+				-,
+				-,	
+				-,
+				-,
+				-,
+				-,
+				false			// hard-code to 0
+				default true;
+seq_then:	.then 9 values next, repeat, return, fork, @ default next;						// any label
+seq_else:	.else 9 values next, repeat, return, fork, 0b000000..0b111111, @ default next;	// any value as it can be a trace char
+
+// Direct byte, usually ASCII code
+directByte	.valfield 8 values 0x00..0xFF default 0xFF;
+
+// 16 bit temporary register
+T			.regfield 2 values
+				same,
+				IL,
+				-,
+				-
+				default same;
+				
+// contains ASCII char for DEBUG UART transmit
+DBGCHAR		.regfield 2 values 
+				same,
+				directByte,
+				zero,
+				-
+				default same;		
+
+// 12-bit IL address register
+IL:			.regfield 3 values
+				same,
+				zero,
+				inc,
+				T,
+				-,
+				-,
+				-,
+				-
+				default same;
+				
+// placeholder
+dummy:			.valfield 8 values * default 0;
+						
+//	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
+goto:		.alias if false then next else;
+noop:		.alias if true then next else next;
+back:	    .alias if true then return else return;
+
+// gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
+dbg_out:	.sub;
+dbg_crlf:	.sub;	
+dump_il:	.sub;
+
+// other
+clear:		.alias DBGCHAR <= zero, IL <= zero;
+
+			.org 0;
+//	First 4 microcode locations can't be used branch destinations
+//	---------------------------------------------------------------------------
+_reset:		clear;  
+
+_reset1:	clear;
+
+_reset2:	clear;
+
+_reset3:	clear;
+
+//	indicate availability and wait for start signal
+//	---------------------------------------------------------------------------
+deadloop:	dump_il();
+			goto deadloop;
+
+			.map 0b????????;
+			goto deadloop;
+			
+// 	Debug related subroutines
+//	---------------------------------------------------------------------------			
+dump_il:	T <= IL, directByte = "I", DBGCHAR <= directByte, dbg_out();	// save IL
+			IL <= zero, directByte = "L", DBGCHAR <= directByte, dbg_out();
+			dbg_crlf();
+dump_il_lp:	if IL_ADDRVALID then next else dump_il_ex;
+			directByte = 0x80, DBGCHAR <= directByte, dbg_out();
+			directByte = 0x81, DBGCHAR <= directByte, dbg_out();
+			directByte = 0x82, DBGCHAR <= directByte, dbg_out();
+			directByte = " ", DBGCHAR <= directByte, dbg_out();
+			directByte = 0x83, DBGCHAR <= directByte, dbg_out();
+			directByte = 0x84, DBGCHAR <= directByte, dbg_crlf();
+			IL <= inc, goto dump_il_lp; 
+dump_il_ex:	IL <= T, back;	// restore IL and return
+			
+dbg_crlf:	directByte = 0x0D, DBGCHAR <= directByte, dbg_out();
+			directByte = 0x0A, DBGCHAR <= directByte;
+dbg_out:	if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
+			if DBG_READY then next else repeat;
+			if DBG_READY then next else repeat;
+			DBGCHAR <= zero, back;				// clear the serial debug output register and return
+			

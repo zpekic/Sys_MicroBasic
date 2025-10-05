@@ -201,7 +201,7 @@ end process;
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.fourdigitsevensegled port map ( 
 			  -- inputs
-			  data => freqcnt_value(15 downto 0),
+			  data => T(15 downto 0), --freqcnt_value(15 downto 0),
 			  digsel => cnt4096(6 downto 5),
            showdigit => "0000",	-- all digits on
 			  showdot => "1111",		-- no dots
@@ -219,7 +219,6 @@ begin
 	else
 		if (rising_edge(RXD_READY)) then
 			T <= T(23 downto 0) & RXD_CHAR; 
-			--TXD_CHAR <= RXD_CHAR;
 		end if;
 	end if;
 end process;
