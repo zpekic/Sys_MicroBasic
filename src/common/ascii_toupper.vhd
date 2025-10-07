@@ -31,7 +31,7 @@ use IEEE.NUMERIC_STD.ALL;
 use work.microbasic_package.all;
 
 entity ascii_toupper is
-    Port ( ascii_in : in  STD_LOGIC_VECTOR (7 downto 0);
+    Port ( ascii8bit : in  STD_LOGIC_VECTOR (7 downto 0);
            ascii_uppercase : out  STD_LOGIC_VECTOR (7 downto 0);
 			  isTAB: out STD_LOGIC;
            isCR : out  STD_LOGIC;
@@ -40,31 +40,38 @@ entity ascii_toupper is
            isSPACE : out  STD_LOGIC;
            isNUM : out  STD_LOGIC;
            isALPHA : out  STD_LOGIC;
-           isCTRL : out  STD_LOGIC);
+           isCTRL : out  STD_LOGIC;
+			  isBIT7SET: out STD_LOGIC);
 end ascii_toupper;
 
 architecture Behavioral of ascii_toupper is
 
 signal isLowerAlpha, isUpperAlpha, isDelete: std_logic;
+signal ascii7bit: std_logic_vector(7 downto 0);
 
 begin
-	isLowerAlpha <= '1' when ((unsigned(ascii_in) >= unsigned(c('a'))) and (unsigned(ascii_in) <= unsigned(c('z')))) else '0';
-	isUpperAlpha <= '1' when ((unsigned(ascii_in) >= unsigned(c('A'))) and (unsigned(ascii_in) <= unsigned(c('Z')))) else '0';
-	isDelete <= '1' when (ascii_in = X"7F") else '0';
-
-	isTAB <= '1' when (ascii_in = X"09") else '0';
-	isCR <= '1' when (ascii_in = X"0D") else '0';
-	isBS <= '1' when (ascii_in = X"08") else '0';
-	isDEL <= isDelete;
-	isSPACE <= '1' when (ascii_in = X"20") else '0';
-	isNUM <= '1' when ((unsigned(ascii_in) >= unsigned(c('0'))) and (unsigned(ascii_in) <= unsigned(c('9')))) else '0';
-	isALPHA <= isLowerAlpha or isUpperAlpha;
-	isCTRL <= '1' when (ascii_in(7 downto 5) = "000") else isDelete;
-	-- Other special chars of possible interest:
-	--isESC <= '1' when (ascii_in = X"1B") else '0';
-	--isBREAK <= '1' when (ascii_in = X"03") else '0'; -- CTRL/C
+	isBIT7SET <= ascii8bit(7);
 	
-	ascii_uppercase <= std_logic_vector(unsigned(ascii_in) - 32) when (isLowerAlpha = '1') else ascii_in;
+	-- all other flags we base on 7-bit ASCII code
+	ascii7bit <= '0' & ascii8bit(6 downto 0);
+	
+	isLowerAlpha <= '1' when ((unsigned(ascii7bit) >= unsigned(c('a'))) and (unsigned(ascii7bit) <= unsigned(c('z')))) else '0';
+	isUpperAlpha <= '1' when ((unsigned(ascii7bit) >= unsigned(c('A'))) and (unsigned(ascii7bit) <= unsigned(c('Z')))) else '0';
+	isDelete <= '1' when (ascii7bit = X"7F") else '0';
+
+	isTAB <= '1' when (ascii7bit = X"09") else '0';
+	isCR <= '1' when (ascii7bit = X"0D") else '0';
+	isBS <= '1' when (ascii7bit = X"08") else '0';
+	isDEL <= isDelete;
+	isSPACE <= '1' when (ascii7bit = X"20") else '0';
+	isNUM <= '1' when ((unsigned(ascii7bit) >= unsigned(c('0'))) and (unsigned(ascii7bit) <= unsigned(c('9')))) else '0';
+	isALPHA <= isLowerAlpha or isUpperAlpha;
+	isCTRL <= '1' when (ascii7bit(7 downto 5) = "000") else isDelete;
+	-- Other special chars of possible interest:
+	--isESC <= '1' when (ascii7bit = X"1B") else '0';
+	--isBREAK <= '1' when (ascii7bit = X"03") else '0'; -- CTRL/C
+	
+	ascii_uppercase <= std_logic_vector(unsigned(ascii7bit) - 32) when (isLowerAlpha = '1') else ascii7bit;
 	
 end Behavioral;
 

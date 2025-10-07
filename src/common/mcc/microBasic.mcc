@@ -2,10 +2,10 @@
 //	MicroBasic Microcode (c) 2025-... zpekic@hotmail.com
 //  Compile with https://github.com/zpekic/MicroCodeCompiler
 //----------------------------------------------------------
-			.code 9, 48, microBasic_code.mif, microBasic_code.cgf, microBasic_code.coe, h2m:microBasic_code.vhd, microBasic_code.hex, microBasic_code.bin, 8;
-			.mapper 8, 9, microBasic_map.mif, microBasic_map.cgf, microBasic_map.coe, h2m:microBasic_map.vhd, microBasic_map.hex, microBasic_map.bin, 2;
+			.code 9, 48, microBasic_code.mif, microBasic_code.cgf, microBasic_code.coe, mb:microBasic_code.vhd, microBasic_code.hex, microBasic_code.bin, 8;
+			.mapper 8, 16, microBasic_map.mif, microBasic_map.cgf, microBasic_map.coe, mb:microBasic_map.vhd, microBasic_map.hex, microBasic_map.bin, 2;
 			.controller microBasic_control_unit.vhd, 4;
-			//.symbol 9, 256, microBasic_sym.mif, microBasic_sym.cgf, microBasic_sym.coe, h2m:microBasic_sym.vhd, microBasic_sym.hex, microBasic_sym.bin, 32;
+			//.symbol 9, 256, microBasic_sym.mif, microBasic_sym.cgf, microBasic_sym.coe, mb:microBasic_sym.vhd, microBasic_sym.hex, microBasic_sym.bin, 32;
 
 // System interface signals
 nBUSREQ			.valfield 1 values 0, 1 default 1;
@@ -20,18 +20,18 @@ seq_cond:		.if 4 values
 				true, 			// hard-code to 1
 				nWAIT,	 		// Z80 bus - 0 to wait for memory
 				nBUSACK,		// z80 bus - 0 if CPU is 
-				IL_ADDRVALID,	// IL address in valid range
+				IL_PC_VALID,	// value of IL program counter in valid range
 				DBG_READY,		// high if tracer has processed the trace character
-				-,		
-				-,	
-				-,	
-				-,	
-				-,
-				-,	
-				-,
-				-,
-				-,
-				-,
+				dummy_5,		
+				dummy_6,		
+				dummy_7,		
+				dummy_8,		
+				dummy_9,		
+				dummy_A,		
+				dummy_B,		
+				dummy_C,		
+				dummy_D,		
+				dummy_E,		
 				false			// hard-code to 0
 				default true;
 seq_then:	.then 9 values next, repeat, return, fork, @ default next;						// any label
@@ -43,7 +43,7 @@ directByte	.valfield 8 values 0x00..0xFF default 0xFF;
 // 16 bit temporary register
 T			.regfield 2 values
 				same,
-				IL,
+				IL_PC,
 				-,
 				-
 				default same;
@@ -56,8 +56,8 @@ DBGCHAR		.regfield 2 values
 				-
 				default same;		
 
-// 12-bit IL address register
-IL:			.regfield 3 values
+// 9-bit IL program counter
+IL_PC:			.regfield 3 values
 				same,
 				zero,
 				inc,
@@ -82,7 +82,7 @@ dbg_crlf:	.sub;
 dump_il:	.sub;
 
 // other
-clear:		.alias DBGCHAR <= zero, IL <= zero;
+clear:		.alias DBGCHAR <= zero, IL_PC <= zero;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -97,31 +97,35 @@ _reset3:	clear;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
-deadloop:	dump_il();
-			goto deadloop;
+			dump_il();
+deadloop:	goto deadloop;
 
 			.map 0b????????;
 			goto deadloop;
 			
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------			
-dump_il:	T <= IL, directByte = "I", DBGCHAR <= directByte, dbg_out();	// save IL
-			IL <= zero, directByte = "L", DBGCHAR <= directByte, dbg_out();
+dump_il:	T <= IL_PC, directByte = "I", DBGCHAR <= directByte, dbg_out();	// save IL
+			IL_PC <= zero, directByte = "L", DBGCHAR <= directByte, dbg_out();
 			dbg_crlf();
-dump_il_lp:	if IL_ADDRVALID then next else dump_il_ex;
+dump_il_lp:	if IL_PC_VALID then next else dump_il_ex;
 			directByte = 0x80, DBGCHAR <= directByte, dbg_out();
 			directByte = 0x81, DBGCHAR <= directByte, dbg_out();
 			directByte = 0x82, DBGCHAR <= directByte, dbg_out();
 			directByte = " ", DBGCHAR <= directByte, dbg_out();
 			directByte = 0x83, DBGCHAR <= directByte, dbg_out();
-			directByte = 0x84, DBGCHAR <= directByte, dbg_crlf();
-			IL <= inc, goto dump_il_lp; 
-dump_il_ex:	IL <= T, back;	// restore IL and return
+			directByte = 0x84, DBGCHAR <= directByte, dbg_out();
+			dbg_crlf();
+			//dbg_crlf();
+			IL_PC <= inc, goto dump_il_lp; 
+dump_il_ex:	IL_PC <= T, back;	// restore IL and return
 			
 dbg_crlf:	directByte = 0x0D, DBGCHAR <= directByte, dbg_out();
 			directByte = 0x0A, DBGCHAR <= directByte;
 dbg_out:	if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
 			if DBG_READY then next else repeat;
-			if DBG_READY then next else repeat;
 			DBGCHAR <= zero, back;				// clear the serial debug output register and return
+			
+			.org 0x1F;
+			goto deadloop;	// TODO: add trace to indicate microcode program stack underflow
 			

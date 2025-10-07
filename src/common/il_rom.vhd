@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -30,8 +30,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity il_rom is
-    Port ( a : in  STD_LOGIC_VECTOR (8 downto 0);
-           d : out  STD_LOGIC_VECTOR (7 downto 0));
+    Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);
+           d : out  STD_LOGIC_VECTOR (7 downto 0);
+			  a_is_valid: out STD_LOGIC);
 end il_rom;
 
 architecture Behavioral of il_rom is
@@ -75,14 +76,14 @@ constant il_rom: rom512x8 := (
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00"
 );
 
 begin
 
-	d <= il_rom(to_integer(unsigned(a)));
+	d <= il_rom(to_integer(unsigned(a(8 downto 0))));
+	-- allow for some NOPs at the end
+	a_is_valid <= '1' when (unsigned(a) < 368) else '0';
 
 end Behavioral;
 

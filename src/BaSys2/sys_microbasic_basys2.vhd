@@ -98,7 +98,8 @@ alias JD4: std_logic is PIO(87);
 alias RESET: std_logic is BTN(3);
 
 -- debug
-signal T, debug, freqcnt_value: std_logic_vector(31 downto 0);
+signal T, freqcnt_value: std_logic_vector(31 downto 0);
+signal cpu_debug: std_logic_vector(15 downto 0);
 signal hexdata, showdigit: std_logic_vector(3 downto 0);
 signal freqcnt_in: std_logic;
 
@@ -114,6 +115,7 @@ alias freq2400: std_logic is cnt307200(7);
 
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
+signal cpu_clk: std_logic;
 
 -- single char UART output
 signal TXD_READY, TXD_SEND: std_logic;
@@ -126,6 +128,8 @@ signal send_clk: std_logic;
 ---
 signal switch: std_logic_vector(7 downto 0);
 alias sw_baudrate: std_logic_vector(2 downto 0) is switch(7 downto 5);
+alias sw_cpuclk: std_logic_vector(2 downto 0) is switch(4 downto 2);
+
 -- 
 signal button: std_logic_vector(7 downto 0);
 
@@ -198,10 +202,32 @@ end process;
 		signal_debounced => button
 	);
 	
+-- 
+cpu: entity work.MicroBasic Port map (
+		reset => RESET,
+		clk => cpu_clk,
+		nWAIT => '1',
+		nBUSACK => '0',
+		baudrate => baudrate_x1,
+		debug_txd => JB_RXD,
+		debug_bus => cpu_debug
+	);
+
+-- CPU clock should ideally be sync'd when switching from one frequency to another
+with sw_cpuclk select cpu_clk <= 
+		button(0) when O"0",
+		freq2 when O"1",
+		cnt4096(6) when O"2",		-- 64Hz
+		cnt4096(0) when O"3",		-- 4.096kHz
+		cnt25MHz(3) when O"4",		-- 3.125MHz
+		cnt25MHz(2) when O"5",		-- 6.25MHz
+		cnt25MHz(1) when O"6",		-- 12.5MHz 
+		cnt25MHz(0) when others; 	-- 25MHz
+		
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.fourdigitsevensegled port map ( 
 			  -- inputs
-			  data => T(15 downto 0), --freqcnt_value(15 downto 0),
+			  data => cpu_debug, --T(15 downto 0), --freqcnt_value(15 downto 0),
 			  digsel => cnt4096(6 downto 5),
            showdigit => "0000",	-- all digits on
 			  showdot => "1111",		-- no dots
@@ -258,8 +284,8 @@ rxdinp: entity work.uart_ser2par Port map (
 		);
 		
 -- Test ASCII component
-to_upper: entity ascii_toupper Port map ( 
-			ascii_in => RXD_CHAR,
+to_upper: entity work.ascii_toupper Port map ( 
+			ascii8bit => RXD_CHAR,
 			ascii_uppercase => TXD_CHAR,
 			isTAB => LED(0),
 			isCR => LED(1),
@@ -268,7 +294,8 @@ to_upper: entity ascii_toupper Port map (
 			isSPACE  => LED(4),
 			isNUM  => LED(5),
 			isALPHA  => LED(6),
-			isCTRL  => LED(7)
+			isCTRL  => LED(7),
+			isBIT7SET => open
 		);
 		
 -- UART baudrate selection
