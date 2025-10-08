@@ -30,7 +30,6 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 use work.microbasic_package.all;	-- utilities
 
-
 entity serialtracer is
     Port ( reset : in  STD_LOGIC;
            clk : in  STD_LOGIC;	-- this should be valid UART baudrate

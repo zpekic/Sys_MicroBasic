@@ -49,11 +49,11 @@ T			.regfield 2 values
 				default same;
 				
 // contains ASCII char for DEBUG UART transmit
-DBGCHAR		.regfield 2 values 
+DBGINDEX		.regfield 2 values 
 				same,
 				directByte,
 				zero,
-				-
+				crlf // shortcut to index 63 which should contain CR, LF, NULL sequence
 				default same;		
 
 // 9-bit IL program counter
@@ -77,12 +77,11 @@ noop:		.alias if true then next else next;
 back:	    .alias if true then return else return;
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
-dbg_out:	.sub;
-dbg_crlf:	.sub;	
 dump_il:	.sub;
+trace:		.sub DBGINDEX;
 
 // other
-clear:		.alias DBGCHAR <= zero, IL_PC <= zero;
+clear:		.alias DBGINDEX <= zero, IL_PC <= zero;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -97,6 +96,8 @@ _reset3:	clear;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
+			directByte = 4, trace(directByte);	// output "MicroBas" on debug UART
+			trace(crlf);
 			dump_il();
 deadloop:	goto deadloop;
 
@@ -105,26 +106,19 @@ deadloop:	goto deadloop;
 			
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------			
-dump_il:	T <= IL_PC, directByte = "I", DBGCHAR <= directByte, dbg_out();	// save IL
-			IL_PC <= zero, directByte = "L", DBGCHAR <= directByte, dbg_out();
-			dbg_crlf();
+dump_il:	directByte = 1, trace(directByte);		// display current IL and header to ROM
+			trace(crlf);
+			T <= IL_PC, IL_PC <= zero; 	// save IL and set to 0 to cover the ROM
 dump_il_lp:	if IL_PC_VALID then next else dump_il_ex;
-			directByte = 0x80, DBGCHAR <= directByte, dbg_out();
-			directByte = 0x81, DBGCHAR <= directByte, dbg_out();
-			directByte = 0x82, DBGCHAR <= directByte, dbg_out();
-			directByte = " ", DBGCHAR <= directByte, dbg_out();
-			directByte = 0x83, DBGCHAR <= directByte, dbg_out();
-			directByte = 0x84, DBGCHAR <= directByte, dbg_out();
-			dbg_crlf();
-			//dbg_crlf();
+			directByte = 2, trace(directByte);
+			directByte = 3, trace(directByte);
+			trace(crlf);
 			IL_PC <= inc, goto dump_il_lp; 
 dump_il_ex:	IL_PC <= T, back;	// restore IL and return
 			
-dbg_crlf:	directByte = 0x0D, DBGCHAR <= directByte, dbg_out();
-			directByte = 0x0A, DBGCHAR <= directByte;
-dbg_out:	if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
+trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
 			if DBG_READY then next else repeat;
-			DBGCHAR <= zero, back;				// clear the serial debug output register and return
+			DBGINDEX <= zero, back;				// clear the serial debug output register and return
 			
 			.org 0x1F;
 			goto deadloop;	// TODO: add trace to indicate microcode program stack underflow

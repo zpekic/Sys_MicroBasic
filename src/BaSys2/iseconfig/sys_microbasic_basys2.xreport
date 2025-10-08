@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2025-10-06T21:21:11</DateModified>
+  <DateModified>2025-10-07T20:57:39</DateModified>
   <ModuleName>sys_microbasic_basys2</ModuleName>
-  <SummaryTimeStamp>2025-10-06T21:18:45</SummaryTimeStamp>
+  <SummaryTimeStamp>2025-10-07T20:54:55</SummaryTimeStamp>
   <SavedFilePath>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/BaSys2/iseconfig/sys_microbasic_basys2.xreport</SavedFilePath>
   <ImplementationReportsDirectory>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/BaSys2\</ImplementationReportsDirectory>
   <DateInitialized>2025-10-01T22:32:28</DateInitialized>

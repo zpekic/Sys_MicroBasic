@@ -54,7 +54,7 @@ signal il_op: std_logic_vector(7 downto 0);
 signal IL_PC_VALID: std_logic;
 
 -- serial debug port
-signal DBGCHAR: std_logic_vector(7 downto 0);
+signal DBGINDEX: std_logic_vector(5 downto 0); -- 64 entries supported
 signal DBG_READY, dbg_start: std_logic;
 
 -- other
@@ -111,7 +111,7 @@ cu_mb: entity work.microbasic_control_unit
 
 -- show IL code an microinstruction address on debug port
 --	debug_bus <= il_op & ui_address(7 downto 0); 
-	debug_bus <= DBGCHAR & ui_address(7 downto 0); 
+	debug_bus <= "00" & DBGINDEX & ui_address(7 downto 0); 
 	
 -- get the microcode instruction 
 mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
@@ -148,11 +148,13 @@ begin
  end if;
 end process;
 	
-tracer: entity work.serialtracer Port map (
+-- serial debug port implementation
+tracer: entity work.serialtracer2 Port map (
 		reset => reset,
 		clk => baudrate,
+		enable => '1',
 		start => dbg_start,
-		char => DBGCHAR,
+		index => DBGINDEX,
 		data(3) => '0',
 		data(2 downto 0) => IL_PC(10 downto 8),
 		data(7 downto 4) => IL_PC(7 downto 4),
@@ -166,24 +168,26 @@ tracer: entity work.serialtracer Port map (
 		ready => DBG_READY
 		);
 	
--- serial debug port implementation
-update_DBGCHAR: process(clk, mb_DBGCHAR)
-begin
-if (rising_edge(clk)) then
-	case mb_DBGCHAR is
---			when DBGCHAR_same =>
---				DBGCHAR <= DBGCHAR;
-		when DBGCHAR_directByte =>
-			DBGCHAR <= mb_directByte;
-			dbg_start <= '1';
-		when DBGCHAR_zero =>
-			DBGCHAR <= (others => '0');
-			dbg_start <= '0';
-		when others =>
-			null;
-	end case;
-end if;
-end process;
-		
+ update_DBGINDEX: process(clk, mb_DBGINDEX)
+ begin
+	if (rising_edge(clk)) then
+		case mb_DBGINDEX is
+--			when DBGINDEX_same =>
+--				DBGINDEX <= DBGINDEX;
+			when DBGINDEX_directByte =>
+				DBGINDEX <= mb_directByte(5 downto 0);
+				dbg_start <= '1';
+			when DBGINDEX_zero =>
+				DBGINDEX <= (others => '0');
+				dbg_start <= '0';
+			when DBGINDEX_crlf =>
+				DBGINDEX <= (others => '1'); -- points to last index in the table
+				dbg_start <= '1';
+			when others =>
+				null;
+		end case;
+ end if;
+ end process;
+
 end Behavioral;
 

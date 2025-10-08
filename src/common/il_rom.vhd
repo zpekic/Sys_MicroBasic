@@ -28,6 +28,7 @@ use IEEE.NUMERIC_STD.ALL;
 -- any Xilinx primitives in this code.
 --library UNISIM;
 --use UNISIM.VComponents.all;
+use work.microbasic_package.all;	-- utilities
 
 entity il_rom is
     Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);
@@ -37,7 +38,6 @@ end il_rom;
 
 architecture Behavioral of il_rom is
 
-type rom512x8 is array (0 to 511) of std_logic_vector(7 downto 0);
 --
 -- From: http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.asm
 -- 

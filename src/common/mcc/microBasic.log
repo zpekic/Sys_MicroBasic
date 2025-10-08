@@ -5,39 +5,39 @@
 Compiling microBasic.mcc, pass 1 out of 2.
 Warning: Clock edge implicitly (by default) set to rising_edge()
 Warning: .org value changed from -1 (0xFFFFFFFF) to 0 (0x0000)
-Line 90: resolved aliases:  clear in 'DBGCHAR <= zero, IL_PC <= zero', line 90
-L0090@0000._reset:  DBGCHAR <= zero, IL_PC <= zero;
+Line 89: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 89
+L0089@0000._reset:  DBGINDEX <= zero, IL_PC <= zero;
 
-Line 92: resolved aliases:  clear in 'DBGCHAR <= zero, IL_PC <= zero', line 92
-L0092@0001._reset1:  DBGCHAR <= zero, IL_PC <= zero;
+Line 91: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 91
+L0091@0001._reset1:  DBGINDEX <= zero, IL_PC <= zero;
 
-Line 94: resolved aliases:  clear in 'DBGCHAR <= zero, IL_PC <= zero', line 94
-L0094@0002._reset2:  DBGCHAR <= zero, IL_PC <= zero;
+Line 93: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 93
+L0093@0002._reset2:  DBGINDEX <= zero, IL_PC <= zero;
 
-Line 96: resolved aliases:  clear in 'DBGCHAR <= zero, IL_PC <= zero', line 96
-L0096@0003._reset3:  DBGCHAR <= zero, IL_PC <= zero;
+Line 95: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 95
+L0095@0003._reset3:  DBGINDEX <= zero, IL_PC <= zero;
 
-Line 101: resolved aliases:  goto in 'if false then next else deadloop', line 101
-L0101@0005.deadloop:  if false then next else deadloop;
+Line 102: resolved aliases:  goto in 'if false then next else deadloop', line 102
+L0102@0007.deadloop:  if false then next else deadloop;
 
 Warning: mask value 255 detected. Range will be 0 to 255
-Line 104: resolved aliases:  goto in 'if false then next else deadloop', line 104
-L0104@0006.  if false then next else deadloop;
+Line 105: resolved aliases:  goto in 'if false then next else deadloop', line 105
+L0105@0008.  if false then next else deadloop;
 
-Line 120: resolved aliases:  goto in 'IL_PC <= inc, if false then next else dump_il_lp', line 120
-L0120@0012.  IL_PC <= inc, if false then next else dump_il_lp;
+Line 116: resolved aliases:  goto in 'IL_PC <= inc, if false then next else dump_il_lp', line 116
+L0116@0010.  IL_PC <= inc, if false then next else dump_il_lp;
 
-Line 121: resolved aliases:  back in 'IL_PC <= T, if true then return else return', line 121
-L0121@0013.dump_il_ex:  IL_PC <= T, if true then return else return;
+Line 117: resolved aliases:  back in 'IL_PC <= T, if true then return else return', line 117
+L0117@0011.dump_il_ex:  IL_PC <= T, if true then return else return;
 
-Line 127: resolved aliases:  back in 'DBGCHAR <= zero, if true then return else return', line 127
-L0127@0018.  DBGCHAR <= zero, if true then return else return;
+Line 121: resolved aliases:  back in 'DBGINDEX <= zero, if true then return else return', line 121
+L0121@0014.  DBGINDEX <= zero, if true then return else return;
 
-Warning: .org value changed from 25 (0x0019) to 31 (0x001F)
-Line 130: resolved aliases:  goto in 'if false then next else deadloop', line 130
-L0130@001F.  if false then next else deadloop;
+Warning: .org value changed from 21 (0x0015) to 31 (0x001F)
+Line 124: resolved aliases:  goto in 'if false then next else deadloop', line 124
+L0124@001F.  if false then next else deadloop;
 
-Success: pass 0 on microBasic.mcc - 131 line(s) read, 50 statement(s) parsed, code address range 0xFFFFFFFF - 0x0020.
+Success: pass 0 on microBasic.mcc - 125 line(s) read, 45 statement(s) parsed, code address range 0xFFFFFFFF - 0x0020.
 Compiling microBasic.mcc, pass 2 out of 2.
 Field 'nBUSREQ' 47 .. 47
 Field 'nWR' 46 .. 46
@@ -47,18 +47,18 @@ Field 'seq_then' 40 .. 32
 Field 'seq_else' 31 .. 23
 Field 'directByte' 22 .. 15
 Field 'T' 14 .. 13
-Field 'DBGCHAR' 12 .. 11
+Field 'DBGINDEX' 12 .. 11
 Field 'IL_PC' 10 .. 8
 Field 'dummy' 7 .. 0
-Info: 256 mapper locations from 0 to 255 set to value '0000000000000110'
+Info: 256 mapper locations from 0 to 255 set to value '0000000000001000'
 Generating code: 
-Warning in line 5: found 486 uninitialized locations:
-0019 .. 001E
+Warning in line 5: found 490 uninitialized locations:
+0015 .. 001E
 0020 .. 01FF
 
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.mif' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.cgf' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.coe' (LF only) ... Done (initialized locations: 26, empty locations: 486, total locations: 512).
+Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.coe' (LF only) ... Done (initialized locations: 22, empty locations: 490, total locations: 512).
 Generating code 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.vhd' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.hex' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code_lendian.bin' ... Done.
@@ -69,4 +69,4 @@ Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microB
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.coe' (LF only) ... Done (initialized locations: 256, empty locations: 0, total locations: 256).
 Generating mapper 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.vhd' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.hex' ... Done.
-Writing 'C:\Users\zoltanp\Docume
+Writing 'C:\Users\zol

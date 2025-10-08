@@ -151,24 +151,26 @@ constant T_IL_PC: 	std_logic_vector(1 downto 0) := "01";
 ---- End boilerplate code
 
 --
--- L0052.DBGCHAR: .regfield 2 values same, directByte, zero, - default same;
+-- L0052.DBGINDEX: .regfield 2 values same, directByte, zero, crlf default same;
 --
-alias mb_DBGCHAR: 	std_logic_vector(1 downto 0) is mb_uinstruction(12 downto 11);
-constant DBGCHAR_same: 	std_logic_vector(1 downto 0) := "00";
-constant DBGCHAR_directByte: 	std_logic_vector(1 downto 0) := "01";
-constant DBGCHAR_zero: 	std_logic_vector(1 downto 0) := "10";
--- Value "11" not allowed (name '-' is not assignable)
+alias mb_DBGINDEX: 	std_logic_vector(1 downto 0) is mb_uinstruction(12 downto 11);
+constant DBGINDEX_same: 	std_logic_vector(1 downto 0) := "00";
+constant DBGINDEX_directByte: 	std_logic_vector(1 downto 0) := "01";
+constant DBGINDEX_zero: 	std_logic_vector(1 downto 0) := "10";
+constant DBGINDEX_crlf: 	std_logic_vector(1 downto 0) := "11";
 ---- Start boilerplate code (use with utmost caution!)
--- update_DBGCHAR: process(clk, mb_DBGCHAR)
+-- update_DBGINDEX: process(clk, mb_DBGINDEX)
 -- begin
 --	if (rising_edge(clk)) then
---		case mb_DBGCHAR is
-----			when DBGCHAR_same =>
-----				DBGCHAR <= DBGCHAR;
---			when DBGCHAR_directByte =>
---				DBGCHAR <= directByte;
---			when DBGCHAR_zero =>
---				DBGCHAR <= (others => '0');
+--		case mb_DBGINDEX is
+----			when DBGINDEX_same =>
+----				DBGINDEX <= DBGINDEX;
+--			when DBGINDEX_directByte =>
+--				DBGINDEX <= directByte;
+--			when DBGINDEX_zero =>
+--				DBGINDEX <= (others => '0');
+--			when DBGINDEX_crlf =>
+--				DBGINDEX <= crlf;
 --			when others =>
 --				null;
 --		end case;
@@ -222,137 +224,117 @@ alias mb_dummy: 	std_logic_vector(7 downto 0) is mb_uinstruction(7 downto 0);
 constant mb_microcode: mb_code_memory := (
 
 -- clear;
--- L0090@0000 E000007F9100._reset:  DBGCHAR <= zero, IL_PC <= zero;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGCHAR <= 10, IL_PC <= 001, dummy = 00000000;
+-- L0089@0000 E000007F9100._reset:  DBGINDEX <= zero, IL_PC <= zero;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 001, dummy = 00000000;
 0 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "10" & O"1" & X"00",
 
 -- clear;
--- L0092@0001 E000007F9100._reset1:  DBGCHAR <= zero, IL_PC <= zero;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGCHAR <= 10, IL_PC <= 001, dummy = 00000000;
+-- L0091@0001 E000007F9100._reset1:  DBGINDEX <= zero, IL_PC <= zero;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 001, dummy = 00000000;
 1 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "10" & O"1" & X"00",
 
 -- clear;
--- L0094@0002 E000007F9100._reset2:  DBGCHAR <= zero, IL_PC <= zero;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGCHAR <= 10, IL_PC <= 001, dummy = 00000000;
+-- L0093@0002 E000007F9100._reset2:  DBGINDEX <= zero, IL_PC <= zero;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 001, dummy = 00000000;
 2 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "10" & O"1" & X"00",
 
 -- clear;
--- L0096@0003 E000007F9100._reset3:  DBGCHAR <= zero, IL_PC <= zero;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGCHAR <= 10, IL_PC <= 001, dummy = 00000000;
+-- L0095@0003 E000007F9100._reset3:  DBGINDEX <= zero, IL_PC <= zero;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 001, dummy = 00000000;
 3 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "10" & O"1" & X"00",
 
+-- directByte = 4, trace(directByte);
+-- L0099@0004 E01209020800.  directByte = 4, trace(directByte);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 00000100, T <= 00, DBGINDEX <= 01, IL_PC <= 000, dummy = 00000000;
+4 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"04" & "00" & "01" & O"0" & X"00",
+
+-- trace(crlf);
+-- L0100@0005 E012097F9800.  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, dummy = 00000000;
+5 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"FF" & "00" & "11" & O"0" & X"00",
+
 -- dump_il();
--- L0100@0004 E00703FF8000.  dump_il();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000111 else 000000111, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-4 => '1' & '1' & '1' & X"0" & O"007" & O"007" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0101@0006 E00904FF8000.  dump_il();
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000001001 else 000001001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+6 => '1' & '1' & '1' & X"0" & O"011" & O"011" & X"FF" & "00" & "00" & O"0" & X"00",
 
 -- goto deadloop;
--- L0101@0005 FE0002FF8000.deadloop:  if false then next else deadloop;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000101, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-5 => '1' & '1' & '1' & X"F" & O"000" & O"005" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0102@0007 FE0003FF8000.deadloop:  if false then next else deadloop;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+7 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & X"00",
 
 -- goto deadloop;
--- L0104@0006 FE0002FF8000.  if false then next else deadloop;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000101, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-6 => '1' & '1' & '1' & X"F" & O"000" & O"005" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0105@0008 FE0003FF8000.  if false then next else deadloop;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+8 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & X"00",
 
--- T <= IL_PC, directByte = "I", DBGCHAR <= directByte, dbg_out();
--- L0108@0007 E0160B24A800.dump_il:  T <= IL_PC, directByte = "I", DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 01001001, T <= 01, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-7 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"49" & "01" & "01" & O"0" & X"00",
+-- directByte = 1, trace(directByte);
+-- L0109@0009 E01209008800.dump_il:  directByte = 1, trace(directByte);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 00000001, T <= 00, DBGINDEX <= 01, IL_PC <= 000, dummy = 00000000;
+9 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"01" & "00" & "01" & O"0" & X"00",
 
--- IL_PC <= zero, directByte = "L", DBGCHAR <= directByte, dbg_out();
--- L0109@0008 E0160B260900.  IL_PC <= zero, directByte = "L", DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 01001100, T <= 00, DBGCHAR <= 01, IL_PC <= 001, dummy = 00000000;
-8 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"4C" & "00" & "01" & O"1" & X"00",
+-- trace(crlf);
+-- L0110@000A E012097F9800.  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, dummy = 00000000;
+10 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"FF" & "00" & "11" & O"0" & X"00",
 
--- dbg_crlf();
--- L0110@0009 E0140A7F8000.  dbg_crlf();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010100 else 000010100, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-9 => '1' & '1' & '1' & X"0" & O"024" & O"024" & X"FF" & "00" & "00" & O"0" & X"00",
+-- T <= IL_PC, IL_PC <= zero;
+-- L0111@000B E000007FA100.  T <= IL_PC, IL_PC <= zero;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 01, DBGINDEX <= 00, IL_PC <= 001, dummy = 00000000;
+11 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "01" & "00" & O"1" & X"00",
 
 -- if IL_PC_VALID then next else dump_il_ex;
--- L0111@000A E60009FF8000.dump_il_lp:  if IL_PC_VALID then next else dump_il_ex;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0011) then 000000000 else 000010011, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-10 => '1' & '1' & '1' & X"3" & O"000" & O"023" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0112@000C E60008FF8000.dump_il_lp:  if IL_PC_VALID then next else dump_il_ex;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0011) then 000000000 else 000010001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+12 => '1' & '1' & '1' & X"3" & O"000" & O"021" & X"FF" & "00" & "00" & O"0" & X"00",
 
--- directByte = 0x80, DBGCHAR <= directByte, dbg_out();
--- L0112@000B E0160B400800.  directByte = 0x80, DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 10000000, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-11 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"80" & "00" & "01" & O"0" & X"00",
+-- directByte = 2, trace(directByte);
+-- L0113@000D E01209010800.  directByte = 2, trace(directByte);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, dummy = 00000000;
+13 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"02" & "00" & "01" & O"0" & X"00",
 
--- directByte = 0x81, DBGCHAR <= directByte, dbg_out();
--- L0113@000C E0160B408800.  directByte = 0x81, DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 10000001, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-12 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"81" & "00" & "01" & O"0" & X"00",
+-- directByte = 3, trace(directByte);
+-- L0114@000E E01209018800.  directByte = 3, trace(directByte);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, dummy = 00000000;
+14 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"03" & "00" & "01" & O"0" & X"00",
 
--- directByte = 0x82, DBGCHAR <= directByte, dbg_out();
--- L0114@000D E0160B410800.  directByte = 0x82, DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 10000010, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-13 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"82" & "00" & "01" & O"0" & X"00",
-
--- directByte = " ", DBGCHAR <= directByte, dbg_out();
--- L0115@000E E0160B100800.  directByte = " ", DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 00100000, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-14 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"20" & "00" & "01" & O"0" & X"00",
-
--- directByte = 0x83, DBGCHAR <= directByte, dbg_out();
--- L0116@000F E0160B418800.  directByte = 0x83, DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 10000011, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-15 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"83" & "00" & "01" & O"0" & X"00",
-
--- directByte = 0x84, DBGCHAR <= directByte, dbg_out();
--- L0117@0010 E0160B420800.  directByte = 0x84, DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 10000100, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-16 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"84" & "00" & "01" & O"0" & X"00",
-
--- dbg_crlf();
--- L0118@0011 E0140A7F8000.  dbg_crlf();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010100 else 000010100, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-17 => '1' & '1' & '1' & X"0" & O"024" & O"024" & X"FF" & "00" & "00" & O"0" & X"00",
+-- trace(crlf);
+-- L0115@000F E012097F9800.  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010010 else 000010010, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, dummy = 00000000;
+15 => '1' & '1' & '1' & X"0" & O"022" & O"022" & X"FF" & "00" & "11" & O"0" & X"00",
 
 -- IL_PC <= inc, goto dump_il_lp;
--- L0120@0012 FE00057F8200.  IL_PC <= inc, if false then next else dump_il_lp;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000001010, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 010, dummy = 00000000;
-18 => '1' & '1' & '1' & X"F" & O"000" & O"012" & X"FF" & "00" & "00" & O"2" & X"00",
+-- L0116@0010 FE00067F8200.  IL_PC <= inc, if false then next else dump_il_lp;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000001100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 010, dummy = 00000000;
+16 => '1' & '1' & '1' & X"F" & O"000" & O"014" & X"FF" & "00" & "00" & O"2" & X"00",
 
 -- IL_PC <= T, back;
--- L0121@0013 E002017F8300.dump_il_ex:  IL_PC <= T, if true then return else return;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 011, dummy = 00000000;
-19 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"3" & X"00",
-
--- directByte = 0x0D, DBGCHAR <= directByte, dbg_out();
--- L0123@0014 E0160B068800.dbg_crlf:  directByte = 0x0D, DBGCHAR <= directByte, dbg_out();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000010110 else 000010110, directByte = 00001101, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-20 => '1' & '1' & '1' & X"0" & O"026" & O"026" & X"0D" & "00" & "01" & O"0" & X"00",
-
--- directByte = 0x0A, DBGCHAR <= directByte;
--- L0124@0015 E00000050800.  directByte = 0x0A, DBGCHAR <= directByte;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 00001010, T <= 00, DBGCHAR <= 01, IL_PC <= 000, dummy = 00000000;
-21 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"0A" & "00" & "01" & O"0" & X"00",
+-- L0117@0011 E002017F8300.dump_il_ex:  IL_PC <= T, if true then return else return;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 011, dummy = 00000000;
+17 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"3" & X"00",
 
 -- if DBG_READY then next else repeat;
--- L0125@0016 E80000FF8000.dbg_out:  if DBG_READY then next else repeat;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-22 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0119@0012 E80000FF8000.trace:  if DBG_READY then next else repeat;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+18 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & X"00",
 
 -- if DBG_READY then next else repeat;
--- L0126@0017 E80000FF8000.  if DBG_READY then next else repeat;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-23 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0120@0013 E80000FF8000.  if DBG_READY then next else repeat;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+19 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & X"00",
 
--- DBGCHAR <= zero, back;
--- L0127@0018 E002017F9000.  DBGCHAR <= zero, if true then return else return;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGCHAR <= 10, IL_PC <= 000, dummy = 00000000;
-24 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "10" & O"0" & X"00",
+-- DBGINDEX <= zero, back;
+-- L0121@0014 E002017F9000.  DBGINDEX <= zero, if true then return else return;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 000, dummy = 00000000;
+20 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "10" & O"0" & X"00",
 
 -- goto deadloop;
--- L0130@001F FE0002FF8000.  if false then next else deadloop;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000101, directByte = 11111111, T <= 00, DBGCHAR <= 00, IL_PC <= 000, dummy = 00000000;
-31 => '1' & '1' & '1' & X"F" & O"000" & O"005" & X"FF" & "00" & "00" & O"0" & X"00",
+-- L0124@001F FE0003FF8000.  if false then next else deadloop;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, dummy = 00000000;
+31 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & X"00",
 
--- 486 location(s) in following ranges will be filled with default value
--- 0019 .. 001E
+-- 490 location(s) in following ranges will be filled with default value
+-- 0015 .. 001E
 -- 0020 .. 01FF
 
 others => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"0" & X"00"
