@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.7
-# Date: Tue Apr 30 21:58:50 2024
+# Date: Fri Oct 10 23:36:52 2025
 #
 ##############################################################
 #
@@ -40,7 +40,7 @@ SELECT Block_Memory_Generator xilinx.com:ip:blk_mem_gen:7.3
 # END Select
 # BEGIN Parameters
 CSET additional_inputs_for_power_estimation=false
-CSET algorithm=Fixed_Primitives
+CSET algorithm=Minimum_Area
 CSET assume_synchronous_clk=false
 CSET axi_id_width=4
 CSET axi_slave_type=Memory_Slave
@@ -73,7 +73,7 @@ CSET port_a_write_rate=50
 CSET port_b_clock=0
 CSET port_b_enable_rate=0
 CSET port_b_write_rate=50
-CSET primitive=4kx4
+CSET primitive=8kx2
 CSET read_width_a=8
 CSET read_width_b=8
 CSET register_porta_input_of_softecc=false
@@ -105,4 +105,4 @@ CSET write_width_b=8
 MISC pkg_timestamp=2012-11-19T16:22:25Z
 # END Extra information
 GENERATE
-# CRC: e9095774
+# CRC: 78ba7f75

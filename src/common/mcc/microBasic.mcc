@@ -2,7 +2,7 @@
 //	MicroBasic Microcode (c) 2025-... zpekic@hotmail.com
 //  Compile with https://github.com/zpekic/MicroCodeCompiler
 //----------------------------------------------------------
-			.code 9, 48, microBasic_code.mif, microBasic_code.cgf, microBasic_code.coe, mb:microBasic_code.vhd, microBasic_code.hex, microBasic_code.bin, 8;
+			.code 9, 64, microBasic_code.mif, microBasic_code.cgf, microBasic_code.coe, mb:microBasic_code.vhd, microBasic_code.hex, microBasic_code.bin, 8;
 			.mapper 8, 16, microBasic_map.mif, microBasic_map.cgf, microBasic_map.coe, mb:microBasic_map.vhd, microBasic_map.hex, microBasic_map.bin, 2;
 			.controller microBasic_control_unit.vhd, 4;
 			//.symbol 9, 256, microBasic_sym.mif, microBasic_sym.cgf, microBasic_sym.coe, mb:microBasic_sym.vhd, microBasic_sym.hex, microBasic_sym.bin, 32;
@@ -11,24 +11,23 @@
 nBUSREQ			.valfield 1 values 0, 1 default 1;
 nWR				.valfield 1 values 0, 1 default 1;
 nRD				.valfield 1 values 0, 1 default 1;
-// nWAIT		consumed as condition
 // nBUSACK		consumed as condition
 // A(15..0)		
 // D(7..0)
 
 seq_cond:		.if 4 values 
 				true, 			// hard-code to 1
-				nWAIT,	 		// Z80 bus - 0 to wait for memory
-				nBUSACK,		// z80 bus - 0 if CPU is 
+				CHAROUT_BIT7,	// 
+				CHAROUT_READY,	//  
 				IL_PC_VALID,	// value of IL program counter in valid range
 				DBG_READY,		// high if tracer has processed the trace character
-				dummy_5,		
-				dummy_6,		
-				dummy_7,		
-				dummy_8,		
-				dummy_9,		
-				dummy_A,		
-				dummy_B,		
+				MDR_IS_ZERO,		
+				nBUSACK,		// low if memory is ready for read/write		
+				INLEND_MAX,		
+				INLEND_MIN,		
+				CHARIN_PRINTABLE,	// ASCII code in range 0x20 .. 0x7E		
+				CHARIN_EQU_DB,		
+				CHARIN_READY,		
 				dummy_C,		
 				dummy_D,		
 				dummy_E,		
@@ -51,7 +50,7 @@ T			.regfield 2 values
 // contains ASCII char for DEBUG UART transmit
 DBGINDEX		.regfield 2 values 
 				same,
-				directByte,
+				from_microcode,
 				zero,
 				crlf // shortcut to index 63 which should contain CR, LF, NULL sequence
 				default same;		
@@ -62,23 +61,81 @@ IL_PC:			.regfield 3 values
 				zero,
 				inc,
 				T,
-				-,
+				pc_plus_off6,
 				-,
 				-,
 				-
 				default same;
 				
+// 8-bit IL opcode
+IL_OP:			.regfield 1 values
+				same,
+				from_interpreter
+				default same;
+
+// 8-bit char to be output
+CHAROUT:		.regfield 2 values
+				same,
+				from_interpreter, 
+				from_microcode,
+				from_charin
+				default same;
+
+// 16-bit Memory Address Register
+MAR:			.regfield 2 values
+				same, 
+				InlEnd,
+				-,
+				-
+				default same;
+				
+// 8-bit Memory Address Register
+MDR:			.regfield 2 values
+				same, 
+				from_Bus,
+				zero,
+				CHARIN
+				default same;
+
+// 16-bit pointer to input buffer
+InlEnd			.regfield 2 values
+				same,
+				InLine,
+				inc,
+				dec
+				default same;
+
+// 16-bit Basic pointer
+BP				.regfield 2 values
+				same,
+				InLine,
+				-,
+				-
+				default same;
+				
+// flag to reset input character ready
+gotChar			.valfield 1 values 
+				0,
+				1
+				default 0;
+				
 // placeholder
-dummy:			.valfield 8 values * default 0;
+dummy:			.valfield 12 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 goto:		.alias if false then next else;
 noop:		.alias if true then next else next;
 back:	    .alias if true then return else return;
+traceString .alias trace(from_microcode), directByte =;
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 dump_il:	.sub;
+dump_input:	.sub;
 trace:		.sub DBGINDEX;
+outCRLF:	.sub;
+outChar:	.sub CHAROUT;
+WriteCore:	.sub MAR, MDR;
+ReadCore:	.sub MAR;
 
 // other
 clear:		.alias DBGINDEX <= zero, IL_PC <= zero;
@@ -96,22 +153,107 @@ _reset3:	clear;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
-			directByte = 4, trace(directByte);	// output "MicroBas" on debug UART
+			traceString 4;	// output "MicroBas" on debug UART
+			trace(crlf);
+			
+fetch:		traceString 2; 								// trace IL_PC
+			traceString 3;								// trace value of IL(IL_PC) (which is now the opcode)
+			IL_OP <= from_interpreter, IL_PC <= inc;	// load opcode, advance IL_PC
+			if true then fork else fork;				// jump to entry point implementing the opcode
+			
+			.map 0b????????;							// opcode sink of last resort
+badop:		traceString 62;								// error message
 			trace(crlf);
 			dump_il();
-deadloop:	goto deadloop;
+deadloop:	goto deadloop;								// require restart
+			
+			.map 0x23;									// NL (Print newline)
+			traceString 6;								// Trace mnemonic
+			outCRLF();
+			goto fetch;
+			
+			.map 0x24;									// PC (Print literal string)
+			traceString 5;								// Trace mnemonic
+pc_loop:	outChar(from_interpreter);
+			traceString 3;								// trace value of IL(IL_PC) (which was the char to be output)
+			IL_PC <= inc, if CHAROUT_BIT7 then next else pc_loop;	// print until char with bit7 set 
+pc_exit:	trace(crlf);
+			goto fetch;
+				
+			.map 0x27;									// GL (Get Input line)
+			traceString 8;								// Trace mnemonic
+gl:			InlEnd <= InLine;
+gl_loop:	if CHARIN_READY then next else repeat;		// wait for input character
+			if CHARIN_PRINTABLE then gl_print else next;
+			directByte = 0x0D, if CHARIN_EQU_DB then gl_cr else next;
+			directByte = 0x08, if CHARIN_EQU_DB then gl_bs else next;
+			directByte = 0x03, if CHARIN_EQU_DB then gl_esc else next;
+//			directByte = 0x09, if CHARIN_EQU_DB then gl_tab else next;		// ignore for now
+			// fall into ignorable characters
+gl_ignore:	directByte = 0x07, outChar(from_microcode); // BEEP, then get next char
+			gotChar = 1, goto gl_loop;
 
-			.map 0b????????;
-			goto deadloop;
+gl_print:	if INLEND_MAX then gl_ignore else next;
+			WriteCore(InlEnd, CHARIN);
+			InlEnd <= inc, outChar(from_charin);		// ECHO
+gl_write0:	WriteCore(InlEnd, zero);
+			gotChar = 1, goto gl_loop;
+					
+gl_esc:		directByte = 0x07, outChar(from_microcode); // BEEP, then get next line (ignore this one)
+			outCRLF();									// start fresh line
+			gotChar = 1, goto gl;
+			
+gl_bs:		if INLEND_MIN then gl_ignore else next;
+			outChar(from_charin);						// ECHO
+			InlEnd <= dec;
+			goto gl_write0;
+			
+gl_cr:		WriteCore(InlEnd, CHARIN);
+			InlEnd <= inc;
+			WriteCore(InlEnd, zero);
+			outCRLF();									// ECHO
+			dump_input();
+			gotChar = 1, BP <= Inline, goto fetch;
+			
+
+			.map 0b01??????;							// BR (relative branch)
+			traceString 7;								// Trace mnemonic
+			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
+			traceString 2;								// trace target
+			trace(crlf);
+			goto fetch;
+			
+			.map 0x60;									// BR with offset 0 is badop
+			goto badop;
+
+outCRLF:	directByte = 0x0D, outChar(from_microcode);		// CR
+			directByte = 0x0A, CHAROUT <= from_microcode;	// LF
+outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
+			if CHAROUT_READY then next else repeat;
+			back;										
+			
+WriteCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
+			nBUSREQ = 0, nWR = 0, back;
+
+ReadCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
+			nBUSREQ = 0, nRD = 0, MDR <= from_Bus, back;
 			
 // 	Debug related subroutines
-//	---------------------------------------------------------------------------			
-dump_il:	directByte = 1, trace(directByte);		// display current IL and header to ROM
+//	---------------------------------------------------------------------------		
+dump_input: InlEnd <= InLine, trace(crlf);
+dump_inlp:	ReadCore(InlEnd);
+			directByte = 9, trace(from_microcode);		// display memory byte as Hex
+			if MDR_IS_ZERO then dump_inex else next;
+			InlEnd <= inc, goto dump_inlp; 
+dump_inex:	trace(crlf);
+			back;
+			
+dump_il:	directByte = 1, trace(from_microcode);		// display current IL and header to ROM
 			trace(crlf);
 			T <= IL_PC, IL_PC <= zero; 	// save IL and set to 0 to cover the ROM
 dump_il_lp:	if IL_PC_VALID then next else dump_il_ex;
-			directByte = 2, trace(directByte);
-			directByte = 3, trace(directByte);
+			directByte = 2, trace(from_microcode);
+			directByte = 3, trace(from_microcode);
 			trace(crlf);
 			IL_PC <= inc, goto dump_il_lp; 
 dump_il_ex:	IL_PC <= T, back;	// restore IL and return
@@ -119,7 +261,4 @@ dump_il_ex:	IL_PC <= T, back;	// restore IL and return
 trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
 			if DBG_READY then next else repeat;
 			DBGINDEX <= zero, back;				// clear the serial debug output register and return
-			
-			.org 0x1F;
-			goto deadloop;	// TODO: add trace to indicate microcode program stack underflow
-			
+					

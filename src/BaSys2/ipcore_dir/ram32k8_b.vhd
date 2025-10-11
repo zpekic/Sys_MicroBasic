@@ -22,7 +22,7 @@
 --    devices, or systems.  Use in such applications are expressly            --
 --    prohibited.                                                             --
 --                                                                            --
---    (c) Copyright 1995-2024 Xilinx, Inc.                                    --
+--    (c) Copyright 1995-2025 Xilinx, Inc.                                    --
 --    All rights reserved.                                                    --
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ END COMPONENT;
     GENERIC MAP (
       c_addra_width => 13,
       c_addrb_width => 13,
-      c_algorithm => 0,
+      c_algorithm => 1,
       c_axi_id_width => 4,
       c_axi_slave_type => 0,
       c_axi_type => 1,
@@ -102,7 +102,7 @@ END COMPONENT;
       c_load_init_file => 0,
       c_mem_type => 0,
       c_mux_pipeline_stages => 0,
-      c_prim_type => 2,
+      c_prim_type => 1,
       c_read_depth_a => 8192,
       c_read_depth_b => 8192,
       c_read_width_a => 8,

@@ -69,6 +69,13 @@ end sys_microbasic_basys2;
 
 architecture Structural of sys_microbasic_basys2 is
 
+-- stores Basic program and input line, everything else is custom registers inside CPU!
+type memory is array (0 to 511) of std_logic_vector(7 downto 0);
+signal ram: memory;
+signal nBUSACK, nRD, nWR: std_logic;
+signal A: std_logic_vector(15 downto 0);
+signal D: std_logic_vector(7 downto 0);
+
 -- Connect to PmodUSBUART 0 (main TDX/RXD)
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
 alias JA_RTS: std_logic is PIO(72); --JA1;
@@ -118,8 +125,8 @@ alias freq2: std_logic is cnt4096(11);
 signal cpu_clk: std_logic;
 
 -- single char UART output
-signal TXD_READY, TXD_SEND: std_logic;
-signal TXD_CHAR: std_logic_vector(7 downto 0);
+signal cpu_outchar_ready, cpu_outchar_send: std_logic;
+signal cpu_outchar: std_logic_vector(7 downto 0);
 -- single char UART input
 signal RXD_READY, RXD_VALID: std_logic;
 signal RXD_CHAR: std_logic_vector(7 downto 0);
@@ -206,12 +213,35 @@ end process;
 cpu: entity work.MicroBasic Port map (
 		reset => RESET,
 		clk => cpu_clk,
-		nWAIT => '1',
-		nBUSACK => '0',
+		nBUSREQ => open,
+      nBUSACK => '0',
+		nRD => nRD,
+		nWR => nWR,
+		ABUS => A,
+		DBUS => D,		
+		-- output char
+		outchar => cpu_outchar,
+		outchar_send => cpu_outchar_send,
+		outchar_ready => cpu_outchar_ready,
+		-- input char
+		inchar => RXD_CHAR,
+		inchar_ready => RXD_READY,
+		-- debug / trace
 		baudrate => baudrate_x1,
 		debug_txd => JB_RXD,
 		debug_bus => cpu_debug
 	);
+
+-- infer simple 1k RAM
+D <= ram(to_integer(unsigned(A(8 downto 0)))) when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
+on_cpuclk: process(cpu_clk)
+begin
+	if (rising_edge(cpu_clk)) then
+		if ((nBUSACK or nWR) = '0') then 
+			ram(to_integer(unsigned(A(8 downto 0)))) <= D;
+		end if;
+	end if;
+end process;
 
 -- CPU clock should ideally be sync'd when switching from one frequency to another
 with sw_cpuclk select cpu_clk <= 
@@ -250,26 +280,26 @@ begin
 end process;
 	
 -- RS flip flop
-send_clk <= RXD_READY when (TXD_SEND = '0') else TXD_READY;
-on_sendclk: process(RESET, send_clk)
-begin
-	if (reset = '1') then
-		TXD_SEND <= '0';
-	else
-		if (rising_edge(send_clk)) then
-			TXD_SEND <= not TXD_SEND;
-		end if;
-	end if;
-end process;
+--send_clk <= RXD_READY when (TXD_SEND = '0') else TXD_READY;
+--on_sendclk: process(RESET, send_clk)
+--begin
+--	if (reset = '1') then
+--		TXD_SEND <= '0';
+--	else
+--		if (rising_edge(send_clk)) then
+--			TXD_SEND <= not TXD_SEND;
+--		end if;
+--	end if;
+--end process;
 	
 -- UART connection to the host
 txdout: entity work.uart_par2ser Port map (
 			reset => reset,
 			txd_clk => baudrate_x1,
-			send => TXD_SEND,
+			send => cpu_outchar_send,
 			mode => "000", -- no parity, extra stop bit
-			data => TXD_CHAR,
-         ready => TXD_READY,
+			data => cpu_outchar,
+         ready => cpu_outchar_ready,
          txd => JA_RXD
 		);
 
@@ -284,19 +314,19 @@ rxdinp: entity work.uart_ser2par Port map (
 		);
 		
 -- Test ASCII component
-to_upper: entity work.ascii_toupper Port map ( 
-			ascii8bit => RXD_CHAR,
-			ascii_uppercase => TXD_CHAR,
-			isTAB => LED(0),
-			isCR => LED(1),
-			isBS  => LED(2),
-			isDEL  => LED(3),
-			isSPACE  => LED(4),
-			isNUM  => LED(5),
-			isALPHA  => LED(6),
-			isCTRL  => LED(7),
-			isBIT7SET => open
-		);
+--to_upper: entity work.ascii_toupper Port map ( 
+--			ascii8bit => RXD_CHAR,
+--			ascii_uppercase => TXD_CHAR,
+--			isTAB => LED(0),
+--			isCR => LED(1),
+--			isBS  => LED(2),
+--			isDEL  => LED(3),
+--			isSPACE  => LED(4),
+--			isNUM  => LED(5),
+--			isALPHA  => LED(6),
+--			isCTRL  => LED(7),
+--			isBIT7SET => open
+--		);
 		
 -- UART baudrate selection
 baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));

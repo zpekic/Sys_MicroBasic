@@ -13,14 +13,10 @@ use IEEE.NUMERIC_STD.ALL;
 
 package microbasic_package is
 
---constant char_zero: std_logic_vector(7 downto 0) := X"00";
+constant NUL: std_logic_vector(7 downto 0) := X"00";
 constant LF: std_logic_vector(7 downto 0) := X"0A";
 constant CR: std_logic_vector(7 downto 0) := X"0D";
---constant char_e: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(natural(character'pos('E')), 8));
---constant char_i: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(natural(character'pos('I')), 8));
---constant char_r: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(natural(character'pos('R')), 8));
---constant char_equ: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(natural(character'pos('=')), 8));
---constant char_space: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(natural(character'pos(' ')), 8));
+constant BEL: std_logic_vector(7 downto 0) := X"07";
 
 impure function c(char: in character) return std_logic_vector;
 
