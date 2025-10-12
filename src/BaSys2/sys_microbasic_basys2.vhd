@@ -229,6 +229,7 @@ cpu: entity work.MicroBasic Port map (
 		-- debug / trace
 		baudrate => baudrate_x1,
 		debug_txd => JB_RXD,
+		debug_sel => sw(1 downto 0),
 		debug_bus => cpu_debug
 	);
 
@@ -246,7 +247,7 @@ end process;
 -- CPU clock should ideally be sync'd when switching from one frequency to another
 with sw_cpuclk select cpu_clk <= 
 		button(0) when O"0",
-		freq2 when O"1",
+		cnt4096(10) when O"1",		-- 4Hz
 		cnt4096(6) when O"2",		-- 64Hz
 		cnt4096(0) when O"3",		-- 4.096kHz
 		cnt25MHz(3) when O"4",		-- 3.125MHz

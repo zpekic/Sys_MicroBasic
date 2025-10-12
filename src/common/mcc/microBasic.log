@@ -5,105 +5,193 @@
 Compiling microBasic.mcc, pass 1 out of 2.
 Warning: Clock edge implicitly (by default) set to rising_edge()
 Warning: .org value changed from -1 (0xFFFFFFFF) to 0 (0x0000)
-Line 146: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 146
-L0146@0000._reset:  DBGINDEX <= zero, IL_PC <= zero;
+Line 164: resolved aliases:  nop in 'if true then next', line 164
+L0164@0000._reset:  if true then next;
 
-Line 148: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 148
-L0148@0001._reset1:  DBGINDEX <= zero, IL_PC <= zero;
+Warning: else clause missing in if statement, default value '' will be used
+Line 166: resolved aliases:  nop in 'if true then next', line 166
+L0166@0001._reset1:  if true then next;
 
-Line 150: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 150
-L0150@0002._reset2:  DBGINDEX <= zero, IL_PC <= zero;
+Warning: else clause missing in if statement, default value '' will be used
+Line 168: resolved aliases:  nop in 'if true then next', line 168
+L0168@0002._reset2:  if true then next;
 
-Line 152: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero', line 152
-L0152@0003._reset3:  DBGINDEX <= zero, IL_PC <= zero;
+Warning: else clause missing in if statement, default value '' will be used
+Line 170: resolved aliases:  nop in 'if true then next', line 170
+L0170@0003._reset3:  if true then next;
 
-Line 156: resolved aliases:  traceString in 'trace(from_microcode), directByte = 4', line 156
-L0156@0004.  trace(from_microcode), directByte = 4;
+Warning: else clause missing in if statement, default value '' will be used
+Line 174: resolved aliases:  clear in 'DBGINDEX <= zero, IL_PC <= zero, BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start', line 174
+L0174@0004.WarmStart:  DBGINDEX <= zero, IL_PC <= zero, BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start;
 
-Line 159: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 159
-L0159@0006.fetch:  trace(from_microcode), directByte = 2;
+Line 176: resolved aliases:  traceString in 'trace(from_microcode), directByte = 4', line 176
+L0176@0006.  trace(from_microcode), directByte = 4;
 
-Line 160: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 160
-L0160@0007.  trace(from_microcode), directByte = 3;
+Line 179: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 179
+L0179@0008.  trace(from_microcode), directByte = 2;
+
+Line 180: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 180
+L0180@0009.  trace(from_microcode), directByte = 3;
 
 Warning: mask value 255 detected. Range will be 0 to 255
-Line 165: resolved aliases:  traceString in 'trace(from_microcode), directByte = 62', line 165
-L0165@000A.badop:  trace(from_microcode), directByte = 62;
+Line 185: resolved aliases:  traceString in 'trace(from_microcode), directByte = 62', line 185
+L0185@000C.badop:  trace(from_microcode), directByte = 62;
 
-Line 168: resolved aliases:  goto in 'if false then next else deadloop', line 168
-L0168@000D.deadloop:  if false then next else deadloop;
+Line 188: resolved aliases:  goto in 'if false then next else WarmStart', line 188
+L0188@000E.  if false then next else WarmStart;
 
-Line 171: resolved aliases:  traceString in 'trace(from_microcode), directByte = 6', line 171
-L0171@000E.  trace(from_microcode), directByte = 6;
+Line 191: resolved aliases:  traceString in 'trace(from_microcode), directByte = 12', line 191
+L0191@000F.  trace(from_microcode), directByte = 12;
 
-Line 173: resolved aliases:  goto in 'if false then next else fetch', line 173
-L0173@0010.  if false then next else fetch;
+Line 192: resolved aliases:  goto in 'if false then next else fetch', line 192
+L0192@0010.  if false then next else fetch;
 
-Line 176: resolved aliases:  traceString in 'trace(from_microcode), directByte = 5', line 176
-L0176@0011.  trace(from_microcode), directByte = 5;
+Line 195: resolved aliases:  traceString in 'trace(from_microcode), directByte = 10', line 195
+L0195@0011.  trace(from_microcode), directByte = 10;
 
-Line 178: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 178
-L0178@0013.  trace(from_microcode), directByte = 3;
+Line 197: resolved aliases:  goto in 'SvPt <= BP, if false then next else fetch', line 197
+L0197@0013.save_bp:  SvPt <= BP, if false then next else fetch;
 
-Line 181: resolved aliases:  goto in 'if false then next else fetch', line 181
-L0181@0016.  if false then next else fetch;
+Line 200: resolved aliases:  traceString in 'trace(from_microcode), directByte = 11', line 200
+L0200@0014.  trace(from_microcode), directByte = 11;
 
-Line 184: resolved aliases:  traceString in 'trace(from_microcode), directByte = 8', line 184
-L0184@0017.  trace(from_microcode), directByte = 8;
+Warning: else clause missing in if statement, default value '' will be used
+Line 202: resolved aliases:  goto in 'SvPt <= BP, BP <= SvPt, if false then next else fetch', line 202
+L0202@0016.ptr_exc:  SvPt <= BP, BP <= SvPt, if false then next else fetch;
 
-Line 194: resolved aliases:  goto in 'gotChar = 1, if false then next else gl_loop', line 194
-L0194@001F.  gotChar = 1, if false then next else gl_loop;
+Line 205: resolved aliases:  traceString in 'trace(from_microcode), directByte = 6', line 205
+L0205@0017.  trace(from_microcode), directByte = 6;
 
-Line 200: resolved aliases:  goto in 'gotChar = 1, if false then next else gl_loop', line 200
-L0200@0024.  gotChar = 1, if false then next else gl_loop;
+Line 207: resolved aliases:  goto in 'if false then next else fetch', line 207
+L0207@0019.  if false then next else fetch;
 
-Line 204: resolved aliases:  goto in 'gotChar = 1, if false then next else gl', line 204
-L0204@0027.  gotChar = 1, if false then next else gl;
+Line 210: resolved aliases:  traceString in 'trace(from_microcode), directByte = 5', line 210
+L0210@001A.  trace(from_microcode), directByte = 5;
 
-Line 209: resolved aliases:  goto in 'if false then next else gl_write0', line 209
-L0209@002B.  if false then next else gl_write0;
+Line 212: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 212
+L0212@001C.  trace(from_microcode), directByte = 3;
 
-Line 216: resolved aliases:  goto in 'gotChar = 1, BP <= Inline, if false then next else fetch', line 216
-L0216@0031.  gotChar = 1, BP <= Inline, if false then next else fetch;
+Line 214: resolved aliases:  goto in 'if false then next else fetch', line 214
+L0214@001E.pc_exit:  if false then next else fetch;
+
+Line 217: resolved aliases:  traceString in 'trace(from_microcode), directByte = 8', line 217
+L0217@001F.  trace(from_microcode), directByte = 8;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 221: resolved aliases:  CR in 'directByte = 0x0D, if CHARIN_EQU_DB then gl_cr', line 221
+L0221@0023.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 222: resolved aliases:  BACKSPACE in 'directByte = 0x08, if CHARIN_EQU_DB then gl_bs', line 222
+L0222@0024.  directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 223: resolved aliases:  ESC in 'directByte = 0x03, if CHARIN_EQU_DB then gl_esc', line 223
+L0223@0025.  directByte = 0x03, if CHARIN_EQU_DB then gl_esc;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 226: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 226
+L0226@0026.gl_ignore:  directByte = 0x07, outChar(from_microcode);
+
+Line 227: resolved aliases:  goto in 'gotChar = 1, if false then next else gl_loop', line 227
+L0227@0027.  gotChar = 1, if false then next else gl_loop;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 234: resolved aliases:  goto in 'gotChar = 1, if false then next else gl_loop', line 234
+L0234@002D.  gotChar = 1, if false then next else gl_loop;
+
+Line 236: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 236
+L0236@002E.gl_esc:  directByte = 0x07, outChar(from_microcode);
+
+Line 238: resolved aliases:  goto in 'gotChar = 1, if false then next else gl', line 238
+L0238@0030.  gotChar = 1, if false then next else gl;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 241: resolved aliases:  goto in 'InlEnd <= dec, if false then next else gl_write0', line 241
+L0241@0032.  InlEnd <= dec, if false then next else gl_write0;
+
+Line 248: resolved aliases:  goto in 'gotChar = 1, BP <= Inline_start, if false then next else fetch', line 248
+L0248@0038.  gotChar = 1, BP <= Inline_start, if false then next else fetch;
 
 Warning: mask value 63 detected. Range will be 64 to 127
-Line 220: resolved aliases:  traceString in 'trace(from_microcode), directByte = 7', line 220
-L0220@0032.  trace(from_microcode), directByte = 7;
+Line 251: resolved aliases:  traceString in 'trace(from_microcode), directByte = 7', line 251
+L0251@0039.  trace(from_microcode), directByte = 7;
 
-Line 222: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 222
-L0222@0034.  trace(from_microcode), directByte = 2;
+Line 253: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 253
+L0253@003B.  trace(from_microcode), directByte = 2;
 
-Line 224: resolved aliases:  goto in 'if false then next else fetch', line 224
-L0224@0036.  if false then next else fetch;
+Line 254: resolved aliases:  goto in 'if false then next else fetch', line 254
+L0254@003C.  if false then next else fetch;
 
-Line 227: resolved aliases:  goto in 'if false then next else badop', line 227
-L0227@0037.  if false then next else badop;
+Line 257: resolved aliases:  goto in 'if false then next else badop', line 257
+L0257@003D.  if false then next else badop;
 
-Line 233: resolved aliases:  back in 'if true then return else return', line 233
-L0233@003C.  if true then return else return;
+Warning: mask value 31 detected. Range will be 224 to 255
+Line 261: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then fetch', line 261
+L0261@003F.  directByte = 0x0D, if MDR_EQU_DB then fetch;
 
-Line 236: resolved aliases:  back in 'nBUSREQ = 0, nWR = 0, if true then return else return', line 236
-L0236@003E.  nBUSREQ = 0, nWR = 0, if true then return else return;
+Warning: else clause missing in if statement, default value '' will be used
+Line 263: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 263
+L0263@0041.  trace(from_microcode), directByte = 2;
 
-Line 239: resolved aliases:  back in 'nBUSREQ = 0, nRD = 0, MDR <= from_Bus, if true then return else return', line 239
-L0239@0040.  nBUSREQ = 0, nRD = 0, MDR <= from_Bus, if true then return else return;
+Line 264: resolved aliases:  goto in 'if false then next else fetch', line 264
+L0264@0042.  if false then next else fetch;
 
-Line 247: resolved aliases:  goto in 'InlEnd <= inc, if false then next else dump_inlp', line 247
-L0247@0045.  InlEnd <= inc, if false then next else dump_inlp;
+Line 267: resolved aliases:  goto in 'if false then next else badop', line 267
+L0267@0043.  if false then next else badop;
 
-Line 249: resolved aliases:  back in 'if true then return else return', line 249
-L0249@0047.  if true then return else return;
+Line 270: resolved aliases:  SPACE in 'directByte = 0x20, if MDR_EQU_DB then skipSp', line 270
+L0270@0045.  directByte = 0x20, if MDR_EQU_DB then skipSp;
 
-Line 258: resolved aliases:  goto in 'IL_PC <= inc, if false then next else dump_il_lp', line 258
-L0258@004F.  IL_PC <= inc, if false then next else dump_il_lp;
+Warning: else clause missing in if statement, default value '' will be used
+Line 271: resolved aliases:  TAB in 'directByte = 0x09, if MDR_EQU_DB then skipSp', line 271
+L0271@0046.  directByte = 0x09, if MDR_EQU_DB then skipSp;
 
-Line 259: resolved aliases:  back in 'IL_PC <= T, if true then return else return', line 259
-L0259@0050.dump_il_ex:  IL_PC <= T, if true then return else return;
+Warning: else clause missing in if statement, default value '' will be used
+Line 272: resolved aliases:  back in 'if true then return else return', line 272
+L0272@0047.  if true then return else return;
 
-Line 263: resolved aliases:  back in 'DBGINDEX <= zero, if true then return else return', line 263
-L0263@0053.  DBGINDEX <= zero, if true then return else return;
+Line 273: resolved aliases:  goto in 'BP <= inc, if false then next else  skipSpaces', line 273
+L0273@0048.skipSp:  BP <= inc, if false then next else  skipSpaces;
 
-Success: pass 0 on microBasic.mcc - 264 line(s) read, 124 statement(s) parsed, code address range 0xFFFFFFFF - 0x0054.
+Line 275: resolved aliases:  CR in 'directByte = 0x0D, outChar(from_microcode)', line 275
+L0275@0049.outCRLF:  directByte = 0x0D, outChar(from_microcode);
+
+Line 276: resolved aliases:  LF in 'directByte = 0x0A, outChar(from_microcode)', line 276
+L0276@004A.  directByte = 0x0A, outChar(from_microcode);
+
+Line 277: resolved aliases:  back in 'if true then return else return', line 277
+L0277@004B.  if true then return else return;
+
+Line 280: resolved aliases:  back in 'if true then return else return', line 280
+L0280@004E.  if true then return else return;
+
+Line 283: resolved aliases:  back in 'nBUSREQ = 0, nWR = 0, if true then return else return', line 283
+L0283@0050.  nBUSREQ = 0, nWR = 0, if true then return else return;
+
+Line 286: resolved aliases:  back in 'nBUSREQ = 0, nRD = 0, MDR <= from_Bus, if true then return else return', line 286
+L0286@0052.  nBUSREQ = 0, nRD = 0, MDR <= from_Bus, if true then return else return;
+
+Line 293: resolved aliases:  NULL in 'directByte = 0x00, if MDR_EQU_DB then dump_inex', line 293
+L0293@0056.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 294: resolved aliases:  goto in 'InlEnd <= inc, if false then next else dump_inlp', line 294
+L0294@0057.  InlEnd <= inc, if false then next else dump_inlp;
+
+Line 296: resolved aliases:  back in 'if true then return else return', line 296
+L0296@0059.  if true then return else return;
+
+Line 305: resolved aliases:  goto in 'IL_PC <= inc, if false then next else dump_il_lp', line 305
+L0305@0061.  IL_PC <= inc, if false then next else dump_il_lp;
+
+Line 306: resolved aliases:  back in 'IL_PC <= T, if true then return else return', line 306
+L0306@0062.dump_il_ex:  IL_PC <= T, if true then return else return;
+
+Line 310: resolved aliases:  back in 'DBGINDEX <= zero, if true then return else return', line 310
+L0310@0065.  DBGINDEX <= zero, if true then return else return;
+
+Success: pass 0 on microBasic.mcc - 311 line(s) read, 158 statement(s) parsed, code address range 0xFFFFFFFF - 0x0066.
 Compiling microBasic.mcc, pass 2 out of 2.
 Field 'nBUSREQ' 63 .. 63
 Field 'nWR' 62 .. 62
@@ -121,89 +209,131 @@ Field 'MAR' 20 .. 19
 Field 'MDR' 18 .. 17
 Field 'InlEnd' 16 .. 15
 Field 'BP' 14 .. 13
-Field 'gotChar' 12 .. 12
-Field 'dummy' 11 .. 0
-Info: 256 mapper locations from 0 to 255 set to value '0000000000001010'
-Warning in line 6: overwriting '0000000000001010' with '0000000000001110' at mapper[0023]
-Info: Mapper location 35 set to value '0000000000001110'
-Warning in line 6: overwriting '0000000000001010' with '0000000000010001' at mapper[0024]
-Info: Mapper location 36 set to value '0000000000010001'
-Warning in line 6: overwriting '0000000000001010' with '0000000000010111' at mapper[0027]
-Info: Mapper location 39 set to value '0000000000010111'
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0040]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0041]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0042]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0043]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0044]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0045]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0046]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0047]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0048]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0049]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[004A]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[004B]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[004C]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[004D]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[004E]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[004F]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0050]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0051]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0052]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0053]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0054]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0055]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0056]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0057]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0058]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0059]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[005A]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[005B]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[005C]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[005D]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[005E]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[005F]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0060]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0061]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0062]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0063]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0064]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0065]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0066]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0067]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0068]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0069]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[006A]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[006B]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[006C]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[006D]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[006E]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[006F]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0070]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0071]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0072]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0073]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0074]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0075]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0076]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0077]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0078]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[0079]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[007A]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[007B]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[007C]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[007D]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[007E]
-Warning in line 6: overwriting '0000000000001010' with '0000000000110010' at mapper[007F]
-Info: 64 mapper locations from 64 to 127 set to value '0000000000110010'
-Warning in line 6: overwriting '0000000000110010' with '0000000000110111' at mapper[0060]
-Info: Mapper location 96 set to value '0000000000110111'
+Field 'SvPt' 12 .. 11
+Field 'gotChar' 10 .. 10
+Field 'dummy' 9 .. 0
+Info: 256 mapper locations from 0 to 255 set to value '0000000000001100'
+Warning in line 6: overwriting '0000000000001100' with '0000000000001111' at mapper[0008]
+Info: Mapper location 8 set to value '0000000000001111'
+Warning in line 6: overwriting '0000000000001100' with '0000000000010001' at mapper[0010]
+Info: Mapper location 16 set to value '0000000000010001'
+Warning in line 6: overwriting '0000000000001100' with '0000000000010100' at mapper[0011]
+Info: Mapper location 17 set to value '0000000000010100'
+Warning in line 6: overwriting '0000000000001100' with '0000000000010111' at mapper[0023]
+Info: Mapper location 35 set to value '0000000000010111'
+Warning in line 6: overwriting '0000000000001100' with '0000000000011010' at mapper[0024]
+Info: Mapper location 36 set to value '0000000000011010'
+Warning in line 6: overwriting '0000000000001100' with '0000000000011111' at mapper[0027]
+Info: Mapper location 39 set to value '0000000000011111'
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0040]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0041]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0042]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0043]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0044]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0045]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0046]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0047]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0048]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0049]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[004A]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[004B]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[004C]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[004D]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[004E]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[004F]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0050]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0051]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0052]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0053]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0054]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0055]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0056]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0057]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0058]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0059]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[005A]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[005B]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[005C]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[005D]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[005E]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[005F]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0060]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0061]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0062]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0063]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0064]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0065]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0066]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0067]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0068]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0069]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[006A]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[006B]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[006C]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[006D]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[006E]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[006F]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0070]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0071]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0072]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0073]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0074]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0075]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0076]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0077]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0078]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[0079]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[007A]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[007B]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[007C]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[007D]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[007E]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111001' at mapper[007F]
+Info: 64 mapper locations from 64 to 127 set to value '0000000000111001'
+Warning in line 6: overwriting '0000000000111001' with '0000000000111101' at mapper[0060]
+Info: Mapper location 96 set to value '0000000000111101'
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E0]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E1]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E2]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E3]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E4]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E5]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E6]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E7]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E8]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00E9]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00EA]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00EB]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00EC]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00ED]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00EE]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00EF]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F0]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F1]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F2]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F3]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F4]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F5]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F6]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F7]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F8]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00F9]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00FA]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00FB]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00FC]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00FD]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00FE]
+Warning in line 6: overwriting '0000000000001100' with '0000000000111110' at mapper[00FF]
+Info: 32 mapper locations from 224 to 255 set to value '0000000000111110'
+Warning in line 6: overwriting '0000000000111110' with '0000000001000011' at mapper[00E0]
+Info: Mapper location 224 set to value '0000000001000011'
 Generating code: 
-Warning in line 5: found 428 uninitialized locations:
-0054 .. 01FF
+Warning in line 5: found 410 uninitialized locations:
+0066 .. 01FF
 
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.mif' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.cgf' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.coe' (LF only) ... Done (initialized locations: 84, empty locations: 428, total locations: 512).
+Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.coe' (LF only) ... Done (initialized locations: 102, empty locations: 410, total locations: 512).
 Generating code 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.vhd' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.hex' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code_lendian.bin' ... Done.
@@ -213,8 +343,4 @@ Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microB
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.cgf' ... Done.
 Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.coe' (LF only) ... Done (initialized locations: 256, empty locations: 0, total locations: 256).
 Generating mapper 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.vhd' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.hex' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map_lendian.bin' ... Done.
-Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map_bendian.bin' ... Done.
-Generating symbol:  skipped.
-Generat
+Writing 'C:\Users\zoltanp\Documents\HexC

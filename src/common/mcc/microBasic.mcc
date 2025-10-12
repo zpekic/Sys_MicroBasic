@@ -21,15 +21,15 @@ seq_cond:		.if 4 values
 				CHAROUT_READY,	//  
 				IL_PC_VALID,	// value of IL program counter in valid range
 				DBG_READY,		// high if tracer has processed the trace character
-				MDR_IS_ZERO,		
+				MDR_EQU_DB,		
 				nBUSACK,		// low if memory is ready for read/write		
 				INLEND_MAX,		
 				INLEND_MIN,		
 				CHARIN_PRINTABLE,	// ASCII code in range 0x20 .. 0x7E		
 				CHARIN_EQU_DB,		
 				CHARIN_READY,		
-				dummy_C,		
-				dummy_D,		
+				BP_IN_INPLINE,		
+				SVP_IN_INPLINE,		
 				dummy_E,		
 				false			// hard-code to 0
 				default true;
@@ -62,7 +62,7 @@ IL_PC:			.regfield 3 values
 				inc,
 				T,
 				pc_plus_off6,
-				-,
+				pc_plus_off5,
 				-,
 				-
 				default same;
@@ -85,7 +85,7 @@ CHAROUT:		.regfield 2 values
 MAR:			.regfield 2 values
 				same, 
 				InlEnd,
-				-,
+				BP,
 				-
 				default same;
 				
@@ -100,7 +100,7 @@ MDR:			.regfield 2 values
 // 16-bit pointer to input buffer
 InlEnd			.regfield 2 values
 				same,
-				InLine,
+				InLine_start,
 				inc,
 				dec
 				default same;
@@ -108,8 +108,16 @@ InlEnd			.regfield 2 values
 // 16-bit Basic pointer
 BP				.regfield 2 values
 				same,
-				InLine,
-				-,
+				InLine_start,
+				SvPt,
+				inc
+				default same;
+
+// 16-bit saved basic pointer
+SvPt			.regfield 2 values
+				same,
+				InLine_start,
+				BP,
 				-
 				default same;
 				
@@ -120,7 +128,7 @@ gotChar			.valfield 1 values
 				default 0;
 				
 // placeholder
-dummy:			.valfield 12 values * default 0;
+dummy:			.valfield 10 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 goto:		.alias if false then next else;
@@ -136,36 +144,62 @@ outCRLF:	.sub;
 outChar:	.sub CHAROUT;
 WriteCore:	.sub MAR, MDR;
 ReadCore:	.sub MAR;
+skipSpaces: .sub;
 
 // other
-clear:		.alias DBGINDEX <= zero, IL_PC <= zero;
+NULL: 		.alias 0x00;
+ESC:		.alias 0x03;
+BEEP:		.alias 0x07;
+BACKSPACE:	.alias 0x08;
+TAB:		.alias 0x09;
+LF:			.alias 0x0A;
+CR:			.alias 0x0D;
+SPACE:		.alias 0x20;
+clear:		.alias DBGINDEX <= zero, IL_PC <= zero, BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start;
+nop:		.alias if true then next;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
 //	---------------------------------------------------------------------------
-_reset:		clear;  
+_reset:		nop;			// TODO: use these 4 microcycles for cold start intialization  
 
-_reset1:	clear;
+_reset1:	nop;
 
-_reset2:	clear;
+_reset2:	nop;
 
-_reset3:	clear;
+_reset3:	nop;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
+WarmStart:	clear;
+			WriteCore(BP, zero);
 			traceString 4;	// output "MicroBas" on debug UART
-			trace(crlf);
 			
-fetch:		traceString 2; 								// trace IL_PC
+fetch:		trace(crlf);
+			traceString 2; 								// trace IL_PC
 			traceString 3;								// trace value of IL(IL_PC) (which is now the opcode)
 			IL_OP <= from_interpreter, IL_PC <= inc;	// load opcode, advance IL_PC
 			if true then fork else fork;				// jump to entry point implementing the opcode
 			
 			.map 0b????????;							// opcode sink of last resort
 badop:		traceString 62;								// error message
+			//dump_il();
 			trace(crlf);
-			dump_il();
-deadloop:	goto deadloop;								// require restart
+			goto WarmStart;
+			
+			.map 0x08;									// NOP (No operation)
+			traceString 12;
+			goto fetch;
+			
+			.map 0x10;									// SB (Save Basic Pointer)
+			traceString 10;								// trace mnemonic
+			if BP_IN_INPLINE then next else ptr_exc;
+save_bp:	SvPt <= BP, goto fetch;
+
+			.map 0x11;									// RB (Restore Basic Pointer)
+			traceString 11;								// trace mnemonic
+			if SVP_IN_INPLINE then save_bp;	
+ptr_exc:	SvPt <= BP, BP <= SvPt, goto fetch;			
 			
 			.map 0x23;									// NL (Print newline)
 			traceString 6;								// Trace mnemonic
@@ -177,57 +211,70 @@ deadloop:	goto deadloop;								// require restart
 pc_loop:	outChar(from_interpreter);
 			traceString 3;								// trace value of IL(IL_PC) (which was the char to be output)
 			IL_PC <= inc, if CHAROUT_BIT7 then next else pc_loop;	// print until char with bit7 set 
-pc_exit:	trace(crlf);
-			goto fetch;
+pc_exit:	goto fetch;
 				
 			.map 0x27;									// GL (Get Input line)
 			traceString 8;								// Trace mnemonic
-gl:			InlEnd <= InLine;
+gl:			InlEnd <= InLine_start;
 gl_loop:	if CHARIN_READY then next else repeat;		// wait for input character
-			if CHARIN_PRINTABLE then gl_print else next;
-			directByte = 0x0D, if CHARIN_EQU_DB then gl_cr else next;
-			directByte = 0x08, if CHARIN_EQU_DB then gl_bs else next;
-			directByte = 0x03, if CHARIN_EQU_DB then gl_esc else next;
-//			directByte = 0x09, if CHARIN_EQU_DB then gl_tab else next;		// ignore for now
+			if CHARIN_PRINTABLE then gl_print;
+			directByte = CR, if CHARIN_EQU_DB then gl_cr;
+			directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
+			directByte = ESC, if CHARIN_EQU_DB then gl_esc;
+//			directByte = TAB, if CHARIN_EQU_DB then gl_tab;		// TODO - implement TAB
 			// fall into ignorable characters
-gl_ignore:	directByte = 0x07, outChar(from_microcode); // BEEP, then get next char
+gl_ignore:	directByte = BEEP, outChar(from_microcode); // BEEP, then get next char
 			gotChar = 1, goto gl_loop;
 
-gl_print:	if INLEND_MAX then gl_ignore else next;
+gl_print:	if INLEND_MAX then gl_ignore;
+			outChar(from_charin);						// ECHO
 			WriteCore(InlEnd, CHARIN);
-			InlEnd <= inc, outChar(from_charin);		// ECHO
+			InlEnd <= inc;
 gl_write0:	WriteCore(InlEnd, zero);
 			gotChar = 1, goto gl_loop;
 					
-gl_esc:		directByte = 0x07, outChar(from_microcode); // BEEP, then get next line (ignore this one)
+gl_esc:		directByte = BEEP, outChar(from_microcode); // BEEP, then get next line (ignore this one)
 			outCRLF();									// start fresh line
 			gotChar = 1, goto gl;
 			
-gl_bs:		if INLEND_MIN then gl_ignore else next;
-			outChar(from_charin);						// ECHO
-			InlEnd <= dec;
-			goto gl_write0;
+gl_bs:		if INLEND_MIN then gl_ignore;
+			InlEnd <= dec, goto gl_write0;
 			
 gl_cr:		WriteCore(InlEnd, CHARIN);
 			InlEnd <= inc;
 			WriteCore(InlEnd, zero);
-			outCRLF();									// ECHO
 			dump_input();
-			gotChar = 1, BP <= Inline, goto fetch;
-			
+			outCRLF();
+			gotChar = 1, BP <= Inline_start, goto fetch;	
 
-			.map 0b01??????;							// BR (relative branch)
+			.map 0b01??????;							// BR (relative branch, 0x40..0x7F)
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
 			traceString 2;								// trace target
-			trace(crlf);
 			goto fetch;
 			
 			.map 0x60;									// BR with offset 0 is badop
 			goto badop;
 
-outCRLF:	directByte = 0x0D, outChar(from_microcode);		// CR
-			directByte = 0x0A, CHAROUT <= from_microcode;	// LF
+			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
+			skipSpaces();
+			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
+			IL_PC <= pc_plus_off5;						// jump destination (+ 31 locations)
+			traceString 2;								// trace target
+			goto fetch;
+			
+			.map 0xE0;									// BE with offset 0 is badop
+			goto badop;
+			
+skipSpaces: ReadCore(BP);
+			directByte = SPACE, if MDR_EQU_DB then skipSp;
+			directByte = TAB, if MDR_EQU_DB then skipSp;		
+			back;
+skipSp:		BP <= inc, goto  skipSpaces;			
+			
+outCRLF:	directByte = CR, outChar(from_microcode);		
+			directByte = LF, outChar(from_microcode);
+			back;
 outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
 			if CHAROUT_READY then next else repeat;
 			back;										
@@ -240,10 +287,10 @@ ReadCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
 			
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		
-dump_input: InlEnd <= InLine, trace(crlf);
+dump_input: InlEnd <= InLine_start, trace(crlf);
 dump_inlp:	ReadCore(InlEnd);
 			directByte = 9, trace(from_microcode);		// display memory byte as Hex
-			if MDR_IS_ZERO then dump_inex else next;
+			directByte = NULL, if MDR_EQU_DB then dump_inex;
 			InlEnd <= inc, goto dump_inlp; 
 dump_inex:	trace(crlf);
 			back;

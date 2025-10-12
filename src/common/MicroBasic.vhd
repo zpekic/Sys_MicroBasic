@@ -51,6 +51,7 @@ entity MicroBasic is
 			  -- debug / trace UART output
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
+			  debug_sel: in STD_LOGIC_VECTOR(1 downto 0);
            debug_bus : out  STD_LOGIC_VECTOR(15 downto 0));
 end MicroBasic;
 
@@ -81,7 +82,13 @@ signal DBG_READY, dbg_start: std_logic;
 -- external memory related
 signal MAR: std_logic_vector(15 downto 0);
 signal MDR: std_logic_vector(7 downto 0);
-signal mdr_is_zero: std_logic;
+signal mdr_equ_db: std_logic;
+
+-- key pointers
+signal BP, SvPt: std_logic_vector(15 downto 0);
+signal bp_in_inpline, svp_in_inpline: std_logic;
+constant Inline_Start: std_logic_vector(15 downto 0) := X"0000"; -- TODO 
+constant Inline_End: std_logic_vector(15 downto 0) := X"00FF"; -- TODO 
 
 -- other
 signal T: std_logic_vector(15 downto 0);
@@ -104,6 +111,8 @@ begin
 	--				MAR <= MAR;
 			when MAR_InlEnd =>
 				MAR <= InlEnd;
+			when MAR_BP =>
+				MAR <= BP;
 			when others =>
 				null;
 		end case;
@@ -129,7 +138,7 @@ begin
 	end if;
 end process;
 
-mdr_is_zero <= '1' when (MDR = X"00") else '0';
+mdr_equ_db <= '1' when (MDR = mb_directByte) else '0';
 
 -- ROM containing the IL language instructions
 cu_il: entity work.il_rom Port map ( 
@@ -159,18 +168,18 @@ cu_mb: entity work.microbasic_control_unit
 			-- condition bits
 			cond(seq_cond_true) => '1',
 			cond(seq_cond_CHAROUT_BIT7) => CHAROUT(7),
-			cond(seq_cond_CHAROUT_READY) => CHAROUT_READY,
+			cond(seq_cond_CHAROUT_READY) => outchar_ready,
 			cond(seq_cond_IL_PC_VALID) => IL_PC_VALID,
 			cond(seq_cond_DBG_READY) => DBG_READY,
-			cond(seq_cond_MDR_IS_ZERO) => mdr_is_zero,
+			cond(seq_cond_MDR_EQU_DB) => mdr_equ_db,
 			cond(seq_cond_nBUSACK) => nBUSACK,
 			cond(seq_cond_INLEND_MAX) => inlend_max,
 			cond(seq_cond_INLEND_MIN) => inlend_min,
 			cond(seq_cond_CHARIN_PRINTABLE) => charin_printable,
 			cond(seq_cond_CHARIN_EQU_DB) => charin_equ_db,
 			cond(seq_cond_CHARIN_READY) => charin_ready,
-			cond(seq_cond_dummy_C) => '1',
-			cond(seq_cond_dummy_D) => '1',
+			cond(seq_cond_BP_IN_INPLINE) => bp_in_inpline,
+			cond(seq_cond_SVP_IN_INPLINE) => svp_in_inpline,
 			cond(seq_cond_dummy_E) => '1',
 			cond(seq_cond_false) => '0',
 			-- outputs
@@ -180,14 +189,11 @@ cu_mb: entity work.microbasic_control_unit
 
 charin_equ_db <= '1' when (CHARIN = mb_directByte) else '0';
 charin_printable <= '0' when (CHARIN(7 downto 5) = "000") else (not CHARIN(7)); -- TODO: Add 0x7F 
-inlend_max <= '1' when (InlEnd = X"00FF") else '0';
-inlend_min <= '1' when (InlEnd = X"0000") else '0';
+inlend_max <= '1' when (InlEnd = InLine_End) else '0';
+inlend_min <= '1' when (InlEnd = InLine_Start) else '0';
+bp_in_inpline <= '1' when ((unsigned(BP) >= unsigned(InLine_Start)) or (unsigned(BP) <= unsigned(InLine_End))) else '0';
+svp_in_inpline <= '1' when ((unsigned(SvPt) >= unsigned(InLine_Start)) or (unsigned(SvPt) <= unsigned(InLine_End))) else '0';
 
--- show IL code an microinstruction address on debug port
---	debug_bus <= il_op & ui_address(7 downto 0); 
---	debug_bus <= "00" & DBGINDEX & ui_address(7 downto 0); 
-	debug_bus <= CHAROUT & CHARIN;
-	
 -- get the microcode instruction 
 mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
 		
@@ -210,6 +216,9 @@ update_IL_PC: process(clk, mb_IL_PC)
 				else
 					IL_PC <= std_logic_vector(unsigned(IL_PC) - unsigned(IL_OP(4 downto 0)));
 				end if;
+			when IL_PC_pc_plus_off5 =>
+				-- can only jump forward
+				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP(4 downto 0)));
 			when others =>
 				null;
 		end case;
@@ -239,6 +248,40 @@ begin
  end if;
 end process;
 	
+ update_BP: process(clk, mb_BP)
+ begin
+	if (rising_edge(clk)) then
+		case mb_BP is
+--			when BP_same =>
+--				BP <= BP;
+			when BP_InLine_start =>
+				BP <= InLine_Start;
+			when BP_SvPt =>
+				BP <= SvPt;
+			when BP_inc =>
+				BP <= std_logic_vector(unsigned(BP) + 1);
+			when others =>
+				null;
+		end case;
+ end if;
+ end process;
+
+ update_SvPt: process(clk, mb_SvPt)
+ begin
+	if (rising_edge(clk)) then
+		case mb_SvPt is
+--			when SvPt_same =>
+--				SvPt <= SvPt;
+			when SvPt_InLine_start =>
+				SvPt <= InLine_Start;
+			when SvPt_BP =>
+				SvPt <= BP;
+			when others =>
+				null;
+		end case;
+ end if;
+ end process;
+	
 -- input buffer pointer
  update_InlEnd: process(clk, mb_InlEnd)
  begin
@@ -246,9 +289,8 @@ end process;
 		case mb_InlEnd is
 --			when InLend_same =>
 --				InLend <= InLend;
-			when InlEnd_InLine =>
-				--InLend <= InLine;
-				InlEnd <= (others => '0');	-- TODO!
+			when InlEnd_InLine_start =>
+				InLend <= InLine_Start;
 			when InlEnd_inc =>
 				InlEnd <= std_logic_vector(unsigned(InlEnd) + 1);
 			when InLend_dec =>
@@ -263,10 +305,11 @@ end process;
  update_CHAROUT: process(clk, mb_CHAROUT)
  begin
 	if (rising_edge(clk)) then
+		outchar_send <= CHAROUT_SEND;				-- delay send signal 1 clock cycle
 		case mb_CHAROUT is
 			when CHAROUT_same =>
 				CHAROUT_SEND <= '0';					-- pulse low
-				CHAROUT <= CHAROUT;
+				--CHAROUT <= CHAROUT;
 			when CHAROUT_from_interpreter =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
 				CHAROUT <= il_codeByte;
@@ -275,7 +318,7 @@ end process;
 				CHAROUT <= mb_directByte;
 			when CHAROUT_from_charin =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
-				CHAROUT <= CHARIN;
+				CHAROUT <= X"2A"; --CHARIN;
 			when others =>
 				null;
 		end case;
@@ -284,8 +327,8 @@ end process;
  
 -- see http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.c line 776
 outchar <= CHAROUT and X"7F";
-outchar_send <= CHAROUT_SEND;
-CHAROUT_READY <= outchar_ready; 
+--outchar_send <= CHAROUT_SEND;
+--CHAROUT_READY <= outchar_ready; 
  
 -- input character
 on_inchar_ready: process(reset, inchar_ready, mb_gotChar)
@@ -342,5 +385,12 @@ tracer: entity work.serialtracer2 Port map (
  end if;
  end process;
 
+-- paralled debug port implementation
+	with debug_sel select debug_bus <= 
+		CHAROUT & CHARIN when "00",
+		InlEnd when "01",
+		il_op & ui_address(7 downto 0) when "10",
+		X"DEAD" when others;
+		
 end Behavioral;
 
