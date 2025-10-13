@@ -444,29 +444,29 @@ constant mb_microcode: mb_code_memory := (
 4 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "10" & O"1" & '0' & "00" & "00" & "00" & "01" & "01" & "01" & '0' & "0000000000",
 
 -- WriteCore(BP, zero);
--- L0175@0005 E04F27FF80140000.  WriteCore(BP, zero);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001111 else 001001111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 10, MDR <= 10, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-5 => '1' & '1' & '1' & X"0" & O"117" & O"117" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "10" & "10" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0175@0005 E050287F80140000.  WriteCore(BP, zero);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010000 else 001010000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 10, MDR <= 10, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+5 => '1' & '1' & '1' & X"0" & O"120" & O"120" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "10" & "10" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 4;
--- L0176@0006 E063318208000000.  trace(from_microcode), directByte = 4;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000100, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-6 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"04" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0176@0006 E064320208000000.  trace(from_microcode), directByte = 4;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000100, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+6 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"04" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- trace(crlf);
--- L0178@0007 E06331FF98000000.fetch:  trace(crlf);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-7 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0178@0007 E064327F98000000.fetch:  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+7 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 2;
--- L0179@0008 E063318108000000.  trace(from_microcode), directByte = 2;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-8 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0179@0008 E064320108000000.  trace(from_microcode), directByte = 2;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+8 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 3;
--- L0180@0009 E063318188000000.  trace(from_microcode), directByte = 3;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-9 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"03" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0180@0009 E064320188000000.  trace(from_microcode), directByte = 3;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+9 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"03" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- IL_OP <= from_interpreter, IL_PC <= inc;
 -- L0181@000A E000007F82800000.  IL_OP <= from_interpreter, IL_PC <= inc;
@@ -479,14 +479,14 @@ constant mb_microcode: mb_code_memory := (
 11 => '1' & '1' & '1' & X"0" & O"003" & O"003" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 62;
--- L0185@000C E063319F08000000.badop:  trace(from_microcode), directByte = 62;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00111110, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-12 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"3E" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0185@000C E064321F08000000.badop:  trace(from_microcode), directByte = 62;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00111110, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+12 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"3E" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- trace(crlf);
--- L0187@000D E06331FF98000000.  trace(crlf);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-13 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0187@000D E064327F98000000.  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+13 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto WarmStart;
 -- L0188@000E FE00027F80000000.  if false then next else WarmStart;
@@ -494,9 +494,9 @@ constant mb_microcode: mb_code_memory := (
 14 => '1' & '1' & '1' & X"F" & O"000" & O"004" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 12;
--- L0191@000F E063318608000000.  trace(from_microcode), directByte = 12;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00001100, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-15 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"0C" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0191@000F E064320608000000.  trace(from_microcode), directByte = 12;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00001100, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+15 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"0C" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto fetch;
 -- L0192@0010 FE0003FF80000000.  if false then next else fetch;
@@ -504,9 +504,9 @@ constant mb_microcode: mb_code_memory := (
 16 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 10;
--- L0195@0011 E063318508000000.  trace(from_microcode), directByte = 10;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00001010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-17 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"0A" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0195@0011 E064320508000000.  trace(from_microcode), directByte = 10;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00001010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+17 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"0A" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- if BP_IN_INPLINE then next else ptr_exc;
 -- L0196@0012 F8000B7F80000000.  if BP_IN_INPLINE then next else ptr_exc;
@@ -519,9 +519,9 @@ constant mb_microcode: mb_code_memory := (
 19 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "10" & '0' & "0000000000",
 
 -- traceString 11;
--- L0200@0014 E063318588000000.  trace(from_microcode), directByte = 11;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00001011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-20 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"0B" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0200@0014 E064320588000000.  trace(from_microcode), directByte = 11;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00001011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+20 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"0B" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- if SVP_IN_INPLINE then save_bp;
 -- L0201@0015 FA13007F80000000.  if SVP_IN_INPLINE then save_bp;
@@ -534,14 +534,14 @@ constant mb_microcode: mb_code_memory := (
 22 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "10" & "10" & '0' & "0000000000",
 
 -- traceString 6;
--- L0205@0017 E063318308000000.  trace(from_microcode), directByte = 6;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000110, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-23 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"06" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0205@0017 E064320308000000.  trace(from_microcode), directByte = 6;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000110, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+23 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"06" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- outCRLF();
--- L0206@0018 E04924FF80000000.  outCRLF();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001001 else 001001001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-24 => '1' & '1' & '1' & X"0" & O"111" & O"111" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0206@0018 E04A257F80000000.  outCRLF();
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001010 else 001001010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+24 => '1' & '1' & '1' & X"0" & O"112" & O"112" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto fetch;
 -- L0207@0019 FE0003FF80000000.  if false then next else fetch;
@@ -549,19 +549,19 @@ constant mb_microcode: mb_code_memory := (
 25 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 5;
--- L0210@001A E063318288000000.  trace(from_microcode), directByte = 5;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000101, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-26 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"05" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0210@001A E064320288000000.  trace(from_microcode), directByte = 5;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000101, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+26 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"05" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- outChar(from_interpreter);
--- L0211@001B E04C267F80200000.pc_loop:  outChar(from_interpreter);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001100 else 001001100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 01, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-27 => '1' & '1' & '1' & X"0" & O"114" & O"114" & X"FF" & "00" & "00" & O"0" & '0' & "01" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0211@001B E04D26FF80200000.pc_loop:  outChar(from_interpreter);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 01, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+27 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"FF" & "00" & "00" & O"0" & '0' & "01" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 3;
--- L0212@001C E063318188000000.  trace(from_microcode), directByte = 3;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-28 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"03" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0212@001C E064320188000000.  trace(from_microcode), directByte = 3;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+28 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"03" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- IL_PC <= inc, if CHAROUT_BIT7 then next else pc_loop;
 -- L0213@001D E2000DFF82000000.  IL_PC <= inc, if CHAROUT_BIT7 then next else pc_loop;
@@ -574,9 +574,9 @@ constant mb_microcode: mb_code_memory := (
 30 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 8;
--- L0217@001F E063318408000000.  trace(from_microcode), directByte = 8;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00001000, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-31 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"08" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0217@001F E064320408000000.  trace(from_microcode), directByte = 8;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00001000, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+31 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"08" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- InlEnd <= InLine_start;
 -- L0218@0020 E000007F80008000.gl:  InlEnd <= InLine_start;
@@ -594,9 +594,9 @@ constant mb_microcode: mb_code_memory := (
 34 => '1' & '1' & '1' & X"9" & O"050" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = CR, if CHARIN_EQU_DB then gl_cr;
--- L0221@0023 F433000680000000.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1010) then 000110011 else 000000000, directByte = 00001101, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-35 => '1' & '1' & '1' & X"A" & O"063" & O"000" & X"0D" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0221@0023 F434000680000000.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1010) then 000110100 else 000000000, directByte = 00001101, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+35 => '1' & '1' & '1' & X"A" & O"064" & O"000" & X"0D" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
 -- L0222@0024 F431000400000000.  directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
@@ -604,14 +604,14 @@ constant mb_microcode: mb_code_memory := (
 36 => '1' & '1' & '1' & X"A" & O"061" & O"000" & X"08" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = ESC, if CHARIN_EQU_DB then gl_esc;
--- L0223@0025 F42E000180000000.  directByte = 0x03, if CHARIN_EQU_DB then gl_esc;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1010) then 000101110 else 000000000, directByte = 00000011, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-37 => '1' & '1' & '1' & X"A" & O"056" & O"000" & X"03" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0223@0025 F42E000D80000000.  directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1010) then 000101110 else 000000000, directByte = 00011011, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+37 => '1' & '1' & '1' & X"A" & O"056" & O"000" & X"1B" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = BEEP, outChar(from_microcode);
--- L0226@0026 E04C260380400000.gl_ignore:  directByte = 0x07, outChar(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001100 else 001001100, directByte = 00000111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-38 => '1' & '1' & '1' & X"0" & O"114" & O"114" & X"07" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0226@0026 E04D268380400000.gl_ignore:  directByte = 0x07, outChar(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 00000111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+38 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"07" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- gotChar = 1, goto gl_loop;
 -- L0227@0027 FE0010FF80000400.  gotChar = 1, if false then next else gl_loop;
@@ -624,14 +624,14 @@ constant mb_microcode: mb_code_memory := (
 40 => '1' & '1' & '1' & X"7" & O"046" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- outChar(from_charin);
--- L0230@0029 E04C267F80600000.  outChar(from_charin);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001100 else 001001100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 11, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-41 => '1' & '1' & '1' & X"0" & O"114" & O"114" & X"FF" & "00" & "00" & O"0" & '0' & "11" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0230@0029 E04D26FF80600000.  outChar(from_charin);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 11, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+41 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"FF" & "00" & "00" & O"0" & '0' & "11" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- WriteCore(InlEnd, CHARIN);
--- L0231@002A E04F27FF800E0000.  WriteCore(InlEnd, CHARIN);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001111 else 001001111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 11, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-42 => '1' & '1' & '1' & X"0" & O"117" & O"117" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "11" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0231@002A E050287F800E0000.  WriteCore(InlEnd, CHARIN);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010000 else 001010000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 11, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+42 => '1' & '1' & '1' & X"0" & O"120" & O"120" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "11" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- InlEnd <= inc;
 -- L0232@002B E000007F80010000.  InlEnd <= inc;
@@ -639,9 +639,9 @@ constant mb_microcode: mb_code_memory := (
 43 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "10" & "00" & "00" & '0' & "0000000000",
 
 -- WriteCore(InlEnd, zero);
--- L0233@002C E04F27FF800C0000.gl_write0:  WriteCore(InlEnd, zero);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001111 else 001001111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 10, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-44 => '1' & '1' & '1' & X"0" & O"117" & O"117" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "10" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0233@002C E050287F800C0000.gl_write0:  WriteCore(InlEnd, zero);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010000 else 001010000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 10, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+44 => '1' & '1' & '1' & X"0" & O"120" & O"120" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "10" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- gotChar = 1, goto gl_loop;
 -- L0234@002D FE0010FF80000400.  gotChar = 1, if false then next else gl_loop;
@@ -649,14 +649,14 @@ constant mb_microcode: mb_code_memory := (
 45 => '1' & '1' & '1' & X"F" & O"000" & O"041" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '1' & "0000000000",
 
 -- directByte = BEEP, outChar(from_microcode);
--- L0236@002E E04C260380400000.gl_esc:  directByte = 0x07, outChar(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001100 else 001001100, directByte = 00000111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-46 => '1' & '1' & '1' & X"0" & O"114" & O"114" & X"07" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0236@002E E04D268380400000.gl_esc:  directByte = 0x07, outChar(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 00000111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+46 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"07" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- outCRLF();
--- L0237@002F E04924FF80000000.  outCRLF();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001001 else 001001001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-47 => '1' & '1' & '1' & X"0" & O"111" & O"111" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0237@002F E04A257F80000000.  outCRLF();
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001010 else 001001010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+47 => '1' & '1' & '1' & X"0" & O"112" & O"112" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- gotChar = 1, goto gl;
 -- L0238@0030 FE00107F80000400.  gotChar = 1, if false then next else gl;
@@ -668,268 +668,273 @@ constant mb_microcode: mb_code_memory := (
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1000) then 000100110 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
 49 => '1' & '1' & '1' & X"8" & O"046" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
+-- directByte = BACKSPACE, outChar(from_microcode);
+-- L0241@0032 E04D268400400000.  directByte = 0x08, outChar(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 00001000, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+50 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"08" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+
 -- InlEnd <= dec, goto gl_write0;
--- L0241@0032 FE00167F80018000.  InlEnd <= dec, if false then next else gl_write0;
+-- L0242@0033 FE00167F80018000.  InlEnd <= dec, if false then next else gl_write0;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000101100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 11, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-50 => '1' & '1' & '1' & X"F" & O"000" & O"054" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "11" & "00" & "00" & '0' & "0000000000",
+51 => '1' & '1' & '1' & X"F" & O"000" & O"054" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "11" & "00" & "00" & '0' & "0000000000",
 
 -- WriteCore(InlEnd, CHARIN);
--- L0243@0033 E04F27FF800E0000.gl_cr:  WriteCore(InlEnd, CHARIN);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001111 else 001001111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 11, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-51 => '1' & '1' & '1' & X"0" & O"117" & O"117" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "11" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0244@0034 E050287F800E0000.gl_cr:  WriteCore(InlEnd, CHARIN);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010000 else 001010000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 11, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+52 => '1' & '1' & '1' & X"0" & O"120" & O"120" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "11" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- InlEnd <= inc;
--- L0244@0034 E000007F80010000.  InlEnd <= inc;
+-- L0245@0035 E000007F80010000.  InlEnd <= inc;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 10, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-52 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "10" & "00" & "00" & '0' & "0000000000",
+53 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "10" & "00" & "00" & '0' & "0000000000",
 
 -- WriteCore(InlEnd, zero);
--- L0245@0035 E04F27FF800C0000.  WriteCore(InlEnd, zero);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001111 else 001001111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 10, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-53 => '1' & '1' & '1' & X"0" & O"117" & O"117" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "10" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0246@0036 E050287F800C0000.  WriteCore(InlEnd, zero);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010000 else 001010000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 10, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+54 => '1' & '1' & '1' & X"0" & O"120" & O"120" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "10" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- dump_input();
--- L0246@0036 E05329FF80000000.  dump_input();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010011 else 001010011, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-54 => '1' & '1' & '1' & X"0" & O"123" & O"123" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0247@0037 E0542A7F80000000.  dump_input();
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010100 else 001010100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+55 => '1' & '1' & '1' & X"0" & O"124" & O"124" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- outCRLF();
--- L0247@0037 E04924FF80000000.  outCRLF();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001001 else 001001001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-55 => '1' & '1' & '1' & X"0" & O"111" & O"111" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0248@0038 E04A257F80000000.  outCRLF();
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001010 else 001001010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+56 => '1' & '1' & '1' & X"0" & O"112" & O"112" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- gotChar = 1, BP <= Inline_start, goto fetch;
--- L0248@0038 FE0003FF80002400.  gotChar = 1, BP <= Inline_start, if false then next else fetch;
+-- L0249@0039 FE0003FF80002400.  gotChar = 1, BP <= Inline_start, if false then next else fetch;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 01, SvPt <= 00, gotChar = 1, dummy = 0000000000;
-56 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "01" & "00" & '1' & "0000000000",
+57 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "01" & "00" & '1' & "0000000000",
 
 -- traceString 7;
--- L0251@0039 E063318388000000.  trace(from_microcode), directByte = 7;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000111, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-57 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"07" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0252@003A E064320388000000.  trace(from_microcode), directByte = 7;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000111, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+58 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"07" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- IL_PC <= pc_plus_off6;
--- L0252@003A E000007F84000000.  IL_PC <= pc_plus_off6;
+-- L0253@003B E000007F84000000.  IL_PC <= pc_plus_off6;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 100, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-58 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"4" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+59 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"4" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 2;
--- L0253@003B E063318108000000.  trace(from_microcode), directByte = 2;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-59 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0254@003C E064320108000000.  trace(from_microcode), directByte = 2;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+60 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto fetch;
--- L0254@003C FE0003FF80000000.  if false then next else fetch;
+-- L0255@003D FE0003FF80000000.  if false then next else fetch;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-60 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+61 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto badop;
--- L0257@003D FE00067F80000000.  if false then next else badop;
+-- L0258@003E FE00067F80000000.  if false then next else badop;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000001100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-61 => '1' & '1' & '1' & X"F" & O"000" & O"014" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+62 => '1' & '1' & '1' & X"F" & O"000" & O"014" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- skipSpaces();
--- L0260@003E E044227F80000000.  skipSpaces();
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001000100 else 001000100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-62 => '1' & '1' & '1' & X"0" & O"104" & O"104" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0261@003F E04522FF80000000.  skipSpaces();
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001000101 else 001000101, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+63 => '1' & '1' & '1' & X"0" & O"105" & O"105" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = CR, if MDR_EQU_DB then fetch;
--- L0261@003F EA07000680000000.  directByte = 0x0D, if MDR_EQU_DB then fetch;
+-- L0262@0040 EA07000680000000.  directByte = 0x0D, if MDR_EQU_DB then fetch;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 000000111 else 000000000, directByte = 00001101, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-63 => '1' & '1' & '1' & X"5" & O"007" & O"000" & X"0D" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+64 => '1' & '1' & '1' & X"5" & O"007" & O"000" & X"0D" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- IL_PC <= pc_plus_off5;
--- L0262@0040 E000007F85000000.  IL_PC <= pc_plus_off5;
+-- L0263@0041 E000007F85000000.  IL_PC <= pc_plus_off5;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 101, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-64 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"5" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+65 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"5" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- traceString 2;
--- L0263@0041 E063318108000000.  trace(from_microcode), directByte = 2;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-65 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0264@0042 E064320108000000.  trace(from_microcode), directByte = 2;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+66 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto fetch;
--- L0264@0042 FE0003FF80000000.  if false then next else fetch;
+-- L0265@0043 FE0003FF80000000.  if false then next else fetch;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000000111, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-66 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+67 => '1' & '1' & '1' & X"F" & O"000" & O"007" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- goto badop;
--- L0267@0043 FE00067F80000000.  if false then next else badop;
+-- L0268@0044 FE00067F80000000.  if false then next else badop;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 000001100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-67 => '1' & '1' & '1' & X"F" & O"000" & O"014" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+68 => '1' & '1' & '1' & X"F" & O"000" & O"014" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- ReadCore(BP);
--- L0269@0044 E05128FF80100000.skipSpaces:  ReadCore(BP);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010001 else 001010001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 10, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-68 => '1' & '1' & '1' & X"0" & O"121" & O"121" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "10" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0270@0045 E052297F80100000.skipSpaces:  ReadCore(BP);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010010 else 001010010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 10, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+69 => '1' & '1' & '1' & X"0" & O"122" & O"122" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "10" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = SPACE, if MDR_EQU_DB then skipSp;
--- L0270@0045 EA48001000000000.  directByte = 0x20, if MDR_EQU_DB then skipSp;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 001001000 else 000000000, directByte = 00100000, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-69 => '1' & '1' & '1' & X"5" & O"110" & O"000" & X"20" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0271@0046 EA49001000000000.  directByte = 0x20, if MDR_EQU_DB then skipSp;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 001001001 else 000000000, directByte = 00100000, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+70 => '1' & '1' & '1' & X"5" & O"111" & O"000" & X"20" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = TAB, if MDR_EQU_DB then skipSp;
--- L0271@0046 EA48000480000000.  directByte = 0x09, if MDR_EQU_DB then skipSp;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 001001000 else 000000000, directByte = 00001001, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-70 => '1' & '1' & '1' & X"5" & O"110" & O"000" & X"09" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0272@0047 EA49000480000000.  directByte = 0x09, if MDR_EQU_DB then skipSp;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 001001001 else 000000000, directByte = 00001001, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+71 => '1' & '1' & '1' & X"5" & O"111" & O"000" & X"09" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- back;
--- L0272@0047 E002017F80000000.  if true then return else return;
+-- L0273@0048 E002017F80000000.  if true then return else return;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-71 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+72 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- BP <= inc, goto  skipSpaces;
--- L0273@0048 FE00227F80006000.skipSp:  BP <= inc, if false then next else  skipSpaces;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 001000100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 11, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-72 => '1' & '1' & '1' & X"F" & O"000" & O"104" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "11" & "00" & '0' & "0000000000",
+-- L0274@0049 FE0022FF80006000.skipSp:  BP <= inc, if false then next else  skipSpaces;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 001000101, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 11, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+73 => '1' & '1' & '1' & X"F" & O"000" & O"105" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "11" & "00" & '0' & "0000000000",
 
 -- directByte = CR, outChar(from_microcode);
--- L0275@0049 E04C260680400000.outCRLF:  directByte = 0x0D, outChar(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001100 else 001001100, directByte = 00001101, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-73 => '1' & '1' & '1' & X"0" & O"114" & O"114" & X"0D" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0276@004A E04D268680400000.outCRLF:  directByte = 0x0D, outChar(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 00001101, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+74 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"0D" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = LF, outChar(from_microcode);
--- L0276@004A E04C260500400000.  directByte = 0x0A, outChar(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001100 else 001001100, directByte = 00001010, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-74 => '1' & '1' & '1' & X"0" & O"114" & O"114" & X"0A" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0277@004B E04D268500400000.  directByte = 0x0A, outChar(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001001101 else 001001101, directByte = 00001010, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 10, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+75 => '1' & '1' & '1' & X"0" & O"115" & O"115" & X"0A" & "00" & "00" & O"0" & '0' & "10" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- back;
--- L0277@004B E002017F80000000.  if true then return else return;
+-- L0278@004C E002017F80000000.  if true then return else return;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-75 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+76 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- if CHAROUT_READY then next else repeat;
--- L0278@004C E40000FF80000000.outChar:  if CHAROUT_READY then next else repeat;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0010) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-76 => '1' & '1' & '1' & X"2" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
-
--- if CHAROUT_READY then next else repeat;
--- L0279@004D E40000FF80000000.  if CHAROUT_READY then next else repeat;
+-- L0279@004D E40000FF80000000.outChar:  if CHAROUT_READY then next else repeat;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0010) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
 77 => '1' & '1' & '1' & X"2" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
+-- if CHAROUT_READY then next else repeat;
+-- L0280@004E E40000FF80000000.  if CHAROUT_READY then next else repeat;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0010) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+78 => '1' & '1' & '1' & X"2" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+
 -- back;
--- L0280@004E E002017F80000000.  if true then return else return;
+-- L0281@004F E002017F80000000.  if true then return else return;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-78 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+79 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- nBUSREQ = 0, if nBUSACK then repeat else next;
--- L0282@004F 6C01007F80000000.WriteCore:  nBUSREQ = 0, if nBUSACK then repeat else next;
+-- L0283@0050 6C01007F80000000.WriteCore:  nBUSREQ = 0, if nBUSACK then repeat else next;
 --  nBUSREQ = 0, nWR = 1, nRD = 1, if (0110) then 000000001 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-79 => '0' & '1' & '1' & X"6" & O"001" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+80 => '0' & '1' & '1' & X"6" & O"001" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- nBUSREQ = 0, nWR = 0, back;
--- L0283@0050 2002017F80000000.  nBUSREQ = 0, nWR = 0, if true then return else return;
+-- L0284@0051 2002017F80000000.  nBUSREQ = 0, nWR = 0, if true then return else return;
 --  nBUSREQ = 0, nWR = 0, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-80 => '0' & '0' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+81 => '0' & '0' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- nBUSREQ = 0, if nBUSACK then repeat else next;
--- L0285@0051 6C01007F80000000.ReadCore:  nBUSREQ = 0, if nBUSACK then repeat else next;
+-- L0286@0052 6C01007F80000000.ReadCore:  nBUSREQ = 0, if nBUSACK then repeat else next;
 --  nBUSREQ = 0, nWR = 1, nRD = 1, if (0110) then 000000001 else 000000000, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-81 => '0' & '1' & '1' & X"6" & O"001" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+82 => '0' & '1' & '1' & X"6" & O"001" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- nBUSREQ = 0, nRD = 0, MDR <= from_Bus, back;
--- L0286@0052 4002017F80020000.  nBUSREQ = 0, nRD = 0, MDR <= from_Bus, if true then return else return;
+-- L0287@0053 4002017F80020000.  nBUSREQ = 0, nRD = 0, MDR <= from_Bus, if true then return else return;
 --  nBUSREQ = 0, nWR = 1, nRD = 0, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 01, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-82 => '0' & '1' & '0' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "01" & "00" & "00" & "00" & '0' & "0000000000",
+83 => '0' & '1' & '0' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "01" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- InlEnd <= InLine_start, trace(crlf);
--- L0290@0053 E06331FF98008000.dump_input:  InlEnd <= InLine_start, trace(crlf);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 01, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-83 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "01" & "00" & "00" & '0' & "0000000000",
+-- L0291@0054 E064327F98008000.dump_input:  InlEnd <= InLine_start, trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 01, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+84 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "01" & "00" & "00" & '0' & "0000000000",
 
 -- ReadCore(InlEnd);
--- L0291@0054 E05128FF80080000.dump_inlp:  ReadCore(InlEnd);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010001 else 001010001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-84 => '1' & '1' & '1' & X"0" & O"121" & O"121" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0292@0055 E052297F80080000.dump_inlp:  ReadCore(InlEnd);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001010010 else 001010010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 01, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+85 => '1' & '1' & '1' & X"0" & O"122" & O"122" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "01" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = 9, trace(from_microcode);
--- L0292@0055 E063318488000000.  directByte = 9, trace(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00001001, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-85 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"09" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0293@0056 E064320488000000.  directByte = 9, trace(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00001001, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+86 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"09" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = NULL, if MDR_EQU_DB then dump_inex;
--- L0293@0056 EA58000000000000.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 001011000 else 000000000, directByte = 00000000, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-86 => '1' & '1' & '1' & X"5" & O"130" & O"000" & X"00" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0294@0057 EA59000000000000.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0101) then 001011001 else 000000000, directByte = 00000000, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+87 => '1' & '1' & '1' & X"5" & O"131" & O"000" & X"00" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- InlEnd <= inc, goto dump_inlp;
--- L0294@0057 FE002A7F80010000.  InlEnd <= inc, if false then next else dump_inlp;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 001010100, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 10, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-87 => '1' & '1' & '1' & X"F" & O"000" & O"124" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "10" & "00" & "00" & '0' & "0000000000",
+-- L0295@0058 FE002AFF80010000.  InlEnd <= inc, if false then next else dump_inlp;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 001010101, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 10, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+88 => '1' & '1' & '1' & X"F" & O"000" & O"125" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "10" & "00" & "00" & '0' & "0000000000",
 
 -- trace(crlf);
--- L0295@0058 E06331FF98000000.dump_inex:  trace(crlf);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-88 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0296@0059 E064327F98000000.dump_inex:  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+89 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- back;
--- L0296@0059 E002017F80000000.  if true then return else return;
+-- L0297@005A E002017F80000000.  if true then return else return;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-89 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+90 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = 1, trace(from_microcode);
--- L0298@005A E063318088000000.dump_il:  directByte = 1, trace(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000001, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-90 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"01" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0299@005B E064320088000000.dump_il:  directByte = 1, trace(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000001, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+91 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"01" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- trace(crlf);
--- L0299@005B E06331FF98000000.  trace(crlf);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-91 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0300@005C E064327F98000000.  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+92 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- T <= IL_PC, IL_PC <= zero;
--- L0300@005C E000007FA1000000.  T <= IL_PC, IL_PC <= zero;
+-- L0301@005D E000007FA1000000.  T <= IL_PC, IL_PC <= zero;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000000 else 000000000, directByte = 11111111, T <= 01, DBGINDEX <= 00, IL_PC <= 001, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-92 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "01" & "00" & O"1" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+93 => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "01" & "00" & O"1" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- if IL_PC_VALID then next else dump_il_ex;
--- L0301@005D E600317F80000000.dump_il_lp:  if IL_PC_VALID then next else dump_il_ex;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0011) then 000000000 else 001100010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-93 => '1' & '1' & '1' & X"3" & O"000" & O"142" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0302@005E E60031FF80000000.dump_il_lp:  if IL_PC_VALID then next else dump_il_ex;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0011) then 000000000 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+94 => '1' & '1' & '1' & X"3" & O"000" & O"143" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = 2, trace(from_microcode);
--- L0302@005E E063318108000000.  directByte = 2, trace(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-94 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0303@005F E064320108000000.  directByte = 2, trace(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000010, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+95 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"02" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- directByte = 3, trace(from_microcode);
--- L0303@005F E063318188000000.  directByte = 3, trace(from_microcode);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-95 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"03" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0304@0060 E064320188000000.  directByte = 3, trace(from_microcode);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 00000011, T <= 00, DBGINDEX <= 01, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+96 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"03" & "00" & "01" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- trace(crlf);
--- L0304@0060 E06331FF98000000.  trace(crlf);
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100011 else 001100011, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-96 => '1' & '1' & '1' & X"0" & O"143" & O"143" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0305@0061 E064327F98000000.  trace(crlf);
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 001100100 else 001100100, directByte = 11111111, T <= 00, DBGINDEX <= 11, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+97 => '1' & '1' & '1' & X"0" & O"144" & O"144" & X"FF" & "00" & "11" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- IL_PC <= inc, goto dump_il_lp;
--- L0305@0061 FE002EFF82000000.  IL_PC <= inc, if false then next else dump_il_lp;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 001011101, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 010, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-97 => '1' & '1' & '1' & X"F" & O"000" & O"135" & X"FF" & "00" & "00" & O"2" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- L0306@0062 FE002F7F82000000.  IL_PC <= inc, if false then next else dump_il_lp;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (1111) then 000000000 else 001011110, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 010, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+98 => '1' & '1' & '1' & X"F" & O"000" & O"136" & X"FF" & "00" & "00" & O"2" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- IL_PC <= T, back;
--- L0306@0062 E002017F83000000.dump_il_ex:  IL_PC <= T, if true then return else return;
+-- L0307@0063 E002017F83000000.dump_il_ex:  IL_PC <= T, if true then return else return;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 011, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-98 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"3" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+99 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "00" & O"3" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
 -- if DBG_READY then next else repeat;
--- L0308@0063 E80000FF80000000.trace:  if DBG_READY then next else repeat;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-99 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
-
--- if DBG_READY then next else repeat;
--- L0309@0064 E80000FF80000000.  if DBG_READY then next else repeat;
+-- L0309@0064 E80000FF80000000.trace:  if DBG_READY then next else repeat;
 --  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
 100 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
--- DBGINDEX <= zero, back;
--- L0310@0065 E002017F90000000.  DBGINDEX <= zero, if true then return else return;
---  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
-101 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "10" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+-- if DBG_READY then next else repeat;
+-- L0310@0065 E80000FF80000000.  if DBG_READY then next else repeat;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0100) then 000000000 else 000000001, directByte = 11111111, T <= 00, DBGINDEX <= 00, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+101 => '1' & '1' & '1' & X"4" & O"000" & O"001" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
 
--- 410 location(s) in following ranges will be filled with default value
--- 0066 .. 01FF
+-- DBGINDEX <= zero, back;
+-- L0311@0066 E002017F90000000.  DBGINDEX <= zero, if true then return else return;
+--  nBUSREQ = 1, nWR = 1, nRD = 1, if (0000) then 000000010 else 000000010, directByte = 11111111, T <= 00, DBGINDEX <= 10, IL_PC <= 000, IL_OP <= 0, CHAROUT <= 00, MAR <= 00, MDR <= 00, InlEnd <= 00, BP <= 00, SvPt <= 00, gotChar = 0, dummy = 0000000000;
+102 => '1' & '1' & '1' & X"0" & O"002" & O"002" & X"FF" & "00" & "10" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000",
+
+-- 409 location(s) in following ranges will be filled with default value
+-- 0067 .. 01FF
 
 others => '1' & '1' & '1' & X"0" & O"000" & O"000" & X"FF" & "00" & "00" & O"0" & '0' & "00" & "00" & "00" & "00" & "00" & "00" & '0' & "0000000000"
 );

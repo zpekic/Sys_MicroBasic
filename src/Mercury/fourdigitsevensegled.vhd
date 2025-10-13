@@ -35,7 +35,7 @@ entity fourdigitsevensegled is
            digsel : in  STD_LOGIC_VECTOR (1 downto 0);
            showdigit : in  STD_LOGIC_VECTOR (3 downto 0);
            showdot : in  STD_LOGIC_VECTOR (3 downto 0);
-           showsegments : in  STD_LOGIC;
+			  showsegments: in STD_LOGIC;
 			  -- outputs
            anode : out  STD_LOGIC_VECTOR (3 downto 0);
            segment : out  STD_LOGIC_VECTOR (7 downto 0)
@@ -44,58 +44,51 @@ end fourdigitsevensegled;
 
 architecture structural of fourdigitsevensegled is
 
-component nibble2sevenseg is
-    Port ( nibble : in  STD_LOGIC_VECTOR (3 downto 0);
-           segment : out  STD_LOGIC_VECTOR (6 downto 0)
-			);
-end component;
-
-component mux16to4
-    Port ( a : in  STD_LOGIC_VECTOR (3 downto 0);
-           b : in  STD_LOGIC_VECTOR (3 downto 0);
-           c : in  STD_LOGIC_VECTOR (3 downto 0);
-           d : in  STD_LOGIC_VECTOR (3 downto 0);
-           sel : in  STD_LOGIC_VECTOR (1 downto 0);
-			  nEnable : in  STD_LOGIC;
-           y : out  STD_LOGIC_VECTOR (3 downto 0)
-			 );
-end component;
-
-signal internalsegment: std_logic_vector(7 downto 0); -- 7th is the dot!
-signal internalsel: std_logic_vector(3 downto 0);
-signal digit: std_logic_vector(3 downto 0);
+signal internalseg: std_logic_vector(6 downto 0); -- 7th is the dot!
+signal dot: std_logic;
+signal displaybus: std_logic_vector(7 downto 0);
+alias hexdata: std_logic_vector(3 downto 0) is displaybus(3 downto 0);
 
 begin
--- decode position
-   internalsel(3) <= digsel(1) and digsel(0);
-   internalsel(2) <= digsel(1) and (not digsel(0));
-   internalsel(1) <= (not digsel(1)) and digsel(0);
-   internalsel(0) <= (not digsel(1)) and (not digsel(0));
--- select 1 digit out of 4 incoming	
-   digitmux: mux16to4 port map (
-								a => data(3 downto 0), 
-								b => data(7 downto 4),  
-								c => data(11 downto 8),  
-								d => data(15 downto 12), 
-								nEnable => '0',
-								sel => digsel,
-								y => digit
-									);
--- set the anodes with digit blanking
-	anode(3) <= not (internalsel(3) and showdigit(3));
-	anode(2) <= not (internalsel(2) and showdigit(2));
-	anode(1) <= not (internalsel(1) and showdigit(1));
-	anode(0) <= not (internalsel(0) and showdigit(0));
--- hook up the cathodes
-   sevensegdriver: nibble2sevenseg port map (
-								nibble => digit,
-								segment => internalsegment(6 downto 0)
-									);
--- set cathodes with blanking (seg7 == dot)
-	segment(7) <= (not showsegments) or ((internalsel(3) and not showdot(3)) or (internalsel(2) and not showdot(2)) or (internalsel(1) and not showdot(1)) or (internalsel(0) and not showdot(0)));
-	segs: for i in 6 downto 0 generate
-		segment(i) <= (not showsegments) or internalsegment(i);
-	end generate;	
+
+anode <= displaybus(7 downto 4);
+
+---- DP for each digit individually
+	with digsel select dot <= 
+		not showdot(0) when "00",
+		not showdot(1) when "01",
+		not showdot(2) when "10",
+		not showdot(3) when others;
+
+---- decode position and select 1 of 4 hex digits
+	with digsel select displaybus <= 	
+		("111" & not showdigit(0)) 		& data(3 downto 0) when "00",
+		("11" & not showdigit(1) & "1")  & data(7 downto 4) when "01",
+		("1" & not showdigit(2) & "11")  & data(11 downto 8) when "10",
+		(not showdigit(3) & "111")			& data(15 downto 12) when others;
+					
+---- hook up the cathodes
+	with hexdata select internalseg <= 
+		 "0000001" when "0000",   --0
+		 "1001111" when "0001",   --1
+		 "0010010" when "0010",   --2
+		 "0000110" when "0011",   --3
+		 "1001100" when "0100",   --4
+		 "0100100" when "0101",   --5
+		 "0100000" when "0110",   --6
+		 "0001111" when "0111",   --7
+		 "0000000" when "1000",   --8
+		 "0000100" when "1001",   --9
+		 "0001000" when "1010",   --A
+		 "1100000" when "1011",   --b
+		 "0110001" when "1100",   --C
+		 "1000010" when "1101",   --d
+		 "0110000" when "1110",   --E
+		 "0111000" when "1111",   --F
+		 "0000000" when others;
+
+-- display or not
+	segment <= dot & internalseg when (showsegments = '1') else X"FF";
 
 end structural;
 

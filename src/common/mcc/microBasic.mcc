@@ -148,7 +148,7 @@ skipSpaces: .sub;
 
 // other
 NULL: 		.alias 0x00;
-ESC:		.alias 0x03;
+ESC:		.alias 0x1b;
 BEEP:		.alias 0x07;
 BACKSPACE:	.alias 0x08;
 TAB:		.alias 0x09;
@@ -221,7 +221,7 @@ gl_loop:	if CHARIN_READY then next else repeat;		// wait for input character
 			directByte = CR, if CHARIN_EQU_DB then gl_cr;
 			directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
 			directByte = ESC, if CHARIN_EQU_DB then gl_esc;
-//			directByte = TAB, if CHARIN_EQU_DB then gl_tab;		// TODO - implement TAB
+			//directByte = TAB, if CHARIN_EQU_DB then gl_tab;		// TODO - implement TAB
 			// fall into ignorable characters
 gl_ignore:	directByte = BEEP, outChar(from_microcode); // BEEP, then get next char
 			gotChar = 1, goto gl_loop;
@@ -238,6 +238,7 @@ gl_esc:		directByte = BEEP, outChar(from_microcode); // BEEP, then get next line
 			gotChar = 1, goto gl;
 			
 gl_bs:		if INLEND_MIN then gl_ignore;
+			directByte = BACKSPACE, outChar(from_microcode);	// ECHO
 			InlEnd <= dec, goto gl_write0;
 			
 gl_cr:		WriteCore(InlEnd, CHARIN);
@@ -246,7 +247,7 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			dump_input();
 			outCRLF();
 			gotChar = 1, BP <= Inline_start, goto fetch;	
-
+			
 			.map 0b01??????;							// BR (relative branch, 0x40..0x7F)
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)

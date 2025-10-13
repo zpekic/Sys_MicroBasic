@@ -138,8 +138,6 @@ begin
 	end if;
 end process;
 
-mdr_equ_db <= '1' when (MDR = mb_directByte) else '0';
-
 -- ROM containing the IL language instructions
 cu_il: entity work.il_rom Port map ( 
 		a => IL_PC,
@@ -187,6 +185,7 @@ cu_mb: entity work.microbasic_control_unit
 			ui_address => ui_address
 		);
 
+mdr_equ_db <= '1' when (MDR = mb_directByte) else '0';
 charin_equ_db <= '1' when (CHARIN = mb_directByte) else '0';
 charin_printable <= '0' when (CHARIN(7 downto 5) = "000") else (not CHARIN(7)); -- TODO: Add 0x7F 
 inlend_max <= '1' when (InlEnd = InLine_End) else '0';
@@ -309,7 +308,7 @@ end process;
 		case mb_CHAROUT is
 			when CHAROUT_same =>
 				CHAROUT_SEND <= '0';					-- pulse low
-				--CHAROUT <= CHAROUT;
+				CHAROUT <= CHAROUT;
 			when CHAROUT_from_interpreter =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
 				CHAROUT <= il_codeByte;
@@ -318,7 +317,8 @@ end process;
 				CHAROUT <= mb_directByte;
 			when CHAROUT_from_charin =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
-				CHAROUT <= X"2A"; --CHARIN;
+				--CHAROUT <= X"2A";
+				CHAROUT <= CHARIN;
 			when others =>
 				null;
 		end case;
@@ -334,7 +334,7 @@ outchar <= CHAROUT and X"7F";
 on_inchar_ready: process(reset, inchar_ready, mb_gotChar)
 begin
 	if ((reset or mb_gotChar) = '1') then
-		CHARIN <= (others => '0');
+		--CHARIN <= (others => '0');
 		charin_ready <= '0';
 	else
 		if (rising_edge(inchar_ready)) then
@@ -389,8 +389,9 @@ tracer: entity work.serialtracer2 Port map (
 	with debug_sel select debug_bus <= 
 		CHAROUT & CHARIN when "00",
 		InlEnd when "01",
-		il_op & ui_address(7 downto 0) when "10",
-		X"DEAD" when others;
+		-- convert microcode address to BCD for easier tracking
+		il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
+		MAR(7 downto 0) & MDR when others;
 		
 end Behavioral;
 

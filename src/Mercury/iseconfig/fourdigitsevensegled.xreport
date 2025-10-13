@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2025-10-12T12:18:00</DateModified>
+  <DateModified>2025-10-12T21:42:43</DateModified>
   <ModuleName>sys_microbasic_mercury</ModuleName>
-  <SummaryTimeStamp>2025-10-12T12:14:47</SummaryTimeStamp>
+  <SummaryTimeStamp>2025-10-12T20:48:40</SummaryTimeStamp>
   <SavedFilePath>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/Mercury/iseconfig/fourdigitsevensegled.xreport</SavedFilePath>
   <ImplementationReportsDirectory>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/Mercury</ImplementationReportsDirectory>
   <DateInitialized>2025-10-12T11:20:18</DateInitialized>
