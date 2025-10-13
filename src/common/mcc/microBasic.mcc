@@ -30,7 +30,7 @@ seq_cond:		.if 4 values
 				CHARIN_READY,		
 				BP_IN_INPLINE,		
 				SVP_IN_INPLINE,		
-				dummy_E,		
+				MDR_IS_NUM,		// MDR contains ASCII 0..9		
 				false			// hard-code to 0
 				default true;
 seq_then:	.then 9 values next, repeat, return, fork, @ default next;						// any label
@@ -43,8 +43,8 @@ directByte	.valfield 8 values 0x00..0xFF default 0xFF;
 T			.regfield 2 values
 				same,
 				IL_PC,
-				-,
-				-
+				zero,
+				T10_plus_mdr
 				default same;
 				
 // contains ASCII char for DEBUG UART transmit
@@ -121,6 +121,17 @@ SvPt			.regfield 2 values
 				-
 				default same;
 				
+ExpStack		.regfield 3 values
+				same,
+				clear,
+				push_T,
+				startSwap,
+				endSwap,
+				-,
+				-,
+				-
+				default same;
+				
 // flag to reset input character ready
 gotChar			.valfield 1 values 
 				0,
@@ -128,7 +139,7 @@ gotChar			.valfield 1 values
 				default 0;
 				
 // placeholder
-dummy:			.valfield 10 values * default 0;
+dummy:			.valfield 7 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 goto:		.alias if false then next else;
@@ -155,7 +166,7 @@ TAB:		.alias 0x09;
 LF:			.alias 0x0A;
 CR:			.alias 0x0D;
 SPACE:		.alias 0x20;
-clear:		.alias DBGINDEX <= zero, IL_PC <= zero, BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start;
+clear:		.alias DBGINDEX <= zero, IL_PC <= zero, BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, ExpStack <= clear;
 nop:		.alias if true then next;
 
 			.org 0;
@@ -187,33 +198,57 @@ badop:		traceString 62;								// error message
 			trace(crlf);
 			goto WarmStart;
 			
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 15;								// trace mnemonic
+			ExpStack <= startSwap;	// R <= ExpStack(0), S <= ExpStack(0 + param) 
+			ExpStack <= endSwap;	// ExpStack(0) <= S, ExpStack(0 + param) <= R
+			goto fetch;
+
+			.map 0x00;									// SX 0 does nothing, so map to just skip
+			traceString 15;								// trace mnemonic
+			goto fetch;
+			
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x08;									// NOP (No operation)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 12;
 			goto fetch;
 			
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x10;									// SB (Save Basic Pointer)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 10;								// trace mnemonic
 			if BP_IN_INPLINE then next else ptr_exc;
 save_bp:	SvPt <= BP, goto fetch;
 
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x11;									// RB (Restore Basic Pointer)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 11;								// trace mnemonic
 			if SVP_IN_INPLINE then save_bp;	
 ptr_exc:	SvPt <= BP, BP <= SvPt, goto fetch;			
 			
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x23;									// NL (Print newline)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 6;								// Trace mnemonic
 			outCRLF();
 			goto fetch;
 			
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x24;									// PC (Print literal string)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 5;								// Trace mnemonic
 pc_loop:	outChar(from_interpreter);
 			traceString 3;								// trace value of IL(IL_PC) (which was the char to be output)
 			IL_PC <= inc, if CHAROUT_BIT7 then next else pc_loop;	// print until char with bit7 set 
 pc_exit:	goto fetch;
 				
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x27;									// GL (Get Input line)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 8;								// Trace mnemonic
 gl:			InlEnd <= InLine_start;
 gl_loop:	if CHARIN_READY then next else repeat;		// wait for input character
@@ -248,7 +283,9 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			outCRLF();
 			gotChar = 1, BP <= Inline_start, goto fetch;	
 			
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0b01??????;							// BR (relative branch, 0x40..0x7F)
+			////////////////////////////////////////////////////////////////////////////////
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
 			traceString 2;								// trace target
@@ -257,7 +294,28 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			.map 0x60;									// BR with offset 0 is badop
 			goto badop;
 
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 14;								// Trace mnemonic
+			skipSpaces();
+			T <= zero, if MDR_IS_NUM then bn_loop;		// MDR was already loaded by skipSpaces()
+			IL_PC <= pc_plus_off5;						// jump destination (+ 31 locations)
+bn_exit:	traceString 2;								// trace target
+			goto fetch;
+bn_loop:	T <= T10_plus_mdr, BP <= inc;
+			ReadCore(BP);
+			if MDR_IS_NUM then bn_loop;
+			// TODO -- if ESTACK_IS_FULL then ERR
+			ExpStack <= push_T, goto bn_exit;
+
+			.map 0xC0;									// BN with offset 0 is badop
+			goto badop;
+
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 13;								// Trace mnemonic
 			skipSpaces();
 			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
 			IL_PC <= pc_plus_off5;						// jump destination (+ 31 locations)
@@ -269,8 +327,7 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			
 skipSpaces: ReadCore(BP);
 			directByte = SPACE, if MDR_EQU_DB then skipSp;
-			directByte = TAB, if MDR_EQU_DB then skipSp;		
-			back;
+			directByte = TAB, if MDR_EQU_DB then skipSp else return;		
 skipSp:		BP <= inc, goto  skipSpaces;			
 			
 outCRLF:	directByte = CR, outChar(from_microcode);		
@@ -307,6 +364,7 @@ dump_il_lp:	if IL_PC_VALID then next else dump_il_ex;
 dump_il_ex:	IL_PC <= T, back;	// restore IL and return
 			
 trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
+			if DBG_READY then next else repeat;
 			if DBG_READY then next else repeat;
 			DBGINDEX <= zero, back;				// clear the serial debug output register and return
 					

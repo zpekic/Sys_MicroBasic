@@ -185,6 +185,7 @@ cpu: entity work.MicroBasic Port map (
 		inchar => RXD_CHAR,
 		inchar_ready => RXD_READY,
 		-- debug / trace
+		traceEnable => '1',
 		baudrate => baudrate_x1,
 		debug_txd => PMOD_RXD1,
 		debug_sel => sw(1 downto 0),

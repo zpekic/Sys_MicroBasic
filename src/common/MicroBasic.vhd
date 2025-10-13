@@ -49,6 +49,7 @@ entity MicroBasic is
 			  inchar: in STD_LOGIC_VECTOR(7 downto 0);
 			  inchar_ready: in STD_LOGIC;
 			  -- debug / trace UART output
+			  traceEnable: in STD_LOGIC;
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
 			  debug_sel: in STD_LOGIC_VECTOR(1 downto 0);
@@ -57,6 +58,8 @@ end MicroBasic;
 
 architecture Behavioral of MicroBasic is
 
+type ram8x8 is array (0 to 7) of std_logic_vector(7 downto 0);
+
 -- control unit
 signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
 signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
@@ -64,6 +67,7 @@ signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
 -- Intermediate languge
 signal IL_PC: std_logic_vector(10 downto 0); -- 9 bits enough, but keep it compatible with other implementations
 signal IL_OP: std_logic_vector(7 downto 0);
+alias IL_OP5: std_logic_vector(4 downto 0) is IL_OP(4 downto 0);
 signal IL_PC_VALID: std_logic;
 signal il_codeByte: std_logic_vector(7 downto 0);
 
@@ -82,7 +86,7 @@ signal DBG_READY, dbg_start: std_logic;
 -- external memory related
 signal MAR: std_logic_vector(15 downto 0);
 signal MDR: std_logic_vector(7 downto 0);
-signal mdr_equ_db: std_logic;
+signal mdr_equ_db, mdr_is_num: std_logic;
 
 -- key pointers
 signal BP, SvPt: std_logic_vector(15 downto 0);
@@ -94,6 +98,12 @@ constant Inline_End: std_logic_vector(15 downto 0) := X"00FF"; -- TODO
 signal T: std_logic_vector(15 downto 0);
 signal InlEnd: std_logic_vector(15 downto 0);
 signal inlend_max, inlend_min: std_logic;
+
+-- expression stack, 8 words, but there is convenience in keeping it as MSB and LSB bytes
+signal ExpStackH, ExpStackL: ram8x8;
+signal ExpSP: std_logic_vector(3 downto 0);
+signal ExpSwap: std_logic_vector(3 downto 0);	-- pointer used in SX IL instruction
+signal R, S: std_logic_vector(7 downto 0);
 
 begin
 
@@ -178,7 +188,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_CHARIN_READY) => charin_ready,
 			cond(seq_cond_BP_IN_INPLINE) => bp_in_inpline,
 			cond(seq_cond_SVP_IN_INPLINE) => svp_in_inpline,
-			cond(seq_cond_dummy_E) => '1',
+			cond(seq_cond_MDR_IS_NUM) => mdr_is_num,
 			cond(seq_cond_false) => '0',
 			-- outputs
 			ui_nextinstr => ui_nextinstr,
@@ -186,12 +196,13 @@ cu_mb: entity work.microbasic_control_unit
 		);
 
 mdr_equ_db <= '1' when (MDR = mb_directByte) else '0';
+mdr_is_num <= '1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
 charin_equ_db <= '1' when (CHARIN = mb_directByte) else '0';
 charin_printable <= '0' when (CHARIN(7 downto 5) = "000") else (not CHARIN(7)); -- TODO: Add 0x7F 
 inlend_max <= '1' when (InlEnd = InLine_End) else '0';
 inlend_min <= '1' when (InlEnd = InLine_Start) else '0';
-bp_in_inpline <= '1' when ((unsigned(BP) >= unsigned(InLine_Start)) or (unsigned(BP) <= unsigned(InLine_End))) else '0';
-svp_in_inpline <= '1' when ((unsigned(SvPt) >= unsigned(InLine_Start)) or (unsigned(SvPt) <= unsigned(InLine_End))) else '0';
+bp_in_inpline <= '1' when ((unsigned(BP) >= unsigned(InLine_Start)) and (unsigned(BP) <= unsigned(InLine_End))) else '0';
+svp_in_inpline <= '1' when ((unsigned(SvPt) >= unsigned(InLine_Start)) and (unsigned(SvPt) <= unsigned(InLine_End))) else '0';
 
 -- get the microcode instruction 
 mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
@@ -211,13 +222,13 @@ update_IL_PC: process(clk, mb_IL_PC)
 			when IL_PC_pc_plus_off6 =>
 				-- a bit bizarre offset
 				if (IL_OP(5) = '1') then
-					IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP(4 downto 0)));
+					IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP5));
 				else
-					IL_PC <= std_logic_vector(unsigned(IL_PC) - unsigned(IL_OP(4 downto 0)));
+					IL_PC <= std_logic_vector(unsigned(IL_PC) - unsigned(IL_OP5));
 				end if;
 			when IL_PC_pc_plus_off5 =>
 				-- can only jump forward
-				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP(4 downto 0)));
+				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP5));
 			when others =>
 				null;
 		end case;
@@ -241,6 +252,10 @@ begin
 --				T <= T;
 			when T_IL_PC =>
 				T <= "00000" & IL_PC;
+			when T_zero =>
+				T <= (others => '0');
+			when T_T10_plus_mdr =>
+				T <= std_logic_vector(10 * unsigned(T) + (unsigned(MDR) - 48));				
 			when others =>
 				null;
 		end case;
@@ -300,6 +315,48 @@ end process;
  end if;
  end process;
 	
+ -- WARNING: this can easily wrap around and destroy the stack!
+ ExpSwap <= std_logic_vector(unsigned(ExpSP) + unsigned(IL_OP(2 downto 1) & '0')); 
+ update_ExpStack: process(clk, mb_ExpStack)
+ begin
+	if (rising_edge(clk)) then
+		case mb_ExpStack is
+--			when ExpStack_same =>
+--				ExpStack <= ExpStack;
+			when ExpStack_clear =>
+				ExpStackH(0) <= (others => '0');
+				ExpStackL(0) <= (others => '0');
+				ExpSP <= (others => '0');
+			when ExpStack_push_T =>
+				ExpStackH(to_integer(unsigned(ExpSP))) <= T(15 downto 8);
+				ExpStackL(to_integer(unsigned(ExpSP))) <= T(7 downto 0);
+				ExpSP <= std_logic_vector(unsigned(ExpSP) + 1);
+			when ExpStack_startSwap =>
+				if (IL_OP(0) = '0') then
+				-- SX 0, 2, 4, 6: copy ST to T and replace with ...
+					R <= ExpStackL(to_integer(unsigned(ExpSP)));
+					S <= ExpStackL(to_integer(unsigned(ExpSwap)));
+				else
+				-- SX 1, 3, 5, 7
+					R <= ExpStackL(to_integer(unsigned(ExpSP)));
+					S <= ExpStackH(to_integer(unsigned(ExpSwap)));
+				end if;
+			when ExpStack_endSwap =>
+				if (IL_OP(0) = '0') then
+				-- SX 2, 4, 6: copy ST to T and replace with ...
+					ExpStackL(to_integer(unsigned(ExpSP))) <= S;
+					ExpStackL(to_integer(unsigned(ExpSwap))) <= R;
+				else
+				-- SX 1, 3, 5, 7
+					ExpStackL(to_integer(unsigned(ExpSP))) <= S;
+					ExpStackH(to_integer(unsigned(ExpSwap))) <= R;
+				end if;
+			when others =>
+				null;
+		end case;
+ end if;
+ end process;
+	
 -- output port (1 ASCII char at a time, usually goes to UART)
  update_CHAROUT: process(clk, mb_CHAROUT)
  begin
@@ -348,7 +405,7 @@ end process;
 tracer: entity work.serialtracer2 Port map (
 		reset => reset,
 		clk => baudrate,
-		enable => '1',
+		enable => traceEnable,	-- TODO: override for some DBGINDEX values
 		start => dbg_start,
 		index => DBGINDEX,
 		data(3) => '0',
@@ -388,7 +445,7 @@ tracer: entity work.serialtracer2 Port map (
 -- paralled debug port implementation
 	with debug_sel select debug_bus <= 
 		CHAROUT & CHARIN when "00",
-		InlEnd when "01",
+		T when "01",
 		-- convert microcode address to BCD for easier tracking
 		il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
 		MAR(7 downto 0) & MDR when others;
