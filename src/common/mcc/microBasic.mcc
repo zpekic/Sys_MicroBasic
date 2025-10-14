@@ -15,7 +15,7 @@ nRD				.valfield 1 values 0, 1 default 1;
 // A(15..0)		
 // D(7..0)
 
-seq_cond:		.if 4 values 
+seq_cond:		.if 5 values 
 				true, 			// hard-code to 1
 				CHAROUT_BIT7,	// 
 				CHAROUT_READY,	//  
@@ -30,7 +30,23 @@ seq_cond:		.if 4 values
 				CHARIN_READY,		
 				BP_IN_INPLINE,		
 				SVP_IN_INPLINE,		
-				MDR_IS_NUM,		// MDR contains ASCII 0..9		
+				MDR_IS_NUM,		// MDR contains ASCII 0..9
+				MDR_IS_ALPHA,
+				ESTACK_IS_FULL,
+				ESTACK_IS_EMPTY,
+				cond18,
+				cond19,
+				cond20,
+				cond21,
+				cond22,
+				cond23,
+				cond24,
+				cond25,
+				cond26,
+				cond27,
+				cond28,
+				cond29,
+				cond30,
 				false			// hard-code to 0
 				default true;
 seq_then:	.then 9 values next, repeat, return, fork, @ default next;						// any label
@@ -90,11 +106,15 @@ MAR:			.regfield 2 values
 				default same;
 				
 // 8-bit Memory Address Register
-MDR:			.regfield 2 values
+MDR:			.regfield 3 values
 				same, 
 				from_Bus,
 				zero,
-				CHARIN
+				CHARIN,
+				ToUpper,
+				-,
+				-,
+				-
 				default same;
 
 // 16-bit pointer to input buffer
@@ -127,7 +147,7 @@ ExpStack		.regfield 3 values
 				push_T,
 				startSwap,
 				endSwap,
-				-,
+				push_MDR2,
 				-,
 				-
 				default same;
@@ -139,7 +159,7 @@ gotChar			.valfield 1 values
 				default 0;
 				
 // placeholder
-dummy:			.valfield 7 values * default 0;
+dummy:			.valfield 5 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 goto:		.alias if false then next else;
@@ -196,8 +216,8 @@ fetch:		trace(crlf);
 badop:		traceString 62;								// error message
 			//dump_il();
 			trace(crlf);
-			goto WarmStart;
-			
+			goto INTERNAL_ERR;
+	
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
 			////////////////////////////////////////////////////////////////////////////////
@@ -288,10 +308,23 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
-			traceString 2;								// trace target
+br_exit:	traceString 2;								// trace target
 			goto fetch;
 			
 			.map 0x60;									// BR with offset 0 is badop
+			goto badop;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0b101?????;							// BV (Branch if not variable, 0xA0..0xBF)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 16;								// Trace mnemonic
+			skipSpaces();
+			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute in parallel	
+			IL_PC <= pc_plus_off5, goto br_exit;		// jump destination (+ 31 locations)
+bv_exec:	if ESTACK_IS_FULL then STACK_ERR;
+			ExpStack <= push_MDR2, goto br_exit;
+
+			.map 0xA0;									// BV with offset 0 is badop
 			goto badop;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -306,7 +339,7 @@ bn_exit:	traceString 2;								// trace target
 bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			ReadCore(BP);
 			if MDR_IS_NUM then bn_loop;
-			// TODO -- if ESTACK_IS_FULL then ERR
+			if ESTACK_IS_FULL then STACK_ERR;
 			ExpStack <= push_T, goto bn_exit;
 
 			.map 0xC0;									// BN with offset 0 is badop
@@ -325,6 +358,17 @@ bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			.map 0xE0;									// BE with offset 0 is badop
 			goto badop;
 			
+INTERNAL_ERR: 	nop;
+STACK_ERR:		nop;
+				directByte = BEEP, outChar(from_microcode);
+				directByte = 'E', outChar(from_microcode);
+				directByte = 'R', outChar(from_microcode);
+				directByte = 'R', outChar(from_microcode);
+				// TODO: error code
+				// TODO: line number
+				outCRLF();
+				goto WarmStart;
+				
 skipSpaces: ReadCore(BP);
 			directByte = SPACE, if MDR_EQU_DB then skipSp;
 			directByte = TAB, if MDR_EQU_DB then skipSp else return;		

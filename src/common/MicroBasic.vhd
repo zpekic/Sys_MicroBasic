@@ -22,7 +22,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -86,7 +86,7 @@ signal DBG_READY, dbg_start: std_logic;
 -- external memory related
 signal MAR: std_logic_vector(15 downto 0);
 signal MDR: std_logic_vector(7 downto 0);
-signal mdr_equ_db, mdr_is_num: std_logic;
+signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase: std_logic;
 
 -- key pointers
 signal BP, SvPt: std_logic_vector(15 downto 0);
@@ -103,6 +103,7 @@ signal inlend_max, inlend_min: std_logic;
 signal ExpStackH, ExpStackL: ram8x8;
 signal ExpSP: std_logic_vector(3 downto 0);
 signal ExpSwap: std_logic_vector(3 downto 0);	-- pointer used in SX IL instruction
+signal estack_is_full, estack_is_empty: std_logic;
 signal R, S: std_logic_vector(7 downto 0);
 
 begin
@@ -142,6 +143,11 @@ begin
 				MDR <= (others => '0');
 			when MDR_CHARIN =>
 				MDR <= CHARIN;
+			when MDR_ToUpper =>
+				-- only touch lowercase a-z and convert to A-Z
+				if (mdr_is_lowercase = '1') then
+					MDR <= std_logic_vector(unsigned(MDR) - 32);
+				end if;
 			when others =>
 				null;
 		end case;
@@ -189,20 +195,41 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_BP_IN_INPLINE) => bp_in_inpline,
 			cond(seq_cond_SVP_IN_INPLINE) => svp_in_inpline,
 			cond(seq_cond_MDR_IS_NUM) => mdr_is_num,
+			cond(seq_cond_MDR_IS_ALPHA) => mdr_is_alpha,
+			cond(seq_cond_ESTACK_IS_FULL) => estack_is_full,
+			cond(seq_cond_ESTACK_IS_EMPTY) => estack_is_empty,
+			cond(seq_cond_cond18) => '1',
+			cond(seq_cond_cond19) => '1',
+			cond(seq_cond_cond20) => '1',
+			cond(seq_cond_cond21) => '1',
+			cond(seq_cond_cond22) => '1',
+			cond(seq_cond_cond23) => '1',
+			cond(seq_cond_cond24) => '1',
+			cond(seq_cond_cond25) => '1',
+			cond(seq_cond_cond26) => '1',
+			cond(seq_cond_cond27) => '1',
+			cond(seq_cond_cond28) => '1',
+			cond(seq_cond_cond29) => '1',
+			cond(seq_cond_cond30) => '1',
 			cond(seq_cond_false) => '0',
 			-- outputs
 			ui_nextinstr => ui_nextinstr,
 			ui_address => ui_address
 		);
 
-mdr_equ_db <= '1' when (MDR = mb_directByte) else '0';
-mdr_is_num <= '1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
-charin_equ_db <= '1' when (CHARIN = mb_directByte) else '0';
-charin_printable <= '0' when (CHARIN(7 downto 5) = "000") else (not CHARIN(7)); -- TODO: Add 0x7F 
-inlend_max <= '1' when (InlEnd = InLine_End) else '0';
-inlend_min <= '1' when (InlEnd = InLine_Start) else '0';
-bp_in_inpline <= '1' when ((unsigned(BP) >= unsigned(InLine_Start)) and (unsigned(BP) <= unsigned(InLine_End))) else '0';
-svp_in_inpline <= '1' when ((unsigned(SvPt) >= unsigned(InLine_Start)) and (unsigned(SvPt) <= unsigned(InLine_End))) else '0';
+mdr_equ_db <=			'1' when (MDR = mb_directByte) else '0';
+mdr_is_num <=			'1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
+mdr_is_lowercase <=	'1' when ((unsigned(MDR) > 96) and (unsigned(MDR) < 123)) else '0';
+mdr_is_uppercase <=	'1' when ((unsigned(MDR) > 64) and (unsigned(MDR) < 91)) else '0';
+mdr_is_alpha <= mdr_is_lowercase or mdr_is_uppercase;
+estack_is_full <= 	'1' when (ExpSP(3 downto 1) = "111") else '0';
+estack_is_empty <=	'1' when (ExpSP(3 downto 1) = "000") else '0';
+charin_equ_db <=		'1' when (CHARIN = mb_directByte) else '0';
+charin_printable <=	'0' when (CHARIN(7 downto 5) = "000") else (not CHARIN(7)); -- TODO: Add 0x7F 
+inlend_max <=			'1' when (InlEnd = InLine_End) else '0';
+inlend_min <=			'1' when (InlEnd = InLine_Start) else '0';
+bp_in_inpline <=		'1' when ((unsigned(BP) >= unsigned(InLine_Start)) and (unsigned(BP) <= unsigned(InLine_End))) else '0';
+svp_in_inpline <=		'1' when ((unsigned(SvPt) >= unsigned(InLine_Start)) and (unsigned(SvPt) <= unsigned(InLine_End))) else '0';
 
 -- get the microcode instruction 
 mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
@@ -351,6 +378,11 @@ end process;
 					ExpStackL(to_integer(unsigned(ExpSP))) <= S;
 					ExpStackH(to_integer(unsigned(ExpSwap))) <= R;
 				end if;
+			when ExpStack_push_MDR2 =>
+				-- assume it is already uppercased, otherwise a and A would be different variables!
+				ExpStackH(to_integer(unsigned(ExpSP))) <= X"00";
+				ExpStackL(to_integer(unsigned(ExpSP))) <= MDR(6 downto 0) & '0';
+				ExpSP <= std_logic_vector(unsigned(ExpSP) + 1);
 			when others =>
 				null;
 		end case;
