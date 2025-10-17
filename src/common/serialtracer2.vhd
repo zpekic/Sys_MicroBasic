@@ -36,7 +36,7 @@ entity serialtracer2 is
 			  enable: in STD_LOGIC;
            start : in  STD_LOGIC;
            index : in  STD_LOGIC_VECTOR (5 downto 0);
-           data : in  STD_LOGIC_VECTOR (31 downto 0);
+           data : in  STD_LOGIC_VECTOR (63 downto 0);
 			  txd: out  STD_LOGIC;
            ready : out  STD_LOGIC);
 end serialtracer2;
@@ -49,40 +49,40 @@ architecture Behavioral of serialtracer2 is
 constant debug_rom: rom512x8 := (
 		X"FF", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 				-- index 0 should not be used
 		CR, LF, c('I'), c('L'), c('='), X"80", X"81", X"82",					-- IL=aaa
-		X"80", X"81", X"82", c(':'), c(' '), X"00", X"00", X"00",			-- aaa:
-		X"83", X"84", c(' '), X"00", X"00", X"00", X"00", X"00",				-- xx
+		X"80", X"81", X"82", c(':'), c(' '), X"83", X"84", c(' '),			-- aaa xx:
+		X"83", X"84", c(' '), X"00", X"00", X"00", X"00", X"00",				
 		c('M'), c('i'), c('c'), c('r'), c('o'), c('B'), c('a'), c('s'),
 		c('P'), c('C'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('N'), c('L'), c(' '), X"00", X"00", X"00", X"00", X"00",
-		c('B'), c('R'), c(' '), X"00", X"00", X"00", X"00", X"00",
+		c('B'), c('R'), c(' '), c('?'), X"87", X"00", X"00", X"00",		-- BR ?n
 		c('G'), c('L'), X"00", X"00", X"00", X"00", X"00", X"00", 
 		X"85", X"86", c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('S'), c('B'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		c('R'), c('B'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('N'), c('O'), c('P'), c(' '), X"00", X"00", X"00", X"00", 
-		c('B'), c('E'), c(' '), X"00", X"00", X"00", X"00", X"00",
-		c('B'), c('N'), c(' '), X"00", X"00", X"00", X"00", X"00", 
-		c('S'), c('X'), c(' '), X"00", X"00", X"00", X"00", X"00",
-		c('B'), c('V'), c(' '), X"00", X"00", X"00", X"00", X"00", 
-		c('B'), c('C'), c(' '), X"00", X"00", X"00", X"00", X"00",
+		c('B'), c('E'), c(' '), c('?'), X"87", X"00", X"00", X"00",			-- BE ?n
+		c('B'), c('N'), c(' '), c('?'), X"87", X"00", X"00", X"00",			-- BN ?n 
+		c('S'), c('X'), c(' '), X"87", X"00", X"00", X"00", X"00",			-- SX n
+		c('B'), c('V'), c(' '), c('?'), X"87", X"00", X"00", X"00", 		-- BV ?n
+		c('B'), c('C'), c(' '), c('?'), X"87", X"00", X"00", X"00",			-- BC ?n
 		c('P'), c('Q'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('R'), c('T'), c(' '), X"00", X"00", X"00", X"00", X"00",
-		c('J'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
-		c('J'), c(' '), X"00", X"00", X"00", X"00", X"00", X"00",
+		c('J'), c('S'), c(' '), X"87", X"00", X"00", X"00", X"00", 
+		c('J'), c(' '), X"87", X"00", X"00", X"00", X"00", X"00",
 		c('A'), c('D'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('S'), c('B'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('M'), c('L'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		c('N'), c('E'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('P'), c('N'), c(' '), X"00", X"00", X"00", X"00", X"00", 
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
+		c('P'), c('T'), c(' '), X"00", X"00", X"00", X"00", X"00",
+		c('L'), c('B'), c(' '), X"00", X"00", X"00", X"00", X"00", 
+		c('L'), c('N'), c(' '), X"00", X"00", X"00", X"00", X"00",
+		c('g'), c('o'), c('t'), c('o'), c(' '), X"80", X"81", X"82", 
+		c('c'), c('a'), c('l'), c('l'), c(' '), X"80", X"81", X"82", 
+		c('Y'), c('='), c(' '), X"88", X"89", X"8A", X"8B", X"00",
+		c('B'), c('P'), c('='), X"8C", X"8D", X"8E", X"8F", X"00",
+		c('S'), c('P'), c(' '), X"00", X"00", X"00", X"00", X"00",
+		c('D'), c('V'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
@@ -124,15 +124,30 @@ signal dbg_clk: std_logic;
 begin
 
 -- various other 4-bit sources
-with char(2 downto 0) select dbg_hex <=
-		data(3 downto 0) when O"0",
-		data(7 downto 4) when O"1",
-		data(11 downto 8) when O"2",
-		data(15 downto 12) when O"3",
-		data(19 downto 16) when O"4",
-		data(23 downto 20) when O"5",
-		data(27 downto 24) when O"6",
-		data(31 downto 28) when others;
+with char(3 downto 0) select dbg_hex <=
+		-- IL_PC
+		data(3 downto 0) when X"0",
+		data(7 downto 4) when X"1",
+		data(11 downto 8) when X"2",
+		-- code byte 
+		data(15 downto 12) when X"3",
+		data(19 downto 16) when X"4",
+		-- MDR (memory data register)
+		data(23 downto 20) when X"5",
+		data(27 downto 24) when X"6",
+		-- lower nibble of IL_OP 
+		data(31 downto 28) when X"7",
+		-- Y
+		data(47 downto 44) when X"8",
+		data(43 downto 40) when X"9",
+		data(39 downto 36) when X"A",
+		data(35 downto 32) when X"B",
+		-- BP
+		data(63 downto 60) when X"C",
+		data(59 downto 56) when X"D",
+		data(55 downto 52) when X"E",
+		data(51 downto 48) when others;
+		
 
 -- 
 ready <= '1' when (counter = "0000000") else '0';

@@ -40,8 +40,8 @@ seq_cond:		.if 5 values
 				ALU_READY,
 				ALU_OVERFLOW,
 				ALU_SIGN,
-				ALU_DIVBY0,
-				cond25,
+				S_IS_ZERO,
+				AT_TAB,
 				cond26,
 				cond27,
 				cond28,
@@ -168,7 +168,7 @@ ExpStack		.regfield 3 values
 				endSwap,
 				push_MDR2,
 				pop2,
-				-
+				push_codeByte
 				default same;
 				
 // flag to reset input character ready
@@ -187,12 +187,12 @@ alu				.regfield 4 values
 				sub,
 				neg,
 				mul,
-				div,
+				Yx16,
 				bcd_start,
 				bcd_next,
-				Yx16,
-				-,
-				-,
+				div_start,
+				div_next,
+				div_end,
 				-,
 				-
 				default nop;
@@ -216,6 +216,10 @@ goto:		.alias if false then next else;
 noop:		.alias if true then next else next;
 back:	    .alias if true then return else return;
 traceString .alias trace(from_microcode), directByte =;
+traceGoto	.alias trace(from_microcode), directByte = 30;
+traceCall	.alias trace(from_microcode), directByte = 31;
+traceY		.alias trace(from_microcode), directByte = 32;
+traceBP		.alias trace(from_microcode), directByte = 33;
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 dump_il:	.sub;
@@ -226,6 +230,7 @@ outChar:	.sub CHAROUT;
 WriteCore:	.sub MAR, MDR;
 ReadCore:	.sub MAR;
 skipSpaces: .sub;
+pullRS:		.sub;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -245,9 +250,8 @@ WarmStart:	clear;
 			traceString 4;	// output "MicroBas" on debug UART
 			
 fetch:		trace(crlf);
-			traceString 2; 								// trace IL_PC
-			traceString 3;								// trace value of IL(IL_PC) (which is now the opcode)
-			IL_OP <= from_interpreter, IL_PC <= inc;		// load opcode, advance IL_PC
+			traceString 2; 								// trace IL_PC and future opcode
+			IL_OP <= from_interpreter, IL_PC <= inc;	// load opcode, advance IL_PC
 			alu <= reset, if IL_PC_VALID then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode (or break if we went into the weeds)
 			
 			.map 0b????????;							// opcode sink of last resort
@@ -272,64 +276,94 @@ badop:		traceString 62;								// error message
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 12;
 			goto fetch;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x09;									// LB (Push literal byte onto stack)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 28;
+lb_push:	traceString 3, ExpStack <= push_codeByte;
+			IL_PC <= inc, if ESTACK_IS_FULL then ESTACK_ERR else fetch;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x0A;									// LN (Push literal word onto stack)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 29;
+			traceString 3, ExpStack <= push_codeByte;	
+			IL_PC <= inc, if ESTACK_IS_FULL then ESTACK_ERR else lb_push;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x0C;									// SP (Stack Pop)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 34;
+			if ESTACK_IS_EMPTY then ESTACK_ERR;
+			ExpStack <= pop2, goto fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x10;									// SB (Save Basic Pointer)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 10;								// trace mnemonic
 			if BP_IN_INPLINE then next else ptr_exc;
-save_bp:	SvPt <= BP, goto fetch;
+save_bp:	SvPt <= BP;
+bp_done:	traceBP;									// trace value of Basic Pointer
+			goto fetch;					
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x11;									// RB (Restore Basic Pointer)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 11;								// trace mnemonic
 			if SVP_IN_INPLINE then save_bp;	
-ptr_exc:	SvPt <= BP, BP <= SvPt, goto fetch;			
+ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 25;								// Trace mnemonic
-			alu <= R_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= neg, if ALU_READY then next else repeat;
-			T <= from_alu, if  ALU_OVERFLOW then OVERFLOW_ERR else alu_done;
+			alu <= R_fromStack;
+			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			alu <= neg, if ALU_READY then alu_done else repeat;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x18;									// AD (Add)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 22;								// Trace mnemonic
-			alu <= R_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= S_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			pullRS();
 			alu <= add, if ALU_READY then next else repeat;
-			T <= from_alu, if  ALU_OVERFLOW then OVERFLOW_ERR;
-alu_done:	ExpStack <= push_T, goto fetch;
+alu_done:	traceY;
+			T <= from_alu, if ALU_OVERFLOW then OVERFLOW_ERR;
+			ExpStack <= push_T, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x19;									// SB (Substract)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 23;								// Trace mnemonic
-			alu <= R_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= S_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= sub, if ALU_READY then next else repeat;
-			T <= from_alu, if  ALU_OVERFLOW then OVERFLOW_ERR else alu_done;
+			pullRS();
+			alu <= sub, if ALU_READY then alu_done else repeat;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1A;									// MP (Multiply)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 24;								// Trace mnemonic
-			alu <= R_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= S_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= mul, if ALU_READY then next else repeat;
-			T <= from_alu, if  ALU_OVERFLOW then OVERFLOW_ERR else alu_done;
+			pullRS();
+			alu <= mul, if ALU_READY then alu_done else repeat;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x1B;									// DV (Divide)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 35;								// Trace mnemonic
+			pullRS();
+			if S_IS_ZERO then DIVBY0_ERR;
+			alu <= div_start;
+			alu <= div_next, if ALU_READY then next else repeat;
+			alu <= div_end, goto alu_done;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x20;									// PN (Print number)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 26;								// Trace mnemonic
-			alu <= R_fromStack, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= bcd_start;							// first step in BCD conversion
+			alu <= R_fromStack;
+			alu <= bcd_start, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
 			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
+			traceY;
 			if ALU_SIGN then next else pn_plus;
 			directByte = '-', outChar(from_microcode); 			// print minus signal
 pn_plus:	outChar(from_YtoAlpha), alu <= Yx16;				// 6 BCD chars, TODO leading zero supression			
@@ -348,6 +382,14 @@ pq_loop:	BP <= inc, ReadCore(BP);
 			directByte = '"', if MDR_EQU_DB then fetch;
 			outChar(from_MDR);
 			directByte = CR, if MDR_EQU_DB then STRING_ERR else pq_loop;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x22;									// PT (Print TAB)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 27;								// Trace mnemonic
+pt_loop:	if AT_TAB then fetch;						// bail if at positions 0, 8, 16, 24, etc.
+			directByte = ' ', outChar(from_microcode);	// this should increment the tab_cnt mantained by the CPU
+			goto pt_loop;
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x23;									// NL (Print newline)
@@ -371,20 +413,26 @@ pc_exit:	IL_PC <= inc, goto fetch;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 19;								// Trace mnemonic
 			if RSTACK_IS_EMPTY then RSTACK_ERR;
-			IL_PC <= RetStack, RetStack <= pop, goto fetch;
+			IL_PC <= RetStack, RetStack <= pop;
+			traceGoto;
+			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00110???;							// JS (IL subroutine call, 0x3000..0x37FF)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 20;								// Trace mnemonic
+			traceString 3;
 			if RSTACK_IS_FULL then RSTACK_ERR;
-			RetStack <= push_IL_PC_PLUS_1, goto jump;
+			RetStack <= push_IL_PC_PLUS_1;
+			IL_PC <= direct11, traceCall;
+			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00111???;							// J (Jump, 0x3800..0x3FF)		
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 21;								// Trace mnemonic
-jump:		IL_PC <= direct11, traceString 2;			// update IL_PC and trace the destination address
+			traceString 3;								// trace lower 8-bits of destination
+			IL_PC <= direct11, traceGoto;
 			goto fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
@@ -429,7 +477,7 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
-br_exit:	traceString 2;								// trace target
+br_exit:	traceGoto;									// trace target
 			goto fetch;
 			
 			.map 0x60;									// BR with offset 0 is badop
@@ -445,8 +493,11 @@ bc_loop:	traceString 3;								// trace value of IL(IL_PC) (char we try to match
 			if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
 			if ILCODEBYTE_BIT7 then bc_match;
 			BP <= inc, IL_PC <= inc, goto bc_loop;
-bc_match: 	BP <= inc, IL_PC <= inc, goto fetch;			// leave pointers right after
-bc_exit:	BP <= restore, IL_PC <= T; 						// not found, restore BP and IL_PC
+bc_match: 	BP <= inc, IL_PC <= inc;					// leave pointers right after
+			traceBP;
+			goto br_exit;
+bc_exit:	BP <= restore, IL_PC <= T; 					// not found, restore BP and IL_PC
+			traceBP;
 			IL_PC <= pc_plus_off5, goto br_exit;	// restore BC and jump
 		
 			//.map 0x80;									// BC with offset 0 is badop
@@ -462,8 +513,8 @@ bc_exit:	BP <= restore, IL_PC <= T; 						// not found, restore BP and IL_PC
 bv_exec:	if ESTACK_IS_FULL then ESTACK_ERR;
 			ExpStack <= push_MDR2, goto br_exit;
 
-			.map 0xA0;									// BV with offset 0 is badop
-			goto badop;
+			//.map 0xA0;									// BV with offset 0 is badop
+			//goto badop;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
@@ -472,7 +523,7 @@ bv_exec:	if ESTACK_IS_FULL then ESTACK_ERR;
 			skipSpaces();
 			T <= zero, if MDR_IS_NUM then bn_loop;		// MDR was already loaded by skipSpaces()
 			IL_PC <= pc_plus_off5;						// jump destination (+ 31 locations)
-bn_exit:	traceString 2;								// trace target
+bn_exit:	traceGoto;									// trace target
 			goto fetch;
 bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			ReadCore(BP);
@@ -480,8 +531,8 @@ bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			if ESTACK_IS_FULL then ESTACK_ERR;
 			ExpStack <= push_T, goto bn_exit;
 
-			.map 0xC0;									// BN with offset 0 is badop
-			goto badop;
+			//.map 0xC0;									// BN with offset 0 is badop
+			//goto badop;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
@@ -489,13 +540,13 @@ bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			traceString 13;								// Trace mnemonic
 			skipSpaces();
 			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
-			IL_PC <= pc_plus_off5;						// jump destination (+ 31 locations)
-			traceString 2;								// trace target
-			goto fetch;
+			IL_PC <= pc_plus_off5, goto br_exit;		// jump destination (+ 31 locations)
 			
-			.map 0xE0;									// BE with offset 0 is badop
-			goto badop;
+			//.map 0xE0;									// BE with offset 0 is badop
+			//goto badop;
 
+DIVBY0_ERR:		traceString 57;
+				goto traceError;
 OVERFLOW_ERR: 	traceString 58;
 				goto traceError;
 STRING_ERR:		traceString 61; 
@@ -516,6 +567,11 @@ traceError:		outCRLF();
 				outCRLF();
 				trace(crlf);
 				goto WarmStart;
+
+pullRS:		alu <= R_fromStack;
+			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			alu <= S_fromStack;
+			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR else return;
 				
 skipSpaces: ReadCore(BP);
 			directByte = ' ', if MDR_EQU_DB then skipSp;

@@ -14,9 +14,10 @@ use IEEE.NUMERIC_STD.ALL;
 package microbasic_package is
 
 constant NUL: std_logic_vector(7 downto 0) := X"00";
-constant LF: std_logic_vector(7 downto 0) := X"0A";
-constant CR: std_logic_vector(7 downto 0) := X"0D";
 constant BEL: std_logic_vector(7 downto 0) := X"07";
+constant BS: std_logic_vector(7 downto 0) := X"08";
+constant CR: std_logic_vector(7 downto 0) := X"0D";
+constant LF: std_logic_vector(7 downto 0) := X"0A";
 
 impure function c(char: in character) return std_logic_vector;
 
