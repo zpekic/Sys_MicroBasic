@@ -40,10 +40,10 @@ seq_cond:		.if 5 values
 				ALU_READY,
 				ALU_OVERFLOW,
 				ALU_SIGN,
-				S_IS_ZERO,
+				R_IS_ZERO,
 				AT_TAB,
-				cond26,
-				cond27,
+				OFF_IS_ZERO,
+				LEADING_ZERO,
 				cond28,
 				cond29,
 				cond30,
@@ -191,9 +191,9 @@ alu				.regfield 4 values
 				bcd_start,
 				bcd_next,
 				div_start,
-				div_next,
+				div_shift,
+				div_subset,
 				div_end,
-				-,
 				-
 				default nop;
 				
@@ -255,9 +255,7 @@ fetch:		trace(crlf);
 			alu <= reset, if IL_PC_VALID then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode (or break if we went into the weeds)
 			
 			.map 0b????????;							// opcode sink of last resort
-badop:		traceString 62;								// error message
-			//dump_il();
-			goto INTERNAL_ERR;
+badop:		goto INTERNAL_ERR;
 	
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
@@ -351,10 +349,13 @@ alu_done:	traceY;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 35;								// Trace mnemonic
 			pullRS();
-			if S_IS_ZERO then DIVBY0_ERR;
+			if R_IS_ZERO then DIVBY0_ERR;
 			alu <= div_start;
-			alu <= div_next, if ALU_READY then next else repeat;
-			alu <= div_end, goto alu_done;
+div_loop:	alu <= div_shift;
+			alu <= div_subset, 
+			traceY;
+			if ALU_READY then next else div_loop;
+div_done:	alu <= div_end, goto alu_done;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x20;									// PN (Print number)
@@ -366,12 +367,29 @@ alu_done:	traceY;
 			traceY;
 			if ALU_SIGN then next else pn_plus;
 			directByte = '-', outChar(from_microcode); 			// print minus signal
-pn_plus:	outChar(from_YtoAlpha), alu <= Yx16;				// 6 BCD chars, TODO leading zero supression			
-			outChar(from_YtoAlpha), alu <= Yx16;
-			outChar(from_YtoAlpha), alu <= Yx16;
-			outChar(from_YtoAlpha), alu <= Yx16;
-			outChar(from_YtoAlpha), alu <= Yx16;
-			outChar(from_YtoAlpha), alu <= Yx16;
+//pn_plus:	outChar(from_YtoAlpha), alu <= Yx16;				// 6 BCD chars, TODO leading zero supression			
+//			outChar(from_YtoAlpha), alu <= Yx16;
+//			outChar(from_YtoAlpha), alu <= Yx16;
+//			outChar(from_YtoAlpha), alu <= Yx16;
+//			outChar(from_YtoAlpha), alu <= Yx16;
+//			outChar(from_YtoAlpha), alu <= Yx16;
+//			goto fetch;
+pn_plus:	if LEADING_ZERO then pn_4; 
+			outChar(from_YtoAlpha);
+pn_4:		alu <= Yx16;
+			if LEADING_ZERO then pn_3;
+			outChar(from_YtoAlpha);
+pn_3:		alu <= Yx16;
+			if LEADING_ZERO then pn_2;
+			outChar(from_YtoAlpha);
+pn_2:		alu <= Yx16;
+			if LEADING_ZERO then pn_1;
+			outChar(from_YtoAlpha);
+pn_1:		alu <= Yx16;
+			if LEADING_ZERO then pn_0;
+			outChar(from_YtoAlpha);
+pn_0:		alu <= Yx16;
+			outChar(from_YtoAlpha);
 			goto fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
@@ -379,9 +397,12 @@ pn_plus:	outChar(from_YtoAlpha), alu <= Yx16;				// 6 BCD chars, TODO leading ze
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 18;								// Trace mnemonic
 pq_loop:	BP <= inc, ReadCore(BP);
-			directByte = '"', if MDR_EQU_DB then fetch;
+			directByte = '"', if MDR_EQU_DB then pq_done;
 			outChar(from_MDR);
+			traceString 3;
 			directByte = CR, if MDR_EQU_DB then STRING_ERR else pq_loop;
+pq_done:	traceBP;
+			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x22;									// PT (Print TAB)
@@ -478,10 +499,7 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
 br_exit:	traceGoto;									// trace target
-			goto fetch;
-			
-			.map 0x60;									// BR with offset 0 is badop
-			goto badop;
+			if OFF_IS_ZERO then badop else fetch;		
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b100?????; 							// BC a "xxx"   (80xxxxXx-9FxxxxXx  String Match Branch)
@@ -498,32 +516,27 @@ bc_match: 	BP <= inc, IL_PC <= inc;					// leave pointers right after
 			goto br_exit;
 bc_exit:	BP <= restore, IL_PC <= T; 					// not found, restore BP and IL_PC
 			traceBP;
-			IL_PC <= pc_plus_off5, goto br_exit;	// restore BC and jump
-		
-			//.map 0x80;									// BC with offset 0 is badop
-			//goto badop;
-			
+//			IL_PC <= pc_plus_off5, goto br_exit;
+			IL_PC <= pc_plus_off5, goto fetch;			// NOTE: no error on opcode 0x80
+					
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b101?????;							// BV (Branch if not variable, 0xA0..0xBF)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 16;								// Trace mnemonic
 			skipSpaces();
 			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute in parallel	
-			IL_PC <= pc_plus_off5, goto br_exit;		// jump destination (+ 31 locations)
+			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop else br_exit;		// jump destination (+ 31 locations)
 bv_exec:	if ESTACK_IS_FULL then ESTACK_ERR;
 			ExpStack <= push_MDR2, goto br_exit;
-
-			//.map 0xA0;									// BV with offset 0 is badop
-			//goto badop;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 14;								// Trace mnemonic
 			skipSpaces();
-			T <= zero, if MDR_IS_NUM then bn_loop;		// MDR was already loaded by skipSpaces()
-			IL_PC <= pc_plus_off5;						// jump destination (+ 31 locations)
-bn_exit:	traceGoto;									// trace target
+			T <= zero, if MDR_IS_NUM then bn_loop;				// MDR was already loaded by skipSpaces()
+			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;	// jump destination (+ 31 locations)
+bn_exit:	traceGoto;											// trace target
 			goto fetch;
 bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			ReadCore(BP);
@@ -531,20 +544,14 @@ bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			if ESTACK_IS_FULL then ESTACK_ERR;
 			ExpStack <= push_T, goto bn_exit;
 
-			//.map 0xC0;									// BN with offset 0 is badop
-			//goto badop;
-
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 13;								// Trace mnemonic
 			skipSpaces();
 			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
-			IL_PC <= pc_plus_off5, goto br_exit;		// jump destination (+ 31 locations)
+			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop else br_exit;		// jump destination (+ 31 locations)
 			
-			//.map 0xE0;									// BE with offset 0 is badop
-			//goto badop;
-
 DIVBY0_ERR:		traceString 57;
 				goto traceError;
 OVERFLOW_ERR: 	traceString 58;

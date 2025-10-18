@@ -48,22 +48,22 @@ entity sys_microbasic_anvyl is
 				JA3: inout std_logic;
 				JA4: inout std_logic;
 				-- drive external 16-bit address bus
-				JB1: out std_logic;
-				JB2: out std_logic;
-				JB3: out std_logic;
-				JB4: out std_logic;
-				JB7: out std_logic;
-				JB8: out std_logic;
-				JB9: out std_logic;
-				JB10: out std_logic;
-				JC1: out std_logic;
-				JC2: out std_logic;
-				JC3: out std_logic;
-				JC4: out std_logic;
-				JC7: out std_logic;
-				JC8: out std_logic;
-				JC9: out std_logic;
-				JC10: out std_logic;
+				--JB1: out std_logic;
+				--JB2: out std_logic;
+				--JB3: out std_logic;
+				--JB4: out std_logic;
+				--JB7: out std_logic;
+				--JB8: out std_logic;
+				--JB9: out std_logic;
+				--JB10: out std_logic;
+				--JC1: out std_logic;
+				--JC2: out std_logic;
+				--JC3: out std_logic;
+				--JC4: out std_logic;
+				--JC7: out std_logic;
+				--JC8: out std_logic;
+				--JC9: out std_logic;
+				--JC10: out std_logic;
 				-- drive external 8-bit address bus
 				JD1: in std_logic;
 				JD2: in std_logic;
@@ -94,18 +94,18 @@ entity sys_microbasic_anvyl is
 				Memory_address: out std_logic_vector(18 downto 0);
 				Memory_data: inout std_logic_vector(15 downto 0);
 				-- Red / Yellow / Green LEDs
-				--LDT1G: out std_logic;
+				LDT1G: out std_logic;
 				LDT1Y: out std_logic;
-				--LDT1R: out std_logic;
+				LDT1R: out std_logic;
 				LDT2G: out std_logic;
 				LDT2Y: out std_logic;
 				LDT2R: out std_logic;
 				-- VGA
-				HSYNC_O: out std_logic;
-				VSYNC_O: out std_logic;
-				RED_O: out std_logic_vector(3 downto 0);
-				GREEN_O: out std_logic_vector(3 downto 0);
-				BLUE_O: out std_logic_vector(3 downto 0);
+				--HSYNC_O: out std_logic;
+				--VSYNC_O: out std_logic;
+				--RED_O: out std_logic_vector(3 downto 0);
+				--GREEN_O: out std_logic_vector(3 downto 0);
+				--BLUE_O: out std_logic_vector(3 downto 0);
 				-- TFT
 --				TFT_R_O: out std_logic_vector(7 downto 0);
 --				TFT_G_O: out std_logic_vector(7 downto 0);
@@ -116,15 +116,15 @@ entity sys_microbasic_anvyl is
 --				TFT_BKLT_O: out std_logic;
 --				TFT_VDDEN_O: out std_logic;
 				-- breadboard signal connections
-				BB1: out std_logic;
-				BB2: out std_logic;
-				BB3: out std_logic;
-				BB4: out std_logic;
-				BB5: out std_logic;
-				BB6: out std_logic;
-				BB7: out std_logic;
-				BB8: out std_logic;
-				BB9: out std_logic;
+				--BB1: out std_logic;
+				--BB2: out std_logic;
+				--BB3: out std_logic;
+				--BB4: out std_logic;
+				--BB5: out std_logic;
+				--BB6: out std_logic;
+				--BB7: out std_logic;
+				--BB8: out std_logic;
+				--BB9: out std_logic;
 				BB10: in std_logic
           );
 end sys_microbasic_anvyl;
@@ -150,16 +150,18 @@ alias PMOD_TXD1: std_logic is JE3;
 alias PMOD_CTS1: std_logic is JE4;
 
 alias RESET: std_logic is BTN(3);
+alias EXT_CLK: std_logic is BB10;	-- external crystal can frequency
 
 -- debug
 signal T, freqcnt_value: std_logic_vector(31 downto 0);
-signal cpu_debug: std_logic_vector(23 downto 0);
+signal cpu_debug: std_logic_vector(31 downto 0);
 signal hexdata, showdigit: std_logic_vector(3 downto 0);
 signal freqcnt_in: std_logic;
+signal debug_txd: std_logic;
 
 signal prescale_baud, prescale_power: integer range 0 to 65535;
 
-signal cnt25MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 50MHz
+signal cnt50MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 100MHz
 signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
 alias freq38400: std_logic is cnt307200(3);
 alias freq19200: std_logic is cnt307200(4);
@@ -177,7 +179,7 @@ signal cpu_outchar: std_logic_vector(7 downto 0);
 -- single char UART input
 signal RXD_READY, RXD_VALID: std_logic;
 signal RXD_CHAR: std_logic_vector(7 downto 0);
-signal send_clk: std_logic;
+--signal send_clk: std_logic;
 
 ---
 signal switch: std_logic_vector(7 downto 0);
@@ -190,13 +192,18 @@ signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
 
 begin
 
-LED(0) <= not nWR;
-LED(1) <= not nRD;
-LED(2) <= not nBUSREQ;
-LED(3) <= cpu_clk;
+LDT1R <= not nWR;
+LDT1G <= not nRD;
+LDT1Y <= not nBUSREQ;
+LDT2R <= not debug_txd;
+LDT2G <= baudrate_x1;
+LDT2Y <= cpu_clk;
+
+PMOD_RXD1 <= debug_txd;
+LED <= RXD_CHAR;
 
 -- divide internal clock   	
-on_mclk: process(CLK, cnt307200, cnt4096, cnt25MHz)
+on_mclk: process(CLK, cnt307200, cnt4096, cnt50MHz)
 begin
 	if (RESET = '1') then
 		prescale_baud <= 0;
@@ -205,16 +212,16 @@ begin
 		cnt4096 <= (others => '0');
 	else
 		if (rising_edge(CLK)) then
-			cnt25MHz <= std_logic_vector(unsigned(cnt25MHz) + 1);
+			cnt50MHz <= std_logic_vector(unsigned(cnt50MHz) + 1);
 			if (prescale_baud = 0) then
 				cnt307200 <= std_logic_vector(unsigned(cnt307200) + 1);
-				prescale_baud <= (25000000 / 307200) - 1;
+				prescale_baud <= (50000000 / 307200) - 1;
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
 			if (prescale_power = 0) then
 				cnt4096 <= std_logic_vector(unsigned(cnt4096) + 1);
-				prescale_power <= (25000000 / 4096);
+				prescale_power <= (50000000 / 4096);
 			else
 				prescale_power <= prescale_power - 1;
 			end if;
@@ -259,7 +266,7 @@ cpu: entity work.MicroBasic Port map (
 		-- debug / trace
 		traceEnable => '1',
 		baudrate => baudrate_x1,
-		debug_txd => PMOD_RXD1,
+		debug_txd => debug_txd, --PMOD_RXD1,
 		debug_sel => sw(1 downto 0),
 		debug_bus => cpu_debug
 	);
@@ -281,32 +288,18 @@ with sw_cpuclk select cpu_clk <=
 		cnt4096(10) when O"1",		-- 4Hz
 		cnt4096(6) when O"2",		-- 64Hz
 		cnt4096(0) when O"3",		-- 4.096kHz
-		cnt25MHz(3) when O"4",		-- 3.125MHz
-		cnt25MHz(2) when O"5",		-- 6.25MHz
-		cnt25MHz(1) when O"6",		-- 12.5MHz 
-		cnt25MHz(0) when others; 	-- 25MHz
-		
--- display some debug data of 6-digit 7-seg display	
---leds: entity work.fourdigitsevensegled port map ( 
---			  -- inputs
---			  data => cpu_debug, --T(15 downto 0), --freqcnt_value(15 downto 0),
---			  digsel => cnt4096(6 downto 5),
---           showdigit => "1111",	-- all digits on
---			  showdot => "0000",		-- no dots
---			  showsegments => '1',
---			  -- outputs
---           anode => AN,
---			  segment(6 downto 0) => A_TO_G(6 downto 0),
---			  segment(7) => DOT
---			 );	 
+		cnt50MHz(3) when O"4",		-- 6.125MHz
+		cnt50MHz(2) when O"5",		-- 12.5MHz
+		cnt50MHz(1) when O"6",		-- 25MHz 
+		cnt50MHz(0) when others; 	-- 50MHz
 			 
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.sixdigitsevensegled port map ( 
 			  -- inputs
-			  data => cpu_debug,
-			  digsel => cnt4096(7 downto 5),
+			  data => cpu_debug(23 downto 0),
+			  digsel => cnt4096(6 downto 4),
            showdigit => "111111",
-			  showdot => "000000",
+			  showdot => cpu_debug(29 downto 24),
            showsegments => '1',
 			  -- outputs
            anode => AN,

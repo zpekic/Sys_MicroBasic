@@ -55,7 +55,7 @@ entity MicroBasic is
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
 			  debug_sel: in STD_LOGIC_VECTOR(1 downto 0);
-           debug_bus : out  STD_LOGIC_VECTOR(23 downto 0));
+           debug_bus : out  STD_LOGIC_VECTOR(31 downto 0));
 end MicroBasic;
 
 architecture Behavioral of MicroBasic is
@@ -73,6 +73,7 @@ signal IL_OP: std_logic_vector(7 downto 0);
 alias IL_OP5: std_logic_vector(4 downto 0) is IL_OP(4 downto 0);
 signal IL_PC_VALID: std_logic;
 signal il_codeByte: std_logic_vector(7 downto 0);
+signal off_is_zero: std_logic;
 
 -- single char output
 signal CHAROUT: std_logic_vector(7 downto 0);
@@ -112,12 +113,14 @@ signal RetSP: std_logic_vector(10 downto 0);
 signal rstack_is_empty, rstack_is_full: std_logic;
 
 -- ALU
-signal Y, bcd_sum: std_logic_vector(23 downto 0);	-- 24 bits to contain BCD digits e.g. 032767
-signal R, S: std_logic_vector(15 downto 0);			-- ALU input arguments are 16 bit
-signal r_plus_s, r_minus_s, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
-signal r_mul_s: std_logic_vector(31 downto 0);
-signal alu_sign, alu_overflow, alu_ready, s_is_zero: std_logic;
-signal plus_overflow, minus_overflow, neg_overflow, mul_overflow: std_logic;
+signal bcd_sum: std_logic_vector(23 downto 0);	-- 24 bits to contain BCD digits e.g. 032767
+signal Y: std_logic_vector(31 downto 0);			-- double size needed for MUL, DIV
+signal R, S: std_logic_vector(15 downto 0);		-- ALU input arguments are 16 bit
+signal r_plus_s, s_minus_r, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
+signal r_mul_s: std_logic_vector(31 downto 0);	-- output of combinatorial multiplier
+signal sub: std_logic_vector(16 downto 0);		-- 17 bits, MSB is carry out which we need 
+signal alu_sign, alu_overflow, alu_ready, r_is_zero, leading_zero: std_logic;
+signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul_neg16: std_logic;
 
 -- other
 signal T: std_logic_vector(15 downto 0);
@@ -223,10 +226,10 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_ALU_READY) => alu_ready,
 			cond(seq_cond_ALU_OVERFLOW) => alu_overflow,
 			cond(seq_cond_ALU_SIGN) => alu_sign,
-			cond(seq_cond_S_IS_ZERO) => s_is_zero,
+			cond(seq_cond_R_IS_ZERO) => r_is_zero,
 			cond(seq_cond_AT_TAB) => at_tab,
-			cond(seq_cond_cond26) => '1',
-			cond(seq_cond_cond27) => '1',
+			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
+			cond(seq_cond_LEADING_ZERO) => leading_zero,
 			cond(seq_cond_cond28) => '1',
 			cond(seq_cond_cond29) => '1',
 			cond(seq_cond_cond30) => '1',
@@ -253,7 +256,9 @@ svp_in_inpline <=		'1' when ((unsigned(SvPt) >= unsigned(InLine_Start)) and (uns
 rstack_is_full	<=		'1' when (RetSP = "111") else '0';
 rstack_is_empty <=	'1' when (RetSP = "000") else '0';
 at_tab <= 				'1' when (tab_cnt(2 downto 0) = "000") else '0';
-s_is_zero <= 			'1' when (S = X"0000") else '0';
+r_is_zero <= 			'1' when (R = X"0000") else '0';
+off_is_zero	<=			'1' when (IL_OP(4 downto 0) = "00000") else '0';
+
 -- get the microcode instruction 
 mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
 		
@@ -332,6 +337,8 @@ begin
 				T <= (others => '0');
 			when T_T10_plus_mdr =>
 				T <= T10_plus_mdr(15 downto 0);		
+			when T_from_alu =>
+				T <= Y(15 downto 0);
 			when others =>
 				null;
 		end case;
@@ -463,7 +470,7 @@ T10_plus_mdr <= std_logic_vector(10 * unsigned(T) + (unsigned(MDR) - 48));
 				CHAROUT <= MDR;
 			when CHAROUT_from_YtoAlpha =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
-				CHAROUT <= hex2ascii(to_integer(unsigned(Y(23 downto 20))));
+				CHAROUT <= hex2ascii(to_integer(unsigned(Y(31 downto 28))));
 			when others =>
 				null;
 		end case;
@@ -476,16 +483,18 @@ begin
 	if (reset = '1') then
 		tab_cnt <= (others => '0');
 	else
-		case CHAROUT is
-			when CR =>	-- CR resets to left margin
-				tab_cnt <= (others => '0');
-			when BS => -- BS goes one space left
-				tab_cnt <= std_logic_vector(unsigned(tab_cnt) - 1);
-			when NUL => -- NULL does nothing
-				null;
-			when others => -- all other characters advance
-				tab_cnt <= std_logic_vector(unsigned(tab_cnt) + 1);
-		end case;
+		if (rising_edge(CHAROUT_SEND)) then
+			case CHAROUT is
+				when CR =>	-- CR resets to left margin
+					tab_cnt <= (others => '0');
+				when BS => -- BS goes one space left
+					tab_cnt <= std_logic_vector(unsigned(tab_cnt) - 1);
+				when NUL => -- NULL does nothing
+					null;
+				when others => -- all other characters advance
+					tab_cnt <= std_logic_vector(unsigned(tab_cnt) + 1);
+			end case;
+		end if;
 	end if;
 end process; 
 
@@ -523,7 +532,7 @@ tracer: entity work.serialtracer2 Port map (
 		data(19 downto 16) => il_codeByte(3 downto 0),
 		data(23 downto 20) => MDR(7 downto 4),
 		data(27 downto 24) => MDR(3 downto 0),
-		data(31 downto 28) => IL_OP(3 downto 0),
+		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
 		data(47 downto 32) => Y(15 downto 0),
 		data(63 downto 48) => BP,
 		txd => debug_txd,
@@ -571,22 +580,22 @@ tracer: entity work.serialtracer2 Port map (
 				S(15 downto 8) <= ExpStack(to_integer(unsigned(ExpSP) - 2)); 
 				S(7 downto 0) <= ExpStack(to_integer(unsigned(ExpSP) - 1)); 
 			when alu_add =>
-				Y <= X"00" & r_plus_s;
+				Y <= X"0000" & r_plus_s;
 				alu_ready <= '1';
 				alu_sign <= r_plus_s(15);
 				alu_overflow <= plus_overflow;
 			when alu_sub =>
-				Y <= X"00" & r_minus_s;
+				Y <= X"0000" & s_minus_r;
 				alu_ready <= '1';
-				alu_sign <= r_minus_s(15);
+				alu_sign <= s_minus_r(15);
 				alu_overflow <= minus_overflow;
 			when alu_neg =>
-				Y <= X"00" & neg_r;
+				Y <= X"0000" & neg_r;
 				alu_ready <= '1';
 				alu_sign <= neg_r(15);
 				alu_overflow <= neg_overflow;
 			when alu_mul =>
-				Y <= X"00" & r_mul_s(15 downto 0);
+				Y <= r_mul_s;
 				alu_ready <= '1';
 				alu_sign <= r_mul_s(31);
 				alu_overflow <= mul_overflow;
@@ -601,9 +610,9 @@ tracer: entity work.serialtracer2 Port map (
 				S <= (others => '0');	-- prepare counter for bit 0 of R
 				Y <= (others => '0');	-- clear BCD accumulator
 				alu_ready <= '0';
-				alu_overflow <= '0';	-- by implementation can't overflow
+				alu_overflow <= '0';		-- by implementation can't overflow
 			when alu_bcd_next =>
-				Y <= bcd_sum;
+				Y <= bcd_sum & X"00";	-- we care about most significant 6 BCD digits
 				if ((S = X"000F") or (R = X"0000")) then
 					alu_ready <= '1';
 				else
@@ -611,8 +620,15 @@ tracer: entity work.serialtracer2 Port map (
 					S <= std_logic_vector(unsigned(S) + 1);
 					R <= '0' & R(15 downto 1);	-- shift down
 				end if;
+				leading_zero <= '1';
 			when alu_Yx16 =>
-				Y <= Y(19 downto 0) & X"0";	-- shift up by a nibble (== BCD digit)
+				-- microcode should execute this EXACTLY 6 times to pick up 6 BCD digits!
+				Y <= Y(27 downto 0) & X"0";	-- shift up by a nibble (== BCD digit)
+				if (Y(27 downto 24) = X"0") then
+					leading_zero <= leading_zero;
+				else
+					leading_zero <= '0';
+				end if;
 			when alu_div_start =>	-- R / S 
 				alu_overflow <= '0';	-- By definition can't overflow
 				alu_ready <= '0';
@@ -621,27 +637,42 @@ tracer: entity work.serialtracer2 Port map (
 					-- NOTE: before this step, S is already checked for 0 (divide by 0 condition)
 					if (R(15) = '0') then
 						-- R >= 0
+						R <= neg_r;	-- we need the -R for subtraction
 						alu_sign <= '0';	-- +/+
 					else
-						-- R < 0
-						R <= neg_r;
+						-- R < 0, already good for substraction
 						alu_sign <= '1';	-- -/+
 					end if;
+					Y <= X"0000" & S;
+					S <= X"000F";	-- S will be the 16 steps counter 
 				else
 					-- S < 0
-					s <= neg_s;
 					if (R(15) = '0') then
 						-- R >= 0
+						R <= neg_r;	-- we need the -R for subtraction
 						alu_sign <= '1';	-- +/-
 					else
 						-- R < 0
-						R <= neg_r;
 						alu_sign <= '0';	-- -/-
 					end if;
+					Y <= X"0000" & neg_s;
+					S <= X"000F";	-- S will be the 16 steps counter 
 				end if;				
-			when alu_div_next =>
-				-- TODO, unsigned divide R / S
-				alu_ready <= '1';	-- do not block
+			when alu_div_shift =>
+				Y <= Y(30 downto 0) & '0'; -- shift remainder and quotient up
+				alu_ready <= '0';
+			when alu_div_subset =>
+				if (S = X"0000") then
+					alu_ready <= '1';	-- done!
+				else	
+					S <= std_logic_vector(unsigned(S) - 1);
+					alu_ready <= '0';	-- continue
+					if (sub(16) = '0') then
+						Y <= Y(31 downto 1) & '0';
+					else
+						Y <= sub(15 downto 0) & Y(15 downto 1) & '1';
+					end if;
+				end if;
 			when alu_div_end =>
 				if (alu_sign = '1') then
 					-- correct quotient sign
@@ -653,11 +684,14 @@ tracer: entity work.serialtracer2 Port map (
  end if;
  end process;
 
+-- 17 bit subtract for division step
+sub <= std_logic_vector(unsigned('0' & Y(31 downto 16)) + unsigned('0' & R));
+
 -- 6 digit BCD adder
 adder: entity work.bcdadder Port map (
 		power => S(3 downto 0),
 		sel => R(0),
-		sum_in => Y,
+		sum_in => Y(31 downto 8),
 		sum_out => bcd_sum
 		);
  
@@ -665,7 +699,7 @@ adder: entity work.bcdadder Port map (
 r_plus_s <= std_logic_vector(signed(R) + signed(S));
 plus_overflow <= '0';
 
-r_minus_s <= std_logic_vector(signed(R) - signed(S));
+s_minus_r <= std_logic_vector(signed(S) - signed(R));
 minus_overflow <= '0';
 
 neg_r <= std_logic_vector(0 - signed(R));
@@ -676,19 +710,27 @@ neg_y <= std_logic_vector(0 - signed(Y(15 downto 0)));
 
 -- will use intrinsic multiplier on FPGA (which is also combinatorial, therefore this is sintesizable)
 r_mul_s <= std_logic_vector(signed(R) * signed(S));
---mul_overflow <= (not (r_mul_s(31) xor r_mul_s(15))) when ((r_mul_s(31 downto 16) = X"0000") or (r_mul_s(31 downto 16) = X"FFFF")) else '1'; -- TODO, check!
-mul_overflow <= '0' when ((r_mul_s(31 downto 16) = X"0000") or (r_mul_s(31 downto 16) = X"FFFF")) else '1'; -- TODO, check!
+mul_pos16 <= '1' when (r_mul_s(31 downto 15) = (X"0000" & '0')) else '0';
+mul_neg16 <= '1' when (r_mul_s(31 downto 15) = (X"FFFF" & '1')) else '0';
+mul_overflow <= not(mul_pos16 or mul_neg16);
 
 -- paralled debug port implementation
-	with debug_sel select debug_bus <= 
-		--CHAROUT & CHARIN when "00",
-		X"012345" when "00",
-		Y(23 downto 0) when "01",
-		X"ABCDEF" when "10",
---		R(7 downto 0) & S(7 downto 0) when "01",
+	with debug_sel select debug_bus(23 downto 0) <= 
+		tab_cnt & CHAROUT & CHARIN when "00",
+		R(11 downto 0) & S(11 downto 0) when "01",
+		Y(23 downto 0) when "10",
 		-- convert microcode address to BCD for easier tracking
 		--il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
-		MAR(15 downto 0) & MDR when others;
+		--MAR(15 downto 0) & MDR when others;
+		ExpStack(to_integer(unsigned(ExpSP) - 2)) & ExpStack(to_integer(unsigned(ExpSP) - 1)) & X"0" & ExpSP when others;
+
+	with debug_sel select debug_bus(31 downto 24) <= 
+		"00010101" when "00",
+		"00001001" when "10",
+		"00000001" when "01",
+		-- convert microcode address to BCD for easier tracking
+		--il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
+		"00000101" when others;
 		
 end Behavioral;
 

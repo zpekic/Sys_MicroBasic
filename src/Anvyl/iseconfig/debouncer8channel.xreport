@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2025-10-16T22:39:00</DateModified>
+  <DateModified>2025-10-18T01:52:09</DateModified>
   <ModuleName>sys_microbasic_anvyl</ModuleName>
-  <SummaryTimeStamp>2025-10-16T22:38:06</SummaryTimeStamp>
+  <SummaryTimeStamp>2025-10-18T01:40:26</SummaryTimeStamp>
   <SavedFilePath>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/Anvyl/iseconfig/debouncer8channel.xreport</SavedFilePath>
   <ImplementationReportsDirectory>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/Anvyl</ImplementationReportsDirectory>
   <DateInitialized>2025-10-16T21:16:42</DateInitialized>

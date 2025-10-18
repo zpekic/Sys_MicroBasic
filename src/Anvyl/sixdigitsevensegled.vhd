@@ -52,12 +52,12 @@ signal digit, hexdata: std_logic_vector(3 downto 0);
 begin
 ---- hex digit select
 	with digsel select hexdata <=
-		data(7 downto 4) when "000",
-		data(3 downto 0) when "001",
-		data(15 downto 12) when "010",
-		data(11 downto 8) when "011",
-		data(23 downto 20) when "100",
-		data(19 downto 16) when "101",
+		data(3 downto 0) when "000",
+		data(7 downto 4) when "001",
+		data(11 downto 8) when "010",
+		data(15 downto 12) when "011",
+		data(19 downto 16) when "100",
+		data(23 downto 20) when "101",
 		X"F" when others;
 
 ---- DP for each digit individually
