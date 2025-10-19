@@ -220,6 +220,7 @@ traceGoto	.alias trace(from_microcode), directByte = 30;
 traceCall	.alias trace(from_microcode), directByte = 31;
 traceY		.alias trace(from_microcode), directByte = 32;
 traceBP		.alias trace(from_microcode), directByte = 33;
+traceSDepth:.alias trace(from_microcode), directByte = 56;	// trace stack depth by indenting 0 to 8 spaces
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 dump_il:	.sub;
@@ -260,24 +261,28 @@ badop:		goto INTERNAL_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 15;								// trace mnemonic
 			ExpStack <= startSwap;	// R <= ExpStack(0), S <= ExpStack(0 + param) 
 			ExpStack <= endSwap;	// ExpStack(0) <= S, ExpStack(0 + param) <= R
 			goto fetch;
 
 			.map 0x00;									// SX 0 does nothing, so map to just skip
+			traceSDepth;
 			traceString 15;								// trace mnemonic
 			goto fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x08;									// NOP (No operation)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 12;
 			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x09;									// LB (Push literal byte onto stack)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 28;
 lb_push:	traceString 3, ExpStack <= push_codeByte;
 			IL_PC <= inc, if ESTACK_IS_FULL then ESTACK_ERR else fetch;
@@ -285,6 +290,7 @@ lb_push:	traceString 3, ExpStack <= push_codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0A;									// LN (Push literal word onto stack)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 29;
 			traceString 3, ExpStack <= push_codeByte;	
 			IL_PC <= inc, if ESTACK_IS_FULL then ESTACK_ERR else lb_push;
@@ -292,6 +298,7 @@ lb_push:	traceString 3, ExpStack <= push_codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0C;									// SP (Stack Pop)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 34;
 			if ESTACK_IS_EMPTY then ESTACK_ERR;
 			ExpStack <= pop2, goto fetch;
@@ -299,6 +306,7 @@ lb_push:	traceString 3, ExpStack <= push_codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x10;									// SB (Save Basic Pointer)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 10;								// trace mnemonic
 			if BP_IN_INPLINE then next else ptr_exc;
 save_bp:	SvPt <= BP;
@@ -308,6 +316,7 @@ bp_done:	traceBP;									// trace value of Basic Pointer
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x11;									// RB (Restore Basic Pointer)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 11;								// trace mnemonic
 			if SVP_IN_INPLINE then save_bp;	
 ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
@@ -315,6 +324,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 25;								// Trace mnemonic
 			alu <= R_fromStack;
 			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
@@ -323,6 +333,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x18;									// AD (Add)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 22;								// Trace mnemonic
 			pullRS();
 			alu <= add, if ALU_READY then next else repeat;
@@ -333,6 +344,7 @@ alu_done:	traceY;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x19;									// SB (Substract)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 23;								// Trace mnemonic
 			pullRS();
 			alu <= sub, if ALU_READY then alu_done else repeat;
@@ -340,6 +352,7 @@ alu_done:	traceY;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1A;									// MP (Multiply)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 24;								// Trace mnemonic
 			pullRS();
 			alu <= mul, if ALU_READY then alu_done else repeat;
@@ -347,6 +360,7 @@ alu_done:	traceY;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1B;									// DV (Divide)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 35;								// Trace mnemonic
 			pullRS();
 			if R_IS_ZERO then DIVBY0_ERR;
@@ -360,21 +374,15 @@ div_done:	alu <= div_end, goto alu_done;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x20;									// PN (Print number)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 26;								// Trace mnemonic
 			alu <= R_fromStack;
 			alu <= bcd_start, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
 			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
 			traceY;
-			if ALU_SIGN then next else pn_plus;
-			directByte = '-', outChar(from_microcode); 			// print minus signal
-//pn_plus:	outChar(from_YtoAlpha), alu <= Yx16;				// 6 BCD chars, TODO leading zero supression			
-//			outChar(from_YtoAlpha), alu <= Yx16;
-//			outChar(from_YtoAlpha), alu <= Yx16;
-//			outChar(from_YtoAlpha), alu <= Yx16;
-//			outChar(from_YtoAlpha), alu <= Yx16;
-//			outChar(from_YtoAlpha), alu <= Yx16;
-//			goto fetch;
-pn_plus:	if LEADING_ZERO then pn_4; 
+			if ALU_SIGN then next else pn_5;
+			directByte = '-', outChar(from_microcode); 			// print minus sign
+pn_5:		if LEADING_ZERO then pn_4; 
 			outChar(from_YtoAlpha);
 pn_4:		alu <= Yx16;
 			if LEADING_ZERO then pn_3;
@@ -395,6 +403,7 @@ pn_0:		alu <= Yx16;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x21;									// PQ (Print basic string)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 18;								// Trace mnemonic
 pq_loop:	BP <= inc, ReadCore(BP);
 			directByte = '"', if MDR_EQU_DB then pq_done;
@@ -407,6 +416,7 @@ pq_done:	traceBP;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x22;									// PT (Print TAB)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 27;								// Trace mnemonic
 pt_loop:	if AT_TAB then fetch;						// bail if at positions 0, 8, 16, 24, etc.
 			directByte = ' ', outChar(from_microcode);	// this should increment the tab_cnt mantained by the CPU
@@ -415,6 +425,7 @@ pt_loop:	if AT_TAB then fetch;						// bail if at positions 0, 8, 16, 24, etc.
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x23;									// NL (Print newline)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 6;								// Trace mnemonic
 			outCRLF();
 			goto fetch;
@@ -422,6 +433,7 @@ pt_loop:	if AT_TAB then fetch;						// bail if at positions 0, 8, 16, 24, etc.
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x24;									// PC (Print literal string)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 5;								// Trace mnemonic
 pc_loop:	outChar(from_interpreter);
 			traceString 3;								// trace value of IL(IL_PC) (which was the char to be output)
@@ -432,33 +444,32 @@ pc_exit:	IL_PC <= inc, goto fetch;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2F;									// RT (IL subroutine return)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 19;								// Trace mnemonic
 			if RSTACK_IS_EMPTY then RSTACK_ERR;
-			IL_PC <= RetStack, RetStack <= pop;
-			traceGoto;
-			goto fetch;
+			IL_PC <= RetStack, RetStack <= pop, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00110???;							// JS (IL subroutine call, 0x3000..0x37FF)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 20;								// Trace mnemonic
 			traceString 3;
 			if RSTACK_IS_FULL then RSTACK_ERR;
-			RetStack <= push_IL_PC_PLUS_1;
-			IL_PC <= direct11, traceCall;
-			goto fetch;
+			RetStack <= push_IL_PC_PLUS_1, goto jump;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00111???;							// J (Jump, 0x3800..0x3FF)		
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 21;								// Trace mnemonic
 			traceString 3;								// trace lower 8-bits of destination
-			IL_PC <= direct11, traceGoto;
-			goto fetch;
+jump:		IL_PC <= direct11, goto fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x27;									// GL (Get Input line)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 8;								// Trace mnemonic
 gl:			InlEnd <= InLine_start;
 gl_loop:	if CHARIN_READY then next else repeat;		// wait for input character
@@ -496,14 +507,23 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b01??????;							// BR (relative branch, 0x40..0x7F)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
 br_exit:	traceGoto;									// trace target
-			if OFF_IS_ZERO then badop else fetch;		
+			goto fetch;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0b01100000;							// BR (relative branch with 0 offset)
+			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
+			traceString 7;								// Trace mnemonic
+			goto badop;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b100?????; 							// BC a "xxx"   (80xxxxXx-9FxxxxXx  String Match Branch)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 17;								// Trace mnemonic
 			T <= IL_PC, BP <= save, skipSpaces();
 bc_loop:	traceString 3;								// trace value of IL(IL_PC) (char we try to match)
@@ -513,25 +533,26 @@ bc_loop:	traceString 3;								// trace value of IL(IL_PC) (char we try to match
 			BP <= inc, IL_PC <= inc, goto bc_loop;
 bc_match: 	BP <= inc, IL_PC <= inc;					// leave pointers right after
 			traceBP;
-			goto br_exit;
+			goto fetch;
 bc_exit:	BP <= restore, IL_PC <= T; 					// not found, restore BP and IL_PC
 			traceBP;
-//			IL_PC <= pc_plus_off5, goto br_exit;
-			IL_PC <= pc_plus_off5, goto fetch;			// NOTE: no error on opcode 0x80
+			IL_PC <= pc_plus_off5, goto br_exit;
 					
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b101?????;							// BV (Branch if not variable, 0xA0..0xBF)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 16;								// Trace mnemonic
 			skipSpaces();
 			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute in parallel	
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop else br_exit;		// jump destination (+ 31 locations)
 bv_exec:	if ESTACK_IS_FULL then ESTACK_ERR;
-			ExpStack <= push_MDR2, goto br_exit;
+			ExpStack <= push_MDR2, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 14;								// Trace mnemonic
 			skipSpaces();
 			T <= zero, if MDR_IS_NUM then bn_loop;				// MDR was already loaded by skipSpaces()
@@ -547,6 +568,7 @@ bn_loop:	T <= T10_plus_mdr, BP <= inc;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
 			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
 			traceString 13;								// Trace mnemonic
 			skipSpaces();
 			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
@@ -618,6 +640,7 @@ dump_il_lp:	if IL_PC_VALID then next else dump_il_ex;
 			trace(crlf);
 			IL_PC <= inc, goto dump_il_lp; 
 dump_il_ex:	IL_PC <= T, back;	// restore IL and return
+			
 			
 trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
 			if DBG_READY then next else repeat;

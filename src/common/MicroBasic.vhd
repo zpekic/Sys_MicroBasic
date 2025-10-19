@@ -109,7 +109,7 @@ signal SwapR, SwapS: std_logic_vector(7 downto 0);
 
 -- IL return stack
 signal RetStack: ram8x11;
-signal RetSP: std_logic_vector(10 downto 0);
+signal RetSP: std_logic_vector(2 downto 0);
 signal rstack_is_empty, rstack_is_full: std_logic;
 
 -- ALU
@@ -276,11 +276,12 @@ update_IL_PC: process(clk, mb_IL_PC)
 				IL_PC <= T(10 downto 0);
 			when IL_PC_pc_plus_off6 =>
 				-- a bit bizarre offset
-				if (IL_OP(5) = '1') then
-					IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP5));
-				else
-					IL_PC <= std_logic_vector(unsigned(IL_PC) - unsigned(IL_OP5));
-				end if;
+				--if (IL_OP(5) = '1') then
+				--	IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP5));
+				--else
+				--	IL_PC <= std_logic_vector(unsigned(IL_PC) - unsigned(IL_OP5));
+				--end if;
+				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP) - 96);
 			when IL_PC_pc_plus_off5 =>
 				-- can only jump forward
 				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP5));
@@ -289,7 +290,7 @@ update_IL_PC: process(clk, mb_IL_PC)
 				IL_PC <= IL_OP(2 downto 0) & il_codeByte;
 			when IL_PC_RetStack =>
 				-- RetSP points to first free location
-				-- we cannot modify RetSP here, so for must be combined with "pop" operation on RetStack
+				-- we cannot modify RetSP here, so must be combined with "pop" operation on RetStack
 				IL_PC <= RetStack(to_integer(unsigned(RetSP) - 1));
 			when others =>
 				null;
@@ -524,6 +525,7 @@ tracer: entity work.serialtracer2 Port map (
 		enable => traceEnable,	-- TODO: override for some DBGINDEX values
 		start => dbg_start,
 		index => DBGINDEX,
+		slevel => RetSp,
 		data(3) => '0',
 		data(2 downto 0) => IL_PC(10 downto 8),
 		data(7 downto 4) => IL_PC(7 downto 4),
@@ -697,7 +699,7 @@ adder: entity work.bcdadder Port map (
  
 -- combinatorial operations
 r_plus_s <= std_logic_vector(signed(R) + signed(S));
-plus_overflow <= '0';
+plus_overflow <= ((not R(15)) and (not S(15))) when (r_plus_s(15) = '1') else (R(15) and S(15));
 
 s_minus_r <= std_logic_vector(signed(S) - signed(R));
 minus_overflow <= '0';

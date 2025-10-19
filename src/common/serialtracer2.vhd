@@ -36,6 +36,7 @@ entity serialtracer2 is
 			  enable: in STD_LOGIC;
            start : in  STD_LOGIC;
            index : in  STD_LOGIC_VECTOR (5 downto 0);
+			  slevel: in STD_LOGIC_VECTOR(2 downto 0);		-- pass in stack level
            data : in  STD_LOGIC_VECTOR (63 downto 0);
 			  txd: out  STD_LOGIC;
            ready : out  STD_LOGIC);
@@ -44,8 +45,7 @@ end serialtracer2;
 architecture Behavioral of serialtracer2 is
 
 
-
-
+-- index = editor row - 50
 constant debug_rom: rom512x8 := (
 		X"FF", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 				-- index 0 should not be used
 		CR, LF, c('I'), c('L'), c('='), X"80", X"81", X"82",					-- IL=aaa
@@ -103,7 +103,7 @@ constant debug_rom: rom512x8 := (
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
+		X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", 		-- used to trace stack depth
 		BEL, c('*'), c('D'), c('i'), c('v'), c('B'), c('y'), c('0'), 
 		BEL, c('*'), c('O'), c('v'), c('e'), c('r'), c('f'), c('l'), 
 		BEL, c('*'), c('R'), c('e'), c('t'), c(' '), c('S'), c('t'), 
@@ -118,7 +118,7 @@ alias charIndex: std_logic_vector(2 downto 0) is counter(6 downto 4);
 alias bitSel: std_logic_vector(3 downto 0) is counter(3 downto 0);
 signal charAddr: std_logic_vector(8 downto 0); -- total of 512 chars in the table
 signal dbg_hex: std_logic_vector(3 downto 0);
-signal char, dbg_char: std_logic_vector(7 downto 0);
+signal rom_char, char, dbg_char, stack_char: std_logic_vector(7 downto 0);
 signal dbg_clk: std_logic;
 
 begin
@@ -171,7 +171,10 @@ end process;
 
 -- pick up char from debug string table
 charAddr <= index & charIndex;
-char <= debug_rom(to_integer(unsigned(charAddr)));
+rom_char <= debug_rom(to_integer(unsigned(charAddr)));
+-- hack to trace stack depth
+char <= stack_char when (rom_char = X"FF") else rom_char;
+stack_char <= X"00" when (unsigned(charIndex) > unsigned(slevel)) else X"20";
 
 -- char that goes out is either direct or hex digit from multiplexed source
 dbg_char <= char when (char(7) = '0') else hex2ascii(to_integer(unsigned(dbg_hex)));	
