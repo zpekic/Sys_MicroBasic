@@ -60,6 +60,7 @@ end MicroBasic;
 
 architecture Behavioral of MicroBasic is
 
+type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
 type ram16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
 type ram8x11 is array (0 to 7) of std_logic_vector(10 downto 0);
 
@@ -106,11 +107,16 @@ signal ExpSP: std_logic_vector(3 downto 0);
 signal ExpSwapR, ExpSwapS: std_logic_vector(3 downto 0);	-- pointers used in SX IL instruction
 signal estack_is_full, estack_is_empty: std_logic;
 signal SwapR, SwapS: std_logic_vector(7 downto 0);
+signal ExpSTHi, ExpSTLo: std_logic_vector(7 downto 0);
 
 -- IL return stack
 signal RetStack: ram8x11;
 signal RetSP: std_logic_vector(2 downto 0);
 signal rstack_is_empty, rstack_is_full: std_logic;
+
+-- Basic variables, A-Z are stored internally in 32*16 RAM
+signal vars: ram32x16;
+signal vars_index: std_logic_vector(7 downto 0); -- 8 bits to make some arithmetic easier
 
 -- ALU
 signal bcd_sum: std_logic_vector(23 downto 0);	-- 24 bits to contain BCD digits e.g. 032767
@@ -126,7 +132,7 @@ signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul
 signal T: std_logic_vector(15 downto 0);
 signal tab_cnt: std_logic_vector(7 downto 0);
 signal at_tab: std_logic;
-signal T10_plus_mdr: std_logic_vector(31 downto 0);
+--signal T10_plus_mdr: std_logic_vector(31 downto 0);
 
 begin
 
@@ -336,10 +342,15 @@ begin
 				T <= "00000" & IL_PC;
 			when T_zero =>
 				T <= (others => '0');
-			when T_T10_plus_mdr =>
-				T <= T10_plus_mdr(15 downto 0);		
+			when T_from_vars =>
+				T <= vars(to_integer(unsigned(vars_index(4 downto 0))));
 			when T_from_alu =>
 				T <= Y(15 downto 0);
+			when T_MDRx2 =>	
+				-- assume it is already uppercased, otherwise a and A would be different variables!
+				T <= X"00" & MDR(6 downto 0) & '0';
+			when T_codeByte =>
+				T <= X"00" & il_codeByte;		
 			when others =>
 				null;
 		end case;
@@ -347,7 +358,7 @@ begin
 end process;
 
 -- will generate 32 bits (16 x 16)
-T10_plus_mdr <= std_logic_vector(10 * unsigned(T) + (unsigned(MDR) - 48));
+--T10_plus_mdr <= std_logic_vector(10 * unsigned(T) + (unsigned(MDR) - 48));
 	
  update_BP: process(clk, mb_BP)
  begin
@@ -410,6 +421,10 @@ T10_plus_mdr <= std_logic_vector(10 * unsigned(T) + (unsigned(MDR) - 48));
  ExpSwapS <= std_logic_vector(unsigned(ExpSP) - 1); 
  ExpSwapR <= std_logic_vector(unsigned(ExpSP) - 1 - unsigned(IL_OP(2 downto 0))); 
  
+ -- Stack top value
+ ExpSTHi <= ExpStack(to_integer(unsigned(ExpSP) - 2));
+ ExpSTLo <= ExpStack(to_integer(unsigned(ExpSP) - 1));
+
  -- ExpSP points to first free byte on the stack!
  update_ExpStack: process(clk, mb_ExpStack)
  begin
@@ -420,28 +435,44 @@ T10_plus_mdr <= std_logic_vector(10 * unsigned(T) + (unsigned(MDR) - 48));
 			when ExpStack_clear =>
 				ExpStack(0) <= (others => '0');
 				ExpSP <= (others => '0');
-			when ExpStack_push_T =>
+			when ExpStack_push_TWord =>
 				-- T to next 2 free locations, MSB first
 				ExpStack(to_integer(unsigned(ExpSP) + 0)) <= T(15 downto 8);
 				ExpStack(to_integer(unsigned(ExpSP) + 1)) <= T(7 downto 0);
 				ExpSP <= std_logic_vector(unsigned(ExpSP) + 2);
+			when ExpStack_push_TByte =>
+				-- T.LSB to next free location
+				ExpStack(to_integer(unsigned(ExpSP) + 0)) <= T(7 downto 0);
+				ExpSP <= std_logic_vector(unsigned(ExpSP) + 1);
 			when ExpStack_startSwap =>
 				SwapS <= ExpStack(to_integer(unsigned(ExpSwapS)));
 				SwapR <= ExpStack(to_integer(unsigned(ExpSwapR)));
 			when ExpStack_endSwap =>
 				ExpStack(to_integer(unsigned(ExpSwapS))) <= SwapR;
 				ExpStack(to_integer(unsigned(ExpSwapR))) <= SwapS;
-			when ExpStack_push_MDR2 =>
-				-- assume it is already uppercased, otherwise a and A would be different variables!
-				ExpStack(to_integer(unsigned(ExpSP) + 0)) <= X"00";
-				ExpStack(to_integer(unsigned(ExpSP) + 1)) <= MDR(6 downto 0) & '0';
-				ExpSP <= std_logic_vector(unsigned(ExpSP) + 2);
+			when ExpStack_pop1 => 
+				-- combine with assigment to some other 8-bit register
+				ExpSP <= std_logic_vector(unsigned(ExpSP) - 1);
 			when ExpStack_pop2 => 
 				-- combine with assigment to some other 16-bit register
 				ExpSP <= std_logic_vector(unsigned(ExpSP) - 2);
-			when ExpStack_push_codeByte =>
-				ExpStack(to_integer(unsigned(ExpSP) + 0)) <= il_codeByte;
-				ExpSP <= std_logic_vector(unsigned(ExpSP) + 1);
+			when others =>
+				null;
+		end case;
+ end if;
+ end process;
+	
+ update_Vars: process(clk, mb_Vars)
+ begin
+	if (rising_edge(clk)) then
+		case mb_Vars is
+--			when Vars_same =>
+--				Vars <= Vars;
+			when Vars_getIndex =>
+				-- top byte on expressions stack (ExpSTLo) contains twice the upper - case ASCII code of the variable name
+				vars_index <= std_logic_vector(unsigned('0' & ExpSTLo(7 downto 1)) - X"40");
+			when Vars_T =>
+				Vars(to_integer(unsigned(vars_index(4 downto 0)))) <= T;
 			when others =>
 				null;
 		end case;
@@ -501,8 +532,6 @@ end process;
 
 -- see http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.c line 776
 outchar <= CHAROUT and X"7F";
---outchar_send <= CHAROUT_SEND;
---CHAROUT_READY <= outchar_ready; 
  
 -- input character
 on_inchar_ready: process(reset, inchar_ready, mb_gotChar)
@@ -536,7 +565,7 @@ tracer: entity work.serialtracer2 Port map (
 		data(27 downto 24) => MDR(3 downto 0),
 		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
 		data(47 downto 32) => Y(15 downto 0),
-		data(63 downto 48) => BP,
+		data(63 downto 48) => Y(31 downto 16), --BP,
 		txd => debug_txd,
 		ready => DBG_READY
 		);
@@ -572,15 +601,16 @@ tracer: entity work.serialtracer2 Port map (
 			when alu_reset =>
 				R <= (others => '0');
 				S <= (others => '0');
+				Y <= (others => '0');
 				alu_ready <= '0';
 				alu_sign <= '0';
 				alu_overflow <= '0';
 			when alu_R_fromStack =>
-				R(15 downto 8) <= ExpStack(to_integer(unsigned(ExpSP) - 2)); 
-				R(7 downto 0) <= ExpStack(to_integer(unsigned(ExpSP) - 1)); 
+				R(15 downto 8) <= ExpSTHi; 
+				R(7 downto 0) <= ExpSTLo; 
 			when alu_S_fromStack =>
-				S(15 downto 8) <= ExpStack(to_integer(unsigned(ExpSP) - 2)); 
-				S(7 downto 0) <= ExpStack(to_integer(unsigned(ExpSP) - 1)); 
+				S(15 downto 8) <= ExpSTHi; 
+				S(7 downto 0) <= ExpSTLo; 
 			when alu_add =>
 				Y <= X"0000" & r_plus_s;
 				alu_ready <= '1';
@@ -623,6 +653,14 @@ tracer: entity work.serialtracer2 Port map (
 					R <= '0' & R(15 downto 1);	-- shift down
 				end if;
 				leading_zero <= '1';
+			when alu_Yx10_plus_MDR =>
+				-- used for string to numeric conversion
+				Y <=  std_logic_vector((10 * unsigned(Y(15 downto 0))) + (unsigned(MDR) - 48));
+				if (Y(31 downto 16) = X"0000") then
+					alu_overflow <= '0';
+				else
+					alu_overflow <= '1';
+				end if;
 			when alu_Yx16 =>
 				-- microcode should execute this EXACTLY 6 times to pick up 6 BCD digits!
 				Y <= Y(27 downto 0) & X"0";	-- shift up by a nibble (== BCD digit)
@@ -631,7 +669,7 @@ tracer: entity work.serialtracer2 Port map (
 				else
 					leading_zero <= '0';
 				end if;
-			when alu_div_start =>	-- R / S 
+			when alu_div_start =>	-- S / R 
 				alu_overflow <= '0';	-- By definition can't overflow
 				alu_ready <= '0';
 				if (S(15) = '0') then
@@ -646,7 +684,7 @@ tracer: entity work.serialtracer2 Port map (
 						alu_sign <= '1';	-- -/+
 					end if;
 					Y <= X"0000" & S;
-					S <= X"000F";	-- S will be the 16 steps counter 
+					S <= X"0010";	-- S will be the 16 steps counter 
 				else
 					-- S < 0
 					if (R(15) = '0') then
@@ -658,11 +696,15 @@ tracer: entity work.serialtracer2 Port map (
 						alu_sign <= '0';	-- -/-
 					end if;
 					Y <= X"0000" & neg_s;
-					S <= X"000F";	-- S will be the 16 steps counter 
+					S <= X"0010";	-- S will be the 16 steps counter 
 				end if;				
 			when alu_div_shift =>
-				Y <= Y(30 downto 0) & '0'; -- shift remainder and quotient up
-				alu_ready <= '0';
+				if (S = X"0000") then
+					alu_ready <= '1';
+				else
+					Y <= Y(30 downto 0) & '0'; -- shift remainder and quotient up
+					alu_ready <= '0';
+				end if;
 			when alu_div_subset =>
 				if (S = X"0000") then
 					alu_ready <= '1';	-- done!
@@ -688,6 +730,7 @@ tracer: entity work.serialtracer2 Port map (
 
 -- 17 bit subtract for division step
 sub <= std_logic_vector(unsigned('0' & Y(31 downto 16)) + unsigned('0' & R));
+--sub <= (others => '1');
 
 -- 6 digit BCD adder
 adder: entity work.bcdadder Port map (
@@ -724,7 +767,7 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 		-- convert microcode address to BCD for easier tracking
 		--il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
 		--MAR(15 downto 0) & MDR when others;
-		ExpStack(to_integer(unsigned(ExpSP) - 2)) & ExpStack(to_integer(unsigned(ExpSP) - 1)) & X"0" & ExpSP when others;
+		ExpSTHi & ExpSTLo & X"0" & ExpSP when others;
 
 	with debug_sel select debug_bus(31 downto 24) <= 
 		"00010101" when "00",

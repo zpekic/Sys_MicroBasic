@@ -132,7 +132,7 @@ end sys_microbasic_anvyl;
 architecture Structural of sys_microbasic_anvyl is
 
 -- stores Basic program and input line, everything else is custom registers inside CPU!
-type memory is array (0 to 512) of std_logic_vector(7 downto 0);
+type memory is array (0 to 2047) of std_logic_vector(7 downto 0);
 signal ram: memory;
 signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
 signal A: std_logic_vector(15 downto 0);
@@ -271,13 +271,13 @@ cpu: entity work.MicroBasic Port map (
 		debug_bus => cpu_debug
 	);
 
--- infer simple 1k RAM
-D <= ram(to_integer(unsigned(A(8 downto 0)))) when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
+-- infer simple 2k RAM
+D <= ram(to_integer(unsigned(A(10 downto 0)))) when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
 		if ((nBUSACK or nWR) = '0') then 
-			ram(to_integer(unsigned(A(8 downto 0)))) <= D;
+			ram(to_integer(unsigned(A(10 downto 0)))) <= D;
 		end if;
 	end if;
 end process;

@@ -60,11 +60,11 @@ T			.regfield 3 values
 				same,
 				IL_PC,
 				zero,
-				T10_plus_mdr,
+				from_vars,
 				ExpStack,
 				from_alu,
-				-,
-				-
+				codeByte,
+				MDRx2
 				default same;
 				
 // contains ASCII char for DEBUG UART transmit
@@ -163,12 +163,12 @@ SvPt			.regfield 2 values
 ExpStack		.regfield 3 values
 				same,
 				clear,
-				push_T,
 				startSwap,
 				endSwap,
-				push_MDR2,
+				push_TWord,
+				push_TByte,
 				pop2,
-				push_codeByte
+				pop1
 				default same;
 				
 // flag to reset input character ready
@@ -177,6 +177,13 @@ gotChar			.valfield 1 values
 				1
 				default 0;				
 
+Vars			.regfield 2 values
+				same,
+				getIndex,
+				T,
+				-
+				default same;
+				
 // 16-bit ALU, with input regs R and S and output Y
 alu				.regfield 4 values
 				nop, 
@@ -194,11 +201,11 @@ alu				.regfield 4 values
 				div_shift,
 				div_subset,
 				div_end,
-				-
+				Yx10_plus_MDR
 				default nop;
 				
 // placeholder
-dummy:			.valfield 4 values * default 0;
+dummy:			.valfield 2 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 NULL: 		.alias 0x00;
@@ -284,7 +291,8 @@ badop:		goto INTERNAL_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
 			traceString 28;
-lb_push:	traceString 3, ExpStack <= push_codeByte;
+lb_push:	traceString 3, T <= codeByte;
+			ExpStack <= push_TByte;
 			IL_PC <= inc, if ESTACK_IS_FULL then ESTACK_ERR else fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -292,8 +300,17 @@ lb_push:	traceString 3, ExpStack <= push_codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
 			traceString 29;
-			traceString 3, ExpStack <= push_codeByte;	
+			traceString 3, T <= codeByte;
+			ExpStack <= push_TByte;	
 			IL_PC <= inc, if ESTACK_IS_FULL then ESTACK_ERR else lb_push;
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x0B;									// DS (Duplicate Stack)
+			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
+			traceString 38;
+			T <= ExpStack, if ESTACK_IS_FULL then ESTACK_ERR;
+			ExpStack <= push_TWord, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0C;									// SP (Stack Pop)
@@ -312,6 +329,26 @@ lb_push:	traceString 3, ExpStack <= push_codeByte;
 save_bp:	SvPt <= BP;
 bp_done:	traceBP;									// trace value of Basic Pointer
 			goto fetch;					
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x12;									// FV (Fetch Variable)
+			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
+			traceString 36;								// trace mnemonic
+			Vars <= getIndex, ExpStack <= pop1;
+			T <= from_vars, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			ExpStack <= push_TWord, goto fetch;
+			
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x13;									// SV (Store Variable)
+			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
+			traceString 37;								// trace mnemonic
+			T <= ExpStack;
+			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			Vars <= getIndex, ExpStack <= pop1;
+			Vars <= T, if ESTACK_IS_EMPTY then ESTACK_ERR else fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x11;									// RB (Restore Basic Pointer)
@@ -339,7 +376,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			alu <= add, if ALU_READY then next else repeat;
 alu_done:	traceY;
 			T <= from_alu, if ALU_OVERFLOW then OVERFLOW_ERR;
-			ExpStack <= push_T, goto fetch;
+			ExpStack <= push_TWord, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x19;									// SB (Substract)
@@ -363,12 +400,16 @@ alu_done:	traceY;
 			traceSDepth;
 			traceString 35;								// Trace mnemonic
 			pullRS();
-			if R_IS_ZERO then DIVBY0_ERR;
-			alu <= div_start;
-div_loop:	alu <= div_shift;
-			alu <= div_subset, 
+			alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
+div_loop:	trace(CRLF);
+			traceBP;
 			traceY;
-			if ALU_READY then next else div_loop;
+			alu <= div_shift;
+			if ALU_READY then div_done;
+			trace(CRLF);
+			traceBP;
+			traceY;		
+			alu <= div_subset, goto div_loop; 
 div_done:	alu <= div_end, goto alu_done;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -544,10 +585,10 @@ bc_exit:	BP <= restore, IL_PC <= T; 					// not found, restore BP and IL_PC
 			traceSDepth;
 			traceString 16;								// Trace mnemonic
 			skipSpaces();
-			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute in parallel	
+			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute conversion and check in parallel	
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop else br_exit;		// jump destination (+ 31 locations)
-bv_exec:	if ESTACK_IS_FULL then ESTACK_ERR;
-			ExpStack <= push_MDR2, goto fetch;
+bv_exec:	T <= MDRx2, if ESTACK_IS_FULL then ESTACK_ERR;
+			ExpStack <= push_TByte, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
@@ -555,15 +596,17 @@ bv_exec:	if ESTACK_IS_FULL then ESTACK_ERR;
 			traceSDepth;
 			traceString 14;								// Trace mnemonic
 			skipSpaces();
-			T <= zero, if MDR_IS_NUM then bn_loop;				// MDR was already loaded by skipSpaces()
+			alu <= reset, if MDR_IS_NUM then bn_loop;			// MDR was already loaded by skipSpaces()
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;	// jump destination (+ 31 locations)
-bn_exit:	traceGoto;											// trace target
+bn_exit:	traceY;												// trace integer parse result
+			traceGoto;											// trace target
 			goto fetch;
-bn_loop:	T <= T10_plus_mdr, BP <= inc;
+bn_loop:	alu <= Yx10_plus_MDR, BP <= inc;
+			if ALU_OVERFLOW then OVERFLOW_ERR;
 			ReadCore(BP);
 			if MDR_IS_NUM then bn_loop;
-			if ESTACK_IS_FULL then ESTACK_ERR;
-			ExpStack <= push_T, goto bn_exit;
+			T <= from_alu, if ESTACK_IS_FULL then ESTACK_ERR;
+			ExpStack <= push_TWord, goto bn_exit;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
