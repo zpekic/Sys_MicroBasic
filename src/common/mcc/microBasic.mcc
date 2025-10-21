@@ -44,7 +44,7 @@ seq_cond:		.if 5 values
 				AT_TAB,
 				OFF_IS_ZERO,
 				LEADING_ZERO,
-				cond28,
+				IS_RUNMODE,
 				cond29,
 				cond30,
 				false			// hard-code to 0
@@ -179,7 +179,7 @@ gotChar			.valfield 1 values
 
 Vars			.regfield 2 values
 				same,
-				getIndex,
+				indexFromExpStack,
 				T,
 				-
 				default same;
@@ -239,6 +239,7 @@ WriteCore:	.sub MAR, MDR;
 ReadCore:	.sub MAR;
 skipSpaces: .sub;
 pullRS:		.sub;
+printDec:	.sub;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -253,9 +254,11 @@ _reset3:	nop;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
+ColdStart:	traceString 4;	// output "MicroBas" on debug UART
 WarmStart:	clear;
+			WriteCore(BP, zero), BP <= inc;
 			WriteCore(BP, zero);
-			traceString 4;	// output "MicroBas" on debug UART
+			clear;
 			
 fetch:		trace(crlf);
 			traceString 2; 								// trace IL_PC and future opcode
@@ -335,8 +338,9 @@ bp_done:	traceBP;									// trace value of Basic Pointer
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
 			traceString 36;								// trace mnemonic
-			Vars <= getIndex, ExpStack <= pop1;
-			T <= from_vars, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			if ESTACK_IS_EMPTY then ESTACK_ERR;
+			Vars <= indexFromExpStack;
+			T <= from_vars, ExpStack <= pop1;
 			ExpStack <= push_TWord, goto fetch;
 			
 
@@ -345,10 +349,11 @@ bp_done:	traceBP;									// trace value of Basic Pointer
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
 			traceString 37;								// trace mnemonic
-			T <= ExpStack;
-			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			Vars <= getIndex, ExpStack <= pop1;
-			Vars <= T, if ESTACK_IS_EMPTY then ESTACK_ERR else fetch;
+			if ESTACK_IS_EMPTY then ESTACK_ERR;
+			T <= ExpStack, ExpStack <= pop2;
+			if ESTACK_IS_EMPTY then ESTACK_ERR;
+			Vars <= indexFromExpStack, ExpStack <= pop1;
+			Vars <= T, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x11;									// RB (Restore Basic Pointer)
@@ -363,8 +368,8 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
 			traceString 25;								// Trace mnemonic
-			alu <= R_fromStack;
-			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			alu <= R_fromStack, if ESTACK_IS_EMPTY then ESTACK_ERR;
+			ExpStack <= pop2;
 			alu <= neg, if ALU_READY then alu_done else repeat;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -395,6 +400,14 @@ alu_done:	traceY;
 			alu <= mul, if ALU_READY then alu_done else repeat;
 
 			////////////////////////////////////////////////////////////////////////////////
+			.map 0x1D;									// NX (Next Basic statement)
+			////////////////////////////////////////////////////////////////////////////////
+			traceSDepth;
+			traceString 39;								// Trace mnemonic
+			if IS_RUNMODE then next else WarmStart;
+			goto badop;									// TODO - implement for RUN mode
+
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1B;									// DV (Divide)
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
@@ -417,30 +430,10 @@ div_done:	alu <= div_end, goto alu_done;
 			////////////////////////////////////////////////////////////////////////////////
 			traceSDepth;
 			traceString 26;								// Trace mnemonic
-			alu <= R_fromStack;
-			alu <= bcd_start, ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
-			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
-			traceY;
-			if ALU_SIGN then next else pn_5;
-			directByte = '-', outChar(from_microcode); 			// print minus sign
-pn_5:		if LEADING_ZERO then pn_4; 
-			outChar(from_YtoAlpha);
-pn_4:		alu <= Yx16;
-			if LEADING_ZERO then pn_3;
-			outChar(from_YtoAlpha);
-pn_3:		alu <= Yx16;
-			if LEADING_ZERO then pn_2;
-			outChar(from_YtoAlpha);
-pn_2:		alu <= Yx16;
-			if LEADING_ZERO then pn_1;
-			outChar(from_YtoAlpha);
-pn_1:		alu <= Yx16;
-			if LEADING_ZERO then pn_0;
-			outChar(from_YtoAlpha);
-pn_0:		alu <= Yx16;
-			outChar(from_YtoAlpha);
+			if ESTACK_IS_EMPTY then ESTACK_ERR;
+			printDec();
 			goto fetch;
-			
+						
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x21;									// PQ (Print basic string)
 			////////////////////////////////////////////////////////////////////////////////
@@ -588,7 +581,7 @@ bc_exit:	BP <= restore, IL_PC <= T; 					// not found, restore BP and IL_PC
 			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute conversion and check in parallel	
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop else br_exit;		// jump destination (+ 31 locations)
 bv_exec:	T <= MDRx2, if ESTACK_IS_FULL then ESTACK_ERR;
-			ExpStack <= push_TByte, goto fetch;
+			ExpStack <= push_TByte, BP <= inc, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
@@ -615,7 +608,9 @@ bn_loop:	alu <= Yx10_plus_MDR, BP <= inc;
 			traceString 13;								// Trace mnemonic
 			skipSpaces();
 			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
-			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop else br_exit;		// jump destination (+ 31 locations)
+			IL_PC <= pc_plus_off5, goto br_exit;		// jump destination (+ 31 locations)
+//			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then next else br_exit;		// jump destination (+ 31 locations)
+//			directByte = CR, if MDR_EQU_DB then fetch else badop;
 			
 DIVBY0_ERR:		traceString 57;
 				goto traceError;
@@ -634,16 +629,51 @@ traceError:		outCRLF();
 				directByte = 'E', outChar(from_microcode);
 				directByte = 'R', outChar(from_microcode);
 				directByte = 'R', outChar(from_microcode);
-				// TODO: error code
-				// TODO: line number
-				outCRLF();
+				directByte = ' ', outChar(from_microcode);
+				directByte = '#', outChar(from_microcode);
+				T <= IL_PC;
+				ExpStack <= push_TWord;
+				printDec();
+				if IS_RUNMODE then next else err_done;
+				directByte = ' ', outChar(from_microcode);
+				directByte = 'A', outChar(from_microcode);
+				directByte = 'T', outChar(from_microcode);
+				directByte = ' ', outChar(from_microcode);
+				// TODO: print Basic line number in DEC
+err_done:		outCRLF();
 				trace(crlf);
 				goto WarmStart;
 
+			// get 2 parameters from top of evaluation stack into ALU input registers R and S
 pullRS:		alu <= R_fromStack;
 			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR;
 			alu <= S_fromStack;
 			ExpStack <= pop2, if ESTACK_IS_EMPTY then ESTACK_ERR else return;
+			
+			// print signed 16-bit number on top of evaluation stack
+printDec:	alu <= R_fromStack;
+			alu <= bcd_start, ExpStack <= pop2; 
+			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
+			traceY;
+			if ALU_SIGN then next else pn_5;
+			directByte = '-', outChar(from_microcode); 			// print minus sign
+pn_5:		if LEADING_ZERO then pn_4; 
+			outChar(from_YtoAlpha);
+pn_4:		alu <= Yx16;
+			if LEADING_ZERO then pn_3;
+			outChar(from_YtoAlpha);
+pn_3:		alu <= Yx16;
+			if LEADING_ZERO then pn_2;
+			outChar(from_YtoAlpha);
+pn_2:		alu <= Yx16;
+			if LEADING_ZERO then pn_1;
+			outChar(from_YtoAlpha);
+pn_1:		alu <= Yx16;
+			if LEADING_ZERO then pn_0;
+			outChar(from_YtoAlpha);
+pn_0:		alu <= Yx16;
+			outChar(from_YtoAlpha);
+			back;
 				
 skipSpaces: ReadCore(BP);
 			directByte = ' ', if MDR_EQU_DB then skipSp;

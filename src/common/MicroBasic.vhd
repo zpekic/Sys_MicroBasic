@@ -128,6 +128,9 @@ signal sub: std_logic_vector(16 downto 0);		-- 17 bits, MSB is carry out which w
 signal alu_sign, alu_overflow, alu_ready, r_is_zero, leading_zero: std_logic;
 signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul_neg16: std_logic;
 
+-- internal state
+signal runmode: std_logic := '0';	-- 0 for commands, 1 for RUN
+
 -- other
 signal T: std_logic_vector(15 downto 0);
 signal tab_cnt: std_logic_vector(7 downto 0);
@@ -236,7 +239,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_AT_TAB) => at_tab,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_LEADING_ZERO) => leading_zero,
-			cond(seq_cond_cond28) => '1',
+			cond(seq_cond_IS_RUNMODE) => runmode,
 			cond(seq_cond_cond29) => '1',
 			cond(seq_cond_cond30) => '1',
 			cond(seq_cond_false) => '0',
@@ -282,11 +285,6 @@ update_IL_PC: process(clk, mb_IL_PC)
 				IL_PC <= T(10 downto 0);
 			when IL_PC_pc_plus_off6 =>
 				-- a bit bizarre offset
-				--if (IL_OP(5) = '1') then
-				--	IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP5));
-				--else
-				--	IL_PC <= std_logic_vector(unsigned(IL_PC) - unsigned(IL_OP5));
-				--end if;
 				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP) - 96);
 			when IL_PC_pc_plus_off5 =>
 				-- can only jump forward
@@ -350,7 +348,9 @@ begin
 				-- assume it is already uppercased, otherwise a and A would be different variables!
 				T <= X"00" & MDR(6 downto 0) & '0';
 			when T_codeByte =>
-				T <= X"00" & il_codeByte;		
+				T <= X"00" & il_codeByte;	
+			when T_ExpStack =>
+				T <= ExpSTHi & ExpSTLo;
 			when others =>
 				null;
 		end case;
@@ -468,7 +468,7 @@ end process;
 		case mb_Vars is
 --			when Vars_same =>
 --				Vars <= Vars;
-			when Vars_getIndex =>
+			when Vars_indexFromExpStack =>
 				-- top byte on expressions stack (ExpSTLo) contains twice the upper - case ASCII code of the variable name
 				vars_index <= std_logic_vector(unsigned('0' & ExpSTLo(7 downto 1)) - X"40");
 			when Vars_T =>
@@ -547,50 +547,6 @@ begin
 	end if;
 end process;
 	
--- serial debug port implementation
-tracer: entity work.serialtracer2 Port map (
-		reset => reset,
-		clk => baudrate,
-		enable => traceEnable,	-- TODO: override for some DBGINDEX values
-		start => dbg_start,
-		index => DBGINDEX,
-		slevel => RetSp,
-		data(3) => '0',
-		data(2 downto 0) => IL_PC(10 downto 8),
-		data(7 downto 4) => IL_PC(7 downto 4),
-		data(11 downto 8) => IL_PC(3 downto 0),
-		data(15 downto 12) => il_codeByte(7 downto 4),
-		data(19 downto 16) => il_codeByte(3 downto 0),
-		data(23 downto 20) => MDR(7 downto 4),
-		data(27 downto 24) => MDR(3 downto 0),
-		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
-		data(47 downto 32) => Y(15 downto 0),
-		data(63 downto 48) => Y(31 downto 16), --BP,
-		txd => debug_txd,
-		ready => DBG_READY
-		);
-	
- update_DBGINDEX: process(clk, mb_DBGINDEX)
- begin
-	if (rising_edge(clk)) then
-		case mb_DBGINDEX is
---			when DBGINDEX_same =>
---				DBGINDEX <= DBGINDEX;
-			when DBGINDEX_from_microcode =>
-				DBGINDEX <= mb_directByte(5 downto 0);
-				dbg_start <= '1';
-			when DBGINDEX_zero =>
-				DBGINDEX <= (others => '0');
-				dbg_start <= '0';
-			when DBGINDEX_crlf =>
-				DBGINDEX <= (others => '1'); -- points to last index in the table
-				dbg_start <= '1';
-			when others =>
-				null;
-		end case;
- end if;
- end process;
-
 -- ALU
  update_alu: process(clk, mb_alu)
  begin
@@ -670,11 +626,9 @@ tracer: entity work.serialtracer2 Port map (
 					leading_zero <= '0';
 				end if;
 			when alu_div_start =>	-- S / R 
-				alu_overflow <= '0';	-- By definition can't overflow
-				alu_ready <= '0';
 				if (S(15) = '0') then
 					-- S > 0
-					-- NOTE: before this step, S is already checked for 0 (divide by 0 condition)
+					-- NOTE: before this step, R is already checked for 0 (divide by 0 condition)
 					if (R(15) = '0') then
 						-- R >= 0
 						R <= neg_r;	-- we need the -R for subtraction
@@ -684,7 +638,6 @@ tracer: entity work.serialtracer2 Port map (
 						alu_sign <= '1';	-- -/+
 					end if;
 					Y <= X"0000" & S;
-					S <= X"0010";	-- S will be the 16 steps counter 
 				else
 					-- S < 0
 					if (R(15) = '0') then
@@ -696,8 +649,10 @@ tracer: entity work.serialtracer2 Port map (
 						alu_sign <= '0';	-- -/-
 					end if;
 					Y <= X"0000" & neg_s;
-					S <= X"0010";	-- S will be the 16 steps counter 
 				end if;				
+				alu_overflow <= '0';	-- By definition can't overflow
+				alu_ready <= '0';
+				S <= X"0010";	-- use S as the 16 steps counter 
 			when alu_div_shift =>
 				if (S = X"0000") then
 					alu_ready <= '1';
@@ -707,8 +662,8 @@ tracer: entity work.serialtracer2 Port map (
 				end if;
 			when alu_div_subset =>
 				if (S = X"0000") then
-					alu_ready <= '1';	-- done!
-				else	
+					alu_ready <= '1';
+				else 
 					S <= std_logic_vector(unsigned(S) - 1);
 					alu_ready <= '0';	-- continue
 					if (sub(16) = '0') then
@@ -759,9 +714,11 @@ mul_pos16 <= '1' when (r_mul_s(31 downto 15) = (X"0000" & '0')) else '0';
 mul_neg16 <= '1' when (r_mul_s(31 downto 15) = (X"FFFF" & '1')) else '0';
 mul_overflow <= not(mul_pos16 or mul_neg16);
 
--- paralled debug port implementation
+-- Built-in debug and tracer components
+-- paralled debug port
 	with debug_sel select debug_bus(23 downto 0) <= 
-		tab_cnt & CHAROUT & CHARIN when "00",
+		--tab_cnt & CHAROUT & CHARIN when "00",
+		vars_index & Vars(to_integer(unsigned(vars_index(4 downto 0)))) when "00",
 		R(11 downto 0) & S(11 downto 0) when "01",
 		Y(23 downto 0) when "10",
 		-- convert microcode address to BCD for easier tracking
@@ -770,12 +727,57 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 		ExpSTHi & ExpSTLo & X"0" & ExpSP when others;
 
 	with debug_sel select debug_bus(31 downto 24) <= 
-		"00010101" when "00",
+		--"00010101" when "00",
+		"00010000" when "00",
 		"00001001" when "10",
 		"00000001" when "01",
 		-- convert microcode address to BCD for easier tracking
 		--il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
 		"00000101" when others;
+
+-- serial debug port
+tracer: entity work.serialtracer2 Port map (
+		reset => reset,
+		clk => baudrate,
+		enable => traceEnable,	-- TODO: override for some DBGINDEX values
+		start => dbg_start,
+		index => DBGINDEX,
+		slevel => RetSp,
+		data(3) => '0',
+		data(2 downto 0) => IL_PC(10 downto 8),
+		data(7 downto 4) => IL_PC(7 downto 4),
+		data(11 downto 8) => IL_PC(3 downto 0),
+		data(15 downto 12) => il_codeByte(7 downto 4),
+		data(19 downto 16) => il_codeByte(3 downto 0),
+		data(23 downto 20) => MDR(7 downto 4),
+		data(27 downto 24) => MDR(3 downto 0),
+		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
+		data(47 downto 32) => Y(15 downto 0),
+		data(63 downto 48) => BP,
+		txd => debug_txd,
+		ready => DBG_READY
+		);
+	
+ update_DBGINDEX: process(clk, mb_DBGINDEX)
+ begin
+	if (rising_edge(clk)) then
+		case mb_DBGINDEX is
+--			when DBGINDEX_same =>
+--				DBGINDEX <= DBGINDEX;
+			when DBGINDEX_from_microcode =>
+				DBGINDEX <= mb_directByte(5 downto 0);
+				dbg_start <= '1';
+			when DBGINDEX_zero =>
+				DBGINDEX <= (others => '0');
+				dbg_start <= '0';
+			when DBGINDEX_crlf =>
+				DBGINDEX <= (others => '1'); -- points to last index in the table
+				dbg_start <= '1';
+			when others =>
+				null;
+		end case;
+ end if;
+ end process;
 		
 end Behavioral;
 
