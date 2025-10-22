@@ -131,6 +131,11 @@ end sys_microbasic_anvyl;
 
 architecture Structural of sys_microbasic_anvyl is
 
+-- IL Code
+signal il_a: std_logic_vector(10 downto 0); -- up to 2k supported
+signal il_d: std_logic_vector(7 downto 0);
+signal il_a_valid: std_logic;
+
 -- stores Basic program and input line, everything else is custom registers inside CPU!
 type memory is array (0 to 2047) of std_logic_vector(7 downto 0);
 signal ram: memory;
@@ -163,11 +168,11 @@ signal prescale_baud, prescale_power: integer range 0 to 65535;
 
 signal cnt50MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 100MHz
 signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
-alias freq38400: std_logic is cnt307200(3);
+--alias freq38400: std_logic is cnt307200(3);
 alias freq19200: std_logic is cnt307200(4);
-alias freq9600: std_logic is cnt307200(5);
-alias freq4800: std_logic is cnt307200(6); 
-alias freq2400: std_logic is cnt307200(7); 
+--alias freq9600: std_logic is cnt307200(5);
+--alias freq4800: std_logic is cnt307200(6); 
+--alias freq2400: std_logic is cnt307200(7); 
 
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
@@ -179,7 +184,6 @@ signal cpu_outchar: std_logic_vector(7 downto 0);
 -- single char UART input
 signal RXD_READY, RXD_VALID: std_logic;
 signal RXD_CHAR: std_logic_vector(7 downto 0);
---signal send_clk: std_logic;
 
 ---
 signal switch: std_logic_vector(7 downto 0);
@@ -250,8 +254,13 @@ nBUSACK <= '0';	-- nothing competes for the RAM
 cpu: entity work.MicroBasic Port map (
 		reset => RESET,
 		clk => cpu_clk,
+		-- Intermediate language (IL) read-only memory
+		IL_A => il_a,
+		IL_D => il_d,
+		IL_A_VALID => il_a_valid,
+		-- Basic code and command line memory
 		nBUSREQ => nBUSREQ,
-      nBUSACK => nBUSACK,
+		nBUSACK => nBUSACK,
 		nRD => nRD,
 		nWR => nWR,
 		ABUS => A,
@@ -270,6 +279,13 @@ cpu: entity work.MicroBasic Port map (
 		debug_sel => sw(1 downto 0),
 		debug_bus => cpu_debug
 	);
+
+-- ROM containing the IL language instructions
+cu_il: entity work.il_rom Port map ( 
+		a => il_a,
+      d => il_d,
+		a_valid => il_a_valid
+		);
 
 -- infer simple 2k RAM
 D <= ram(to_integer(unsigned(A(10 downto 0)))) when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";

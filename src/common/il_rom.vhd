@@ -33,7 +33,7 @@ use work.microbasic_package.all;	-- utilities
 entity il_rom is
     Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);
            d : out  STD_LOGIC_VECTOR (7 downto 0);
-			  a_is_valid: out STD_LOGIC);
+			  a_valid: out STD_LOGIC);
 end il_rom;
 
 architecture Behavioral of il_rom is
@@ -83,7 +83,7 @@ begin
 
 	d <= il_rom(to_integer(unsigned(a(8 downto 0))));
 	-- allow for some NOPs at the end
-	a_is_valid <= '1' when (unsigned(a) < 368) else '0';
+	a_valid <= '1' when (unsigned(a) < 368) else '0';
 
 end Behavioral;
 
