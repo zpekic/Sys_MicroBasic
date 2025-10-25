@@ -101,11 +101,11 @@ entity sys_microbasic_anvyl is
 				LDT2Y: out std_logic;
 				LDT2R: out std_logic;
 				-- VGA
-				--HSYNC_O: out std_logic;
-				--VSYNC_O: out std_logic;
-				--RED_O: out std_logic_vector(3 downto 0);
-				--GREEN_O: out std_logic_vector(3 downto 0);
-				--BLUE_O: out std_logic_vector(3 downto 0);
+				HSYNC_O: out std_logic;
+				VSYNC_O: out std_logic;
+				RED_O: out std_logic_vector(3 downto 0);
+				GREEN_O: out std_logic_vector(3 downto 0);
+				BLUE_O: out std_logic_vector(3 downto 0);
 				-- TFT
 --				TFT_R_O: out std_logic_vector(7 downto 0);
 --				TFT_G_O: out std_logic_vector(7 downto 0);
@@ -163,16 +163,14 @@ signal cpu_debug: std_logic_vector(31 downto 0);
 signal hexdata, showdigit: std_logic_vector(3 downto 0);
 signal freqcnt_in: std_logic;
 signal debug_txd: std_logic;
+signal cpu_bp: std_logic_vector(15 downto 0);
 
 signal prescale_baud, prescale_power: integer range 0 to 65535;
 
 signal cnt50MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 100MHz
+alias vga_clk: std_logic is cnt50MHz(1);
 signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
---alias freq38400: std_logic is cnt307200(3);
 alias freq19200: std_logic is cnt307200(4);
---alias freq9600: std_logic is cnt307200(5);
---alias freq4800: std_logic is cnt307200(6); 
---alias freq2400: std_logic is cnt307200(7); 
 
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
@@ -193,6 +191,12 @@ signal button: std_logic_vector(7 downto 0);
 
 ---- UART
 signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
+
+-- VGA
+signal x80, x64, y60, y32: std_logic_vector(7 downto 0);
+signal is_program, is_ram, cursor: std_logic;
+signal ram_address: std_logic_vector(10 downto 0);	
+signal ram_char: std_logic_vector(7 downto 0);
 
 begin
 
@@ -275,7 +279,8 @@ cpu: entity work.MicroBasic Port map (
 		-- debug / trace
 		traceEnable => not sw_cpuclk(2),
 		baudrate => baudrate_x1,
-		debug_txd => debug_txd, --PMOD_RXD1,
+		debug_bp => cpu_bp,		-- use to display "cursor" at the BP register position
+		debug_txd => debug_txd, 
 		debug_sel => sw(1 downto 0),
 		debug_bus => cpu_debug
 	);
@@ -334,19 +339,6 @@ begin
 	end if;
 end process;
 	
--- RS flip flop
---send_clk <= RXD_READY when (TXD_SEND = '0') else TXD_READY;
---on_sendclk: process(RESET, send_clk)
---begin
---	if (reset = '1') then
---		TXD_SEND <= '0';
---	else
---		if (rising_edge(send_clk)) then
---			TXD_SEND <= not TXD_SEND;
---		end if;
---	end if;
---end process;
-	
 -- UART connection to the host
 txdout: entity work.uart_par2ser Port map (
 			reset => reset,
@@ -368,21 +360,6 @@ rxdinp: entity work.uart_ser2par Port map (
          rxd => PMOD_TXD0
 		);
 		
--- Test ASCII component
---to_upper: entity work.ascii_toupper Port map ( 
---			ascii8bit => RXD_CHAR,
---			ascii_uppercase => TXD_CHAR,
---			isTAB => LED(0),
---			isCR => LED(1),
---			isBS  => LED(2),
---			isDEL  => LED(3),
---			isSPACE  => LED(4),
---			isNUM  => LED(5),
---			isALPHA  => LED(6),
---			isCTRL  => LED(7),
---			isBIT7SET => open
---		);
-		
 -- UART baudrate selection
 baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
 baudrate_x2 <= cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
@@ -398,7 +375,40 @@ freqcnt: entity work.freqcounter Port map (
 		cin => '0',
 		cout => open,
 		value => freqcnt_value
-	);							
+	);		
+
+-- VGA to visualize Basic memory
+-- 32 rows by 64 chars are displayed, so whole 2k RAM fits into display
+vga: entity work.mwvga Port map ( 
+		reset => reset,
+		clk => vga_clk,
+		border_char => X"20", -- space
+		win_char => ram_char,
+		win => is_ram,
+		win_color => is_program,
+		hactive => open, -- TODO: use for BUSACK?
+		vactive => open, -- TODO: use for BUSACK?
+		x => x80,
+		y => y60,
+		cursor_enable => cursor,
+		cursor_type => '1',
+		-- VGA connections
+		color(11 downto 8) => RED_O,
+		color(7 downto 4) => GREEN_O,
+		color(3 downto 0) => BLUE_O,
+		hsync => HSYNC_O,
+		vsync => VSYNC_O
+	);
+	
+-- convert VGA 80*60 to 64*32 by creating a center positioned window
+x64 <= std_logic_vector(unsigned(x80) - 8);
+y32 <= std_logic_vector(unsigned(y60) - 14);
+is_program <= '1' when (unsigned(y32) > 3) else '0';	-- color program area differently than input buffer
+is_ram <= not(y32(7) or y32(6) or y32(5) or x64(7) or x64(6));
+ram_address <= y32(4 downto 0) & x64(5 downto 0);	
+ram_char <= ram(to_integer(unsigned(ram_address)));
+--cursor <= freq2 when (cpu_bp(10 downto 0) = ram_address) else '0';
+cursor <= freq2 when (cpu_debug(10 downto 0) = ram_address) else '0';
 end;
 
 
