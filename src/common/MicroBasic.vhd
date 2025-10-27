@@ -74,7 +74,7 @@ signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
 signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
 
 -- Intermediate languge
-signal IL_PC: std_logic_vector(10 downto 0); -- 9 bits enough, but keep it compatible with other implementations
+signal IL_PC, XQhere: std_logic_vector(10 downto 0); -- 9 bits enough, but keep it compatible with other implementations
 signal IL_OP: std_logic_vector(7 downto 0);
 alias IL_OP5: std_logic_vector(4 downto 0) is IL_OP(4 downto 0);
 alias il_codeByte: std_logic_vector(7 downto 0) is IL_D;
@@ -94,7 +94,7 @@ signal DBG_READY, dbg_start: std_logic;
 
 -- external memory related
 signal MAR: std_logic_vector(15 downto 0);
-signal MDR: std_logic_vector(7 downto 0);
+signal MDR, MDR_UpperCase: std_logic_vector(7 downto 0);
 signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase, mdr_matches_ilcodebyte: std_logic;
 
 -- key pointers
@@ -134,15 +134,16 @@ signal R, S: std_logic_vector(15 downto 0);		-- ALU input arguments are 16 bit
 signal s_plus_r, s_minus_r, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
 signal s_mul_r: std_logic_vector(31 downto 0);	-- output of combinatorial multiplier
 signal subc: std_logic_vector(16 downto 0);		-- 17 bits, MSB is carry out which we need 
-signal y_sign, y_zero, r_is_zero: std_logic;		-- combinatorial state of Y and R
+signal y_zero, r_is_zero: std_logic;				-- combinatorial state of Y and R
 signal alu_sign, alu_overflow, alu_ready, leading_zero: std_logic;	-- state needed for BCD, signed division
+alias ls_params_ok: std_logic is alu_ready;
+alias ls_in_range: std_logic is alu_ready;
+alias ls_passed_end: std_logic is alu_overflow;
 signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul_neg16: std_logic;
 
 -- Basic line number
-signal Lino: std_logic_vector(15 downto 0);
-
--- internal state
-signal runmode: std_logic := '0';	-- 0 for commands, 1 for RUN
+signal Lino: std_logic_vector(15 downto 0) := X"0000";
+signal is_runmode: std_logic;		-- 0 for commands, 1 for RUN
 
 -- other
 signal T: std_logic_vector(15 downto 0);
@@ -222,6 +223,7 @@ cu_mb: entity work.microbasic_control_unit
 			seq_then => mb_seq_then,
 			seq_else => mb_seq_else,
 			seq_fork => mb_instructionstart(8 downto 0),	-- IL opcode mapper input
+			
 			-- condition bits
 			cond(seq_cond_true) => '1',
 			cond(seq_cond_ILCODEBYTE_BIT7) => il_codebyte(7),
@@ -244,23 +246,24 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_MDR_MATCHES_ILCODEBYTE) => mdr_matches_ilcodebyte,
 			cond(seq_cond_R_IS_ZERO) => r_is_zero,
 			cond(seq_cond_Y_ZERO) => y_zero,
-			cond(seq_cond_Y_SIGN) => y_sign,
+			cond(seq_cond_Y_SIGN) => Y(15),
 			cond(seq_cond_ALU_READY) => alu_ready,
 			cond(seq_cond_ALU_OVERFLOW) => alu_overflow,
 			cond(seq_cond_ALU_SIGN) => alu_sign,
 			cond(seq_cond_AT_TAB) => at_tab,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_LEADING_ZERO) => leading_zero,
-			cond(seq_cond_IS_RUNMODE) => runmode,
+			cond(seq_cond_IS_RUNMODE) => is_runmode,
+			cond(seq_cond_dummy29) => '1',
 			cond(seq_cond_dummy30) => '1',
-			cond(seq_cond_dummy31) => '1',
 			cond(seq_cond_false) => '0',
 			-- outputs
 			ui_nextinstr => ui_nextinstr,
 			ui_address => ui_address
 		);
 
-mdr_matches_ilcodebyte <= '1' when (MDR(6 downto 0) = il_codeByte(6 downto 0)) else '0'; -- TODO: make it case insensitive!
+--mdr_matches_ilcodebyte <= '1' when (MDR(6 downto 0) = il_codeByte(6 downto 0)) else '0';
+mdr_matches_ilcodebyte <= '1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
 mdr_equ_db <=			'1' when (MDR = mb_directByte) else '0';
 mdr_is_num <=			'1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
 mdr_is_lowercase <=	'1' when ((unsigned(MDR) > 96) and (unsigned(MDR) < 123)) else '0';
@@ -279,8 +282,11 @@ rstack_is_empty <=	'1' when (RetSP = "000") else '0';
 at_tab <= 				'1' when (tab_cnt(2 downto 0) = "000") else '0';
 r_is_zero <= 			'1' when (R = X"0000") else '0';
 off_is_zero	<=			'1' when (IL_OP(4 downto 0) = "00000") else '0';
-y_sign <=				Y(15);
 y_zero <=				'1' when (Y(15 downto 0) = X"0000") else '0';
+is_runmode <=			'0' when (Lino = X"0000") else '1';
+
+-- we need a "to_upper()" copy of MDR for case insensitive comparison
+MDR_UpperCase <= std_logic_vector(unsigned(MDR) - X"20") when (mdr_is_lowercase = '1') else MDR;
 
 -- select right stack condition based on IL_OP (currently executed opcode)
 with IL_OP select stack_is_empty <= 
@@ -296,6 +302,9 @@ with IL_OP select stack_is_full <=
 -- get the microcode instruction 
 mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
 		
+--------------------------------------------------------------------------------
+-- Basic CPU has a program counter, instruction register, internal return stack
+--------------------------------------------------------------------------------		
 update_IL_PC: process(clk, mb_IL_PC)
  begin
 	if (rising_edge(clk)) then
@@ -326,6 +335,24 @@ update_IL_PC: process(clk, mb_IL_PC)
 		end case;
  end if;
 end process;
+
+ update_XQhere: process(clk, mb_XQhere)
+ begin
+	if (rising_edge(clk)) then
+	    if (mb_XQhere = XQhere_T) then
+		    XQhere <= T(10 downto 0);
+	    end if;
+ end if;
+ end process;
+
+ update_IL_OP: process(clk, mb_IL_OP)
+ begin
+	if (rising_edge(clk)) then
+	    if (mb_IL_OP = IL_OP_from_interpreter) then
+		    IL_OP <= il_codeByte;
+	    end if;
+ end if;
+ end process;
 		
  update_RetStack: process(clk, mb_RetStack)
  begin
@@ -345,15 +372,6 @@ end process;
 		end case;
  end if;
  end process;
-
- update_IL_OP: process(clk, mb_IL_OP)
- begin
-	if (rising_edge(clk)) then
-	    if (mb_IL_OP = IL_OP_from_interpreter) then
-		    IL_OP <= il_codeByte;
-	    end if;
- end if;
- end process;
 		
 update_T: process(clk, mb_T)
 begin
@@ -363,8 +381,8 @@ begin
 --				T <= T;
 			when T_IL_PC =>
 				T <= "00000" & IL_PC;
-			when T_zero =>
-				T <= (others => '0');
+			when T_XQhere =>
+				T <= "00000" & XQhere;
 			when T_from_vars =>
 				T <= vars(to_integer(unsigned(vars_index(4 downto 0))));
 			when T_ExpStack =>
@@ -412,6 +430,10 @@ end process;
 				BP_temp <= BP;
 			when BP_restore =>
 				BP <= BP_temp;
+			when BP_T =>
+				BP <= T;
+			when BP_LS =>
+				BP <= LS;
 			when others =>
 				null;
 		end case;
@@ -731,6 +753,32 @@ end process;
 				S <= std_logic_vector(unsigned(S) + 1);
 				R <= std_logic_vector(unsigned(R) + 1);
 				Y <= std_logic_vector(unsigned(Y) - 1);
+			when alu_ls_load =>
+				-- initialize for LS (list) opcode
+				-- S = start line, R = end line, store both to Y and check values
+				if (unsigned(R) < unsigned(S)) then
+					if (S = X"FFFF") then
+						ls_params_ok <= '1';
+						S <= R;
+						Y <= R & R;
+					else
+						ls_params_ok <= '0';
+					end if;
+				else
+					ls_params_ok <= '1';
+					Y <= S & R;
+				end if;
+			when alu_ls_check =>
+				-- check if current line with number R is in range previously saved in Y
+				if (unsigned(R) >= unsigned(Y(31 downto 16))) then
+					if (unsigned(R) <= unsigned(Y(15 downto 0))) then
+						ls_in_range <= '1';
+					else
+						ls_in_range <= '0';
+					end if;
+				else
+					ls_in_range <= '0';
+				end if;
 			when others =>
 				null;
 		end case;
