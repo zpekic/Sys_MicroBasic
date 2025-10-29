@@ -14,6 +14,7 @@ use IEEE.NUMERIC_STD.ALL;
 package microbasic_package is
 
 constant NUL: std_logic_vector(7 downto 0) := X"00";
+constant STX: std_logic_vector(7 downto 0) := X"03";	-- CTRL/C
 constant BEL: std_logic_vector(7 downto 0) := X"07";
 constant BS: std_logic_vector(7 downto 0) := X"08";
 constant CR: std_logic_vector(7 downto 0) := X"0D";

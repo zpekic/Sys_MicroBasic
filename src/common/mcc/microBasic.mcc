@@ -20,11 +20,11 @@ seq_cond:		.if 5 values
 				ILCODEBYTE_BIT7,	// 
 				CHAROUT_READY,	//  
 				IL_A_VALID,	// value of IL program counter in valid range
-				DBG_READY,		// high if tracer has processed the trace character
+				DBG_READY | KBD_BREAK,		// high if tracer has processed the trace character, or presence of CTRL/C in charin if not tracing
 				MDR_EQU_DB,		
 				nBUSACK,		// low if memory is ready for read/write		
-				INLEND_MAX,		
-				INLEND_MIN,		
+				INLEND_MAX	| BASLINE_FOUND,		
+				INLEND_MIN	| IMPLINE_EMPTY,		
 				CHARIN_PRINTABLE,	// ASCII code in range 0x20 .. 0x7E		
 				CHARIN_EQU_DB,		
 				CHARIN_READY,		
@@ -38,9 +38,9 @@ seq_cond:		.if 5 values
 				R_IS_ZERO,
 				Y_ZERO,
 				Y_SIGN,
-				ALU_READY | LS_PARAMS_OK | LS_IN_RANGE,
-				ALU_OVERFLOW | LS_PASSED_END,
-				ALU_SIGN,
+				ALU_READY		| LS_PARAMS_OK | CP_SKIP,
+				ALU_OVERFLOW 	| LS_PASSED_END,
+				ALU_SIGN		| LS_IN_RANGE,
 				AT_TAB,
 				OFF_IS_ZERO,
 				LEADING_ZERO,
@@ -62,7 +62,7 @@ T			.regfield 4 values
 				XQhere,
 				from_vars,
 				ExpStack,
-				from_Y,
+				from_YLo,
 				codeByte,
 				MDRx2,
 				inc,
@@ -133,10 +133,10 @@ MAR:			.regfield 2 values
 				T
 				default same;
 				
-// 8-bit Memory Address Register
+// 8-bit Memory Data Register
 MDR:			.regfield 3 values
 				same, 
-				from_Bus,
+				from_Bus,		// Only way to read byte from Basic program or Input line ("core memory")
 				zero,
 				CHARIN,
 				ToUpper,
@@ -220,13 +220,13 @@ alu				.regfield 5 values
 				S_fromT,
 				R_fromT,
 				S_fromLino,
-				copy_setup,
-				copy_next,
+				copy_del,
+				copy_inc,
 				ls_load,
 				ls_check,
-				-,
-				-,
-				-,
+				Y_save,
+				Y_recall,
+				cp,
 				-,
 				-,
 				-,
@@ -268,7 +268,7 @@ dummy:			.valfield 2 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 NULL: 		.alias 0x00;
-CTRL_C:		.alias 0x03;
+//STX:		.alias 0x03;	// CTRL/C
 ESC:		.alias 0x1b;
 BEEP:		.alias 0x07;
 BACKSPACE:	.alias 0x08;
@@ -285,8 +285,8 @@ back:	    .alias if true then return else return;
 traceString .alias trace(from_microcode), directByte =;
 traceGoto	.alias trace(from_microcode), directByte = 30;
 traceCall	.alias trace(from_microcode), directByte = 31;
-traceLino	.alias trace(from_microcode), directByte = 52;
-traceT		.alias trace(from_microcode), directByte = 53;
+traceLino	.alias trace(from_microcode), directByte = 51;
+traceT		.alias trace(from_microcode), directByte = 52;
 traceSDepth:.alias trace(from_microcode), directByte = 56;	// trace stack depth by indenting 0 to 8 spaces
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
@@ -295,22 +295,21 @@ dump_input:	.sub;
 trace:		.sub DBGINDEX;
 outCRLF:	.sub;
 outChar:	.sub CHAROUT;
-WriteCore:	.sub MAR, MDR;
-ReadCore:	.sub MAR;
+writeCore:	.sub MAR, MDR;
+readCore:	.sub MAR;
 skipSpaces: .sub;
 pullRS:		.sub;
 printDec:	.sub;
 printDecR:	.sub;
 delBasLine: .sub;
-insLnBefore:.sub;
-findBasLine:.sub T;
-findPrgEnd: .sub T;
+scanProgram:.sub;
 findNextCR:	.sub T;
 write2Nulls:.sub T;
 readCore16:	.sub T;
 traceALU:	.sub;
 traceY:		.sub;
 traceBP:	.sub;
+outBeep:	.sub;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -331,14 +330,13 @@ WarmStart:	clear;
 			BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= from_R; 
 			Lino <= T;
 			XQhere <= T;
-			T <= Prog_start;
-			PrgEnd <= T;
 			write2Nulls(BP);
 			
 fetch:		trace(crlf);
 			traceString 51;								// trace Basic line number (in hex, for speed)
 			traceString 2; 								// trace IL_PC and future opcode
 			IL_OP <= from_interpreter, IL_PC <= inc;	// load opcode, advance IL_PC
+			traceSDepth;
 			alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode (or break if we went into the weeds)
 			
 			.map 0b????????;							// opcode sink of last resort
@@ -347,28 +345,24 @@ badop:		goto INTERNAL_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 15;								// trace mnemonic
 			ExpStack <= startSwap;	// R <= ExpStack(0), S <= ExpStack(0 + param) 
 			ExpStack <= endSwap;	// ExpStack(0) <= S, ExpStack(0 + param) <= R
 			goto fetch;
 
 			.map 0x00;									// SX 0 does nothing, so map to just skip
-			traceSDepth;
 			traceString 15;								// trace mnemonic
 			goto fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x08;									// NOP (No operation)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 12;
 			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x09;									// LB (Push literal byte onto stack)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 28;
 lb_push:	traceString 3, T <= codeByte;
 			ExpStack <= push_TByte;
@@ -377,7 +371,6 @@ lb_push:	traceString 3, T <= codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0A;									// LN (Push literal word onto stack)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 29;
 			traceString 3, T <= codeByte;
 			ExpStack <= push_TByte;	
@@ -386,7 +379,6 @@ lb_push:	traceString 3, T <= codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0B;									// DS (Duplicate Stack)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 38;
 			if STACK_IS_EMPTY then ESTACK_ERR;
 			T <= ExpStack, if STACK_IS_FULL then ESTACK_ERR;
@@ -395,7 +387,6 @@ lb_push:	traceString 3, T <= codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0C;									// SP (Stack Pop)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 34;
 			if STACK_IS_EMPTY then ESTACK_ERR;
 			ExpStack <= pop2, goto fetch;
@@ -403,7 +394,6 @@ lb_push:	traceString 3, T <= codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x10;									// SB (Save Basic Pointer)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 10;								// trace mnemonic
 			if BP_IN_INPLINE then next else ptr_exc;
 save_bp:	SvPt <= BP;
@@ -413,7 +403,6 @@ bp_done:	traceBP();									// trace value of Basic Pointer
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x11;									// RB (Restore Basic Pointer)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 11;								// trace mnemonic
 			if SVP_IN_INPLINE then save_bp;	
 ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
@@ -421,29 +410,26 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x12;									// FV (Fetch Variable)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 36;								// trace mnemonic
 			if STACK_IS_EMPTY then ESTACK_ERR;
-			Vars <= indexFromExpStack;
-			T <= from_vars, ExpStack <= pop1;
-			ExpStack <= push_TWord, goto fetch;			
+			Vars <= indexFromExpStack;					// get index (variable name A-Z)
+			T <= from_vars, ExpStack <= pop1;			// T <= Vars(index)
+			ExpStack <= push_TWord, goto fetch;			// push onto stack
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x13;									// SV (Store Variable)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 37;								// trace mnemonic
 			if STACK_IS_EMPTY then ESTACK_ERR;
-			T <= ExpStack, ExpStack <= pop2;
+			T <= ExpStack, ExpStack <= pop2;			// pop T from stack
 			if STACK_IS_EMPTY then ESTACK_ERR;
-			Vars <= indexFromExpStack, ExpStack <= pop1;
-			Vars <= T, goto fetch;
+			Vars <= indexFromExpStack, ExpStack <= pop1;// pop index (variable name A-Z)
+			Vars <= T, goto fetch;						// Vars(index) <= T
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x16;									// GO (GOTO)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
-			traceString 55;										// Trace mnemonic
+			traceString 45;										// Trace mnemonic
 			T <= XQhere;
 			IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;		// IL_PC <= XQhere
 			alu <= R_fromStack, ExpStack <= pop2;
@@ -452,12 +438,11 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			if IS_RUNMODE then stop_run else fetch;				// entering GOTO 0 on command line does nothing
 go_find:	T <= from_R;
 			Lino <= T, T <= Prog_start;							// new non-zero Lino picked up from evaluation stack
-go_search:	alu <= reset1, ReadCore(T);
+go_search:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
-			ReadCore(T);
+			alu <= S_fromLino, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
-			alu <= S_fromLino, if R_IS_ZERO then stop_run;		// TODO: "line xxx not found in yyy" message?
-			alu <= S_minus_R;									// Lino - inspected line
+			alu <= S_minus_R, if R_IS_ZERO then stop_run;		// TODO: "line xxx not found in yyy" message?
 			if Y_ZERO then go_found;
 			findNextCR(same);
 			T <= inc, goto go_search;			
@@ -466,7 +451,6 @@ go_found:	BP <= T, goto fetch;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 25;								// Trace mnemonic
 			alu <= R_fromStack, if STACK_IS_EMPTY then ESTACK_ERR;
 			ExpStack <= pop2;
@@ -475,18 +459,16 @@ go_found:	BP <= T, goto fetch;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x18;									// AD (Add)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 22;								// Trace mnemonic
 			pullRS();
 			alu <= S_plus_R, if ALU_READY then next else repeat;
 alu_done:	traceALU();
-			T <= from_Y, if ALU_OVERFLOW then OVERFLOW_ERR;
+			T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
 			ExpStack <= push_TWord, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x19;									// SB (Substract)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 23;								// Trace mnemonic
 			pullRS();
 			alu <= S_minus_R, if ALU_READY then alu_done else repeat;
@@ -494,7 +476,6 @@ alu_done:	traceALU();
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1A;									// MP (Multiply)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 24;								// Trace mnemonic
 			pullRS();
 			alu <= S_mul_R, if ALU_READY then alu_done else repeat;
@@ -502,26 +483,30 @@ alu_done:	traceALU();
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1B;									// DV (Divide)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 35;								// Trace mnemonic
 			pullRS();
 			alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
-div_loop:	nop;
-			//trace(CRLF);
-			//traceBP();
-			//traceY();
-			alu <= div_shift;
+div_loop:	alu <= div_shift;
 			if ALU_READY then div_done;
-			//trace(CRLF);
-			//traceBP();
-			//traceY();		
 			alu <= div_subset, goto div_loop; 
 div_done:	alu <= div_end, goto alu_done;
 
 			////////////////////////////////////////////////////////////////////////////////
+			.map 0x1C;									// CP (Compare)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 46;								// Trace mnemonic
+			alu <= R_fromStack, ExpStack <= pop2;
+			ExpStack <= push_TByte;						// push dummy byte to make it even
+			T <= ExpStack, ExpStack <= pop2;			// load condition mask into T (16 bit)
+			alu <= S_fromStack, ExpStack <= pop2;
+			traceALU();
+			alu <= cp;
+			if CP_SKIP then next else fetch;
+			IL_PC <= inc, goto fetch;
+
+			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1D;									// NX (Next Basic statement)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 39;								// Trace mnemonic
 			if IS_RUNMODE then nx_run;
 			IL_PC <= zero, goto fetch;					// command mode, restart at reading the input buffer
@@ -534,50 +519,46 @@ nx_run:		findNextCR(BP);
 			Lino <= T;									// new current executing statement line number 
 			T <= XQhere;
 			IL_PC <= T;									// IL_PC <= XQhere
-			if CHARIN_READY then next else fetch;		// nothing was pressed, continue
-			gotChar = 1, directByte = CTRL_C, if CHARIN_EQU_DB then nx_err else fetch;	// break only if CTRL/C received			
+			traceLino;
+			traceBP();
+			if KBD_BREAK then BREAK else fetch;
 nx_err:		directByte = BEEP, outChar(from_microcode);	// TODO - write some error that we ran out of code?
 			goto stop_run;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1F;									// LS (List Basic program)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 41;								// Trace mnemonic
-			alu <= reset1, if IS_RUNMODE then badop;	// S == from == 0, R == to == 65535
+			alu <= reset1, if IS_RUNMODE then badop;	// S == from == 0, R == to == 65535			
 ls_parload:	T <= from_R, if STACK_IS_EMPTY then ls_parchk;
 			alu <= S_fromT;
-			alu <= R_fromStack, ExpStack <= pop2, goto ls_parload;
-ls_parchk:  traceALU();
-			alu <= ls_load;								// loads Y with S and R, also checks that R >= S and neither are 0
+			alu <= R_fromStack, ExpStack <= pop2;
+			traceALU(); 
+			goto ls_parload;
+ls_parchk:  alu <= ls_load;									// loads Y with S and R, also checks that R >= S and neither are 0
 			if LS_PARAMS_OK then next else SYNTAX_ERR;
-ls_start:	T <= Prog_start; 
-			traceALU();
-ls_lineloop:if CHARIN_READY then next else ls_nobreak;		// check if a character came in
-			gotChar = 1, directByte = CTRL_C, if CHARIN_EQU_DB then crlf_fetch;	// bail if it was a CTRL/C (break)
-			directByte = ' ', if CHARIN_EQU_DB then next else ls_nobreak;	// SPACE pauses/resumes listing
-ls_pause:	if CHARIN_READY then next else repeat;							// SPACE detected, now wait for next char
+ls_start:	T <= Prog_start, traceALU();
+ls_lineloop:if CHARIN_READY then next else ls_continue;		// check if a character came in
+			if KBD_BREAK then BREAK;
+			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;	// SPACE pauses/resumes listing
+ls_pause:	if CHARIN_READY then next else repeat;			// SPACE detected, now wait for next char
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause; 
-ls_nobreak:	gotChar = 1, readCore16(same);
-			T <= dec, alu <= ls_check, if R_IS_ZERO then crlf_fetch;	// found 2 zero bytes, so at the end of Basic program
+ls_continue:gotChar = 1, alu <= Y_save, readCore16(same); 	// read line number into R
 			traceALU();
-			if LS_IN_RANGE then next else ls_skipline;		// current line >= from
-			printDecR();									// output line number
-			directByte = ' ', outChar(from_microcode);		// followed by a single space
-ls_nextchar:T <= inc;
-			ReadCore(T);									// read from Basic program text		
-			outChar(from_MDR);								// output verbatim
-			directByte = CR, if MDR_EQU_DB then next else ls_nextchar;  // loop until CR found, which is end of Basic line
-			directByte = LF, outChar(from_microcode);		// output LF after CR
-ls_nextline:T <= inc, goto ls_lineloop;						// continue with next Basic line 
-ls_skipline:T <= inc;
-			ReadCore(T);
-			directByte = CR, if MDR_EQU_DB then ls_nextline else ls_skipline;
-
+			alu <= ls_check, if R_IS_ZERO then crlf_fetch;	// end of program, bail
+			if LS_PASSED_END then crlf_fetch;				// passed the end, bail
+			if LS_IN_RANGE then next else ls_nextLine;
+			printDecR();									// output line number (in decimal!) - this trashes Y so we need to restore it after
+			alu <= Y_recall, directByte = ' ', outChar(from_microcode);		// followed by a single space
+ls_charloop:readCore(T);
+			outChar(from_MDR);
+ls_nextchar:T <= inc, directByte = CR, if MDR_EQU_DB then ls_lineloop else ls_charloop;  // loop until CR found, which is end of Basic line
+ls_nextLine:findNextCR(same);
+			T <= inc, goto ls_lineloop;
+			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x20;									// PN (Print number)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 26;								// Trace mnemonic
 			if STACK_IS_EMPTY then ESTACK_ERR;
 			printDec();
@@ -586,9 +567,8 @@ ls_skipline:T <= inc;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x21;									// PQ (Print basic string)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 18;								// Trace mnemonic
-pq_loop:	BP <= inc, ReadCore(BP);
+pq_loop:	BP <= inc, readCore(BP);
 			directByte = '"', if MDR_EQU_DB then pq_done;
 			outChar(from_MDR);
 			traceString 3;
@@ -599,7 +579,6 @@ pq_done:	traceBP();
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x22;									// PT (Print TAB)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 27;								// Trace mnemonic
 pt_loop:	if AT_TAB then fetch;						// bail if at positions 0, 8, 16, 24, etc.
 			directByte = ' ', outChar(from_microcode);	// this should increment the tab_cnt mantained by the CPU
@@ -608,7 +587,6 @@ pt_loop:	if AT_TAB then fetch;						// bail if at positions 0, 8, 16, 24, etc.
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x23;									// NL (Print newline)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 6;								// Trace mnemonic
 crlf_fetch:	outCRLF();
 			goto fetch;
@@ -616,22 +594,20 @@ crlf_fetch:	outCRLF();
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x24;									// PC (Print literal string)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 5;								// Trace mnemonic
 pc_loop:	outChar(from_interpreter);
-			traceString 3;								// trace value of IL(IL_PC) (which was the char to be output)
-			if ILCODEBYTE_BIT7 then pc_exit;			// print until char with bit7 set
-			IL_PC <= inc, goto pc_loop;
-pc_exit:	IL_PC <= inc, goto fetch;
+			traceString 3;												// trace value of IL(IL_PC) (which was the char to be output)
+			IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;	// print until char with bit7 set
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x27;									// GL (Get Input line)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 8;								// Trace mnemonic
 gl:			InlEnd <= InLine_start;
 gl_loop:	if CHARIN_READY then next else repeat;		// wait for input character
-			if CHARIN_PRINTABLE then gl_print;
+			if KBD_BREAK then next else gl_char;
+			gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
+gl_char:	if CHARIN_PRINTABLE then gl_print;
 			directByte = CR, if CHARIN_EQU_DB then gl_cr;
 			directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
 			directByte = ESC, if CHARIN_EQU_DB then gl_esc;
@@ -642,9 +618,8 @@ gl_ignore:	directByte = BEEP, outChar(from_microcode); // BEEP, then get next ch
 
 gl_print:	if INLEND_MAX then gl_ignore;
 			outChar(from_charin);						// ECHO
-			WriteCore(InlEnd, CHARIN);
-			InlEnd <= inc;
-gl_write0:	WriteCore(InlEnd, zero);
+			writeCore(InlEnd, CHARIN), InlEnd <= inc;
+gl_write0:	writeCore(InlEnd, zero);
 			gotChar = 1, goto gl_loop;
 					
 gl_esc:		directByte = BEEP, outChar(from_microcode); // BEEP, then get next line (ignore this one)
@@ -655,9 +630,8 @@ gl_bs:		if INLEND_MIN then gl_ignore;
 			directByte = BACKSPACE, outChar(from_microcode);	// ECHO
 			InlEnd <= dec, goto gl_write0;
 			
-gl_cr:		WriteCore(InlEnd, CHARIN);
-			InlEnd <= inc;
-			WriteCore(InlEnd, zero);
+gl_cr:		writeCore(InlEnd, CHARIN), InlEnd <= inc;
+			writeCore(InlEnd, zero);
 			dump_input();
 			outCRLF();
 			gotChar = 1, BP <= Inline_start, goto fetch;	
@@ -665,65 +639,91 @@ gl_cr:		WriteCore(InlEnd, CHARIN);
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2A;									// IL (insert Basic line)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 40;								// Trace mnemonic
-			T <= ExpStack;
-			Lino <= T, ExpStack <= pop2, alu <= S_fromT;
-			traceLino;
-			alu <= S_minus_R;							// compare Lino - 0
-			if Y_SIGN then SYNTAX_ERR;					// error if line number is negative
-			if Y_ZERO then SYNTAX_ERR;					// error if zero line number
-			skipSpaces();								// BS now points to first char of the new Basic line in input buffer
-			directByte = CR, if MDR_EQU_DB then delLine;	// check for empty line, which means request to delete the "Lino" line
+			alu <= S_fromStack, ExpStack <= pop2;		// keep new line number in S
+			alu <= S_plus_R;							// test line number
+			T <= from_YLo, if Y_SIGN then SYNTAX_ERR;	// error if line number is negative
+			Lino <= T, if Y_ZERO then SYNTAX_ERR;		// error if zero line number, if all good Lino <= S (picked up from stack)
+			traceALU();
 			
-			//--- inserting a line ---
-insLine:    findNextCR(BP);
-			BE <= T;									// command STRING is from BS to BE inclusive (line number is in Lino)
-insLine1:	findPrgEnd(Prog_start);
-			findBasLine(Prog_start);
-			if R_IS_ZERO then appendLine;				// new line is the highest in the program
-			alu <= S_minus_R;							// Lino - foundLineNumber
-			if Y_ZERO then replaceLine;
-			if Y_SIGN then next else INTERNAL_ERR;		// Error if somehow Lino is higher than found line
-			//--- inserting before next higher number line ---
-			insLnBefore(); 
-			goto fetch;
+			skipSpaces();								// BP now points to first char of the new Basic line in input buffer
+			T <= BP;
+il_findBE:	BE <= T, readCore(T);
+			directByte = CR, if MDR_EQU_DB then il_fork;// input line text is between BP and BE inclusive
+			T <= inc, goto il_findBE;
 			
-			// first we delete the line with Lino number, then insert from the input buffer
-replaceLine:delBasLine();
-			goto insLine1;								// TODO: yes, this looks like a possible dead loop :-)
+il_fork:	if IMPLINE_EMPTY then next else changeLine;
 
-appendLine:	T <= PrgEnd;
-			alu <= S_fromLino, T <= dec;				// go back one to overwrite the first NULL char too
-			WriteCore(T, from_SHi);						// Line number in binary, MSB first
+deleteLine:	scanProgram();
+			if BASLINE_FOUND then next else WarmStart;
+			if Y_ZERO then next else WarmStart;
+			delBasLine();
+			goto WarmStart;
+			
+changeLine:	scanProgram();
+			if BASLINE_FOUND then next else appendLine;
+			if Y_ZERO then next else insertLine;
+
+replaceLine:goto RSTACK_ERR;		// TODO REPLACE CASE
+
+insertLine:	goto ESTACK_ERR;		// TODO INSERT CASE
+			
+appendLine:	alu <= S_fromLino, T <= dec;				// go back one to overwrite the first NULL char too
+			writeCore(T, from_SHi);						// Line number in binary, MSB first
 			T <= inc;
-			WriteCore(T, from_SLo);						// Line number in binary, LSB last
+			writeCore(T, from_SLo);						// Line number in binary, LSB last
 			T <= inc;
-app_loop:	ReadCore(BP);								// copy from input buffer
-			WriteCore(T, same);							// to Basic program area
+app_loop:	readCore(BP);								// copy from input buffer
+			writeCore(T, same);							// to Basic program area
 			BP <= inc, T <= inc;			
 			directByte = CR, if MDR_EQU_DB then next else app_loop;
 			write2Nulls(same);
-			goto fetch;
-
+			goto WarmStart;
+					
+			// Scan through program text to find all pointers we need
+scanProgram:alu <= reset0;
+			T <= from_R;
+			LS <= T, LE <= T, T <= Prog_start;
+scan_loop:  readCore16(same);								// assume this will be LS (LE also needed to make it "found")
+			alu <= S_fromLino, if R_IS_ZERO then scan_done;	// found end of Basic program (2 NULLs)
+			alu <= S_minus_R;								// Lino - current line, T at first character of the Basic statement text
+			traceALU();
+			if Y_ZERO then scan_found else next; 
+			if Y_SIGN then scan_found else next;			// we care only about same or higher
+scan_next:	findNextCR(same);								// skip to end of current line
+scan_line:	T <= inc, goto scan_loop;						// scan next line
+scan_found:	if BASLINE_FOUND then scan_next;
+			T <= dec;
+			T <= dec;
+			LS <= T, T <= inc;								// LS to first char of found statement (includes 16-bit line number)
+			findNextCR(inc);								// search for CR only after the line number, as some 16-bit numbers have 0x0D in them :-)
+			LE <= T, T <= from_R;							// LE to last char of found statement
+			ExpStack <= push_TWord, goto scan_line;			// save R (found line number) to stack
+scan_done:  alu <= S_fromLino, T <= dec;					// get back line number
+			PrgEnd <= T;									// update PrgEnd pointer (points to last of 2 NULLs)
+			if BASLINE_FOUND then next else scan_exit;
+			alu <= R_fromStack, ExpStack <= pop2;			// if we found the line, reload it into R
+scan_exit:	alu <= S_minus_R, back;							// compare Lino - found line
+		
 			//--- deleting a found line ---
-delLine:	findPrgEnd(Prog_start);
-			findBasLine(Prog_start);					// no need to search for BE, must be equal to BP
-			if Y_ZERO then next else WarmStart;			// TODO, is this the right jump target for no operation?
-			delBasLine();
-			goto fetch;
+delBasLine: alu <= copy_del;				// R (dest) = LS, S (source) = LE + 1, Y (count) = PrgEnd - LE
+dbs_loop:	if Y_ZERO then return;			// bail if no bytes left to copy
+			T <= from_S;
+			readCore(T);
+			T <= from_R;
+			writeCore(T, same);
+			traceALU();
+			alu <= copy_inc, goto dbs_loop;	// R++, S++, Y--
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2B;									// MT (Mark the BASIC program space Empty)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 43;								// Trace mnemonic
 			goto ColdStart;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2C;									// XQ (Start Execute)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 42;								// Trace mnemonic
 			T <= IL_PC;
 			XQhere <= T, readCore16(Prog_start);		// XQhere <= IL_PC, find line number of first statement
@@ -734,36 +734,16 @@ delLine:	findPrgEnd(Prog_start);
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2D;									// WS (Stop Execute)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 44;								// Trace mnemonic
 stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 'T', outChar(from_microcode);
 			directByte = 'O', outChar(from_microcode);
 			directByte = 'P', outChar(from_microcode);
-			goto print_lino;
-						
-findPrgEnd: alu <= reset1;					// S = 0, R = -1, T = param;
-fpend_loop:	ReadCore(T);
-			alu <= Rx256_plus_MDR;
-			if R_IS_ZERO then fpend_exit;	// 0 - two bytes in R				
-			T <= inc, goto fpend_loop;
-fpend_exit:	PrgEnd <= T, back;			
-			
-delBasLine: alu <= copy_setup;		// R = LS, S = LE + 1, Y = PrgEnd - LE
-dbs_loop:	traceALU();
-			T <= from_S;
-			ReadCore(T);
-			T <= from_R;
-			WriteCore(T, same);
-			alu <= copy_next;		// R++, S++, Y--
-			if Y_ZERO then return else dbs_loop;
-
-insLnBefore:goto INTERNAL_ERR;
+			goto print_lino;									
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2F;									// RT (IL subroutine return)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 19;								// Trace mnemonic
 			if STACK_IS_EMPTY then RSTACK_ERR;
 			IL_PC <= RetStack, RetStack <= pop, goto fetch;
@@ -771,7 +751,6 @@ insLnBefore:goto INTERNAL_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00110???;							// JS (IL subroutine call, 0x3000..0x37FF)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 20;								// Trace mnemonic
 			traceString 3;
 			if STACK_IS_FULL then RSTACK_ERR;
@@ -780,16 +759,13 @@ insLnBefore:goto INTERNAL_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b00111???;							// J (Jump, 0x3800..0x3FF)		
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 21;								// Trace mnemonic
 			traceString 3;								// trace lower 8-bits of destination
-jump:		IL_PC <= direct11, goto fetch;
-			
+jump:		IL_PC <= direct11, goto fetch;			
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b01??????;							// BR (relative branch, 0x40..0x7F)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 7;								// Trace mnemonic
 			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
 br_exit:	traceGoto;									// trace target
@@ -798,32 +774,29 @@ br_exit:	traceGoto;									// trace target
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b01100000;							// BR (relative branch with 0 offset)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 7;								// Trace mnemonic
 			goto badop;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b100?????; 							// BC a "xxx"   (80xxxxXx-9FxxxxXx  String Match Branch)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 17;								// Trace mnemonic
 			T <= IL_PC, BP <= save, skipSpaces();
 bc_loop:	traceString 3;								// trace value of IL(IL_PC) (char we try to match)
-			ReadCore(BP);
+			readCore(BP);
 			if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
 			if ILCODEBYTE_BIT7 then bc_match;
 			BP <= inc, IL_PC <= inc, goto bc_loop;
 bc_match: 	BP <= inc, IL_PC <= inc;					// leave pointers right after
-			traceBP();
+			//traceBP();
 			goto fetch;
 bc_exit:	BP <= restore, IL_PC <= T; 					// not found, restore BP and IL_PC
-			traceBP();
+			//traceBP();
 			IL_PC <= pc_plus_off5, goto br_exit;
 					
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b101?????;							// BV (Branch if not variable, 0xA0..0xBF)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 16;								// Trace mnemonic
 			skipSpaces();
 			MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;	// test covers lowercase too, so can execute conversion and check in parallel	
@@ -834,31 +807,34 @@ bv_exec:	T <= MDRx2, if STACK_IS_FULL then ESTACK_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b110?????;							// BN (Branch if not a number, 0xC0..0xDF)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 14;								// Trace mnemonic
 			skipSpaces();
 			alu <= reset0, if MDR_IS_NUM then bn_loop;			// MDR was already loaded by skipSpaces()
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;	// jump destination (+ 31 locations)
-bn_exit:	traceY();												// trace integer parse result
+bn_exit:	traceY();											// trace integer parse result
 			traceGoto;											// trace target
 			goto fetch;
 bn_loop:	alu <= Yx10_plus_MDR, BP <= inc;
 			if ALU_OVERFLOW then OVERFLOW_ERR;
-			ReadCore(BP);
+			readCore(BP);
 			if MDR_IS_NUM then bn_loop;
-			T <= from_Y, if STACK_IS_FULL then ESTACK_ERR;
+			T <= from_YLo, if STACK_IS_FULL then ESTACK_ERR;
 			ExpStack <= push_TWord, goto bn_exit;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0b111?????;							// BE (Branch if not endline, 0xE0..0xFF)
 			////////////////////////////////////////////////////////////////////////////////
-			traceSDepth;
 			traceString 13;								// Trace mnemonic
 			skipSpaces();
 			directByte = CR, if MDR_EQU_DB then fetch;	// found a CR, continue with next IL instruction
 			IL_PC <= pc_plus_off5, goto br_exit;		// jump destination (+ 31 locations)
 //			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then next else br_exit;		// jump destination (+ 31 locations)
 //			directByte = CR, if MDR_EQU_DB then fetch else badop;
+			
+BREAK:			gotChar = 1, traceString 55;
+				outBeep();
+				directByte = 'B', outChar(from_microcode);
+				goto traceDetails;
 			
 NOPROG_ERR:		traceString 50;
 				goto traceError;
@@ -873,14 +849,9 @@ INTERNAL_ERR: 	traceString 62;
 ESTACK_ERR:		traceString 60; 
 				goto traceError;
 RSTACK_ERR:		traceString 59;
-traceError:		outCRLF();
-				trace(crlf);
-				directByte = BEEP, outChar(from_microcode);
+traceError:		outBeep();
 				directByte = 'E', outChar(from_microcode);
-				directByte = 'R', outChar(from_microcode);
-				directByte = 'R', outChar(from_microcode);
-				directByte = ' ', outChar(from_microcode);
-				directByte = '#', outChar(from_microcode), T <= IL_PC;
+traceDetails:	directByte = '#', outChar(from_microcode), T <= IL_PC;
 				T <= dec;				// IL_PC is already on next instruction, so go back one for correctness
 				alu <= R_fromT, printDecR();
 				if IS_RUNMODE then next else err_done;
@@ -894,44 +865,29 @@ err_done:		outCRLF();
 				trace(crlf);
 				goto WarmStart;
 
-findNextCR: ReadCore(T);
+findNextCR: readCore(T);
 			directByte = CR, if MDR_EQU_DB then return;			// return with T pointing to CR
 			directByte = NULL, if MDR_EQU_DB then INTERNAL_ERR;	// finding NULL before CR is unexpected, TODO "code corruption error"?
 			T <= inc, goto findNextCR;		
 
-readCore16:	ReadCore(T);
+readCore16:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
-			ReadCore(T);
+			readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc, back;				// return with T pointing to first char after the 16-bit word
 
-// Search the Basic text for line with number in Lino, starting with param passed into T
-// Exit on found: R is found line (same of first higher than Lino), LS at begin of line number, ES at CR
-// Exit on not found: R is 0, LS and LE same as input param (usually Prog_start)
-// Error: found line start, but not the end, bail to error handling			
-findBasLine:alu <= reset1; 
-			alu <= S_fromLino, LS <= T;			// S = Lino, R = -1, T = param;
-			readCore16(same);
-			if R_IS_ZERO then return;			// found 2 zero bytes, so at the end of Basic program
-			alu <= S_minus_R;					// compare Lino with word from memory
-			if Y_ZERO then fbs_found;			// found it exact line 
-			if Y_SIGN then fbs_found; 			// found next higher line
-			findNextCR(same);					// not found, look for CR which marks end of Basic statement
-			T <= inc, goto findBasLine;			// T is at LE of this line
-fbs_found:	findNextCR(same);
-			LE <= T, back;
-
-write2Nulls:WriteCore(T, zero), T <= inc;
-			WriteCore(T, zero);									// return with T pointing to last NULL! 
+write2Nulls:writeCore(T, zero), T <= inc;
+			writeCore(T, zero);									// return with T pointing to last NULL! 
 			back;			
-
+			
 			// get 2 parameters from top of evaluation stack into ALU input registers R and S
-pullRS:		alu <= R_fromStack;
-			ExpStack <= pop2, if STACK_IS_EMPTY then ESTACK_ERR;
-			alu <= S_fromStack;
-			ExpStack <= pop2, if STACK_IS_EMPTY then ESTACK_ERR else return;
+pullRS:		if STACK_IS_EMPTY then ESTACK_ERR;
+			alu <= R_fromStack, ExpStack <= pop2;
+			if STACK_IS_EMPTY then ESTACK_ERR;
+			alu <= S_fromStack, ExpStack <= pop2, back;
 			
 			// print signed 16-bit number on top of evaluation stack
 printDec:	alu <= R_fromStack, ExpStack <= pop2;
+			// or print it directly from R register
 printDecR:	alu <= bcd_start; 
 			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
 			//traceY();
@@ -954,27 +910,30 @@ pn_1:		alu <= Yx16;
 pn_0:		alu <= Yx16;
 			CHAROUT <= from_YtoAlpha, goto outChar;			// saving 1 microinstruction here...
 				
-skipSpaces: ReadCore(BP);
+skipSpaces: readCore(BP);
 			directByte = ' ', if MDR_EQU_DB then skipSp;
 			directByte = TAB, if MDR_EQU_DB then skipSp else return;		
-skipSp:		BP <= inc, goto  skipSpaces;			
+skipSp:		BP <= inc, goto skipSpaces;			
+
+outBeep:	outCRLF();
+			trace(crlf);
+			directByte = BEEP, CHAROUT <= from_microcode, goto outChar;
 			
 outCRLF:	directByte = CR, outChar(from_microcode);		
 			directByte = LF, CHAROUT <= from_microcode;		// use the old fall-through trick to save time and space
 outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
-			if CHAROUT_READY then next else repeat;
-			back;										
+			if CHAROUT_READY then return else repeat;
 			
-WriteCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
+writeCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
 			nBUSREQ = 0, nWR = 0, back;
 
-ReadCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
+readCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
 			nBUSREQ = 0, nRD = 0, MDR <= from_Bus, back;
 			
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		
 dump_input: InlEnd <= InLine_start, trace(crlf);
-dump_inlp:	ReadCore(InlEnd);
+dump_inlp:	readCore(InlEnd);
 			directByte = 9, trace(from_microcode);		// display memory byte as Hex
 			directByte = NULL, if MDR_EQU_DB then dump_inex;
 			InlEnd <= inc, goto dump_inlp; 
@@ -985,18 +944,17 @@ traceBP:	ExpStack <= push_TWord, T <= BP;
 			traceString 33;
 			T <= ExpStack, ExpStack <= pop2, back;
 
-traceY:		ExpStack <= push_TWord, T <= from_Y;
+traceY:		ExpStack <= push_TWord, T <= from_YLo;
 			traceString 32;
 			T <= ExpStack, ExpStack <= pop2, back;
 			
 traceALU:	trace(crlf);
 		    ExpStack <= push_TWord, traceT;
-			T <= from_S, traceString 54;
-			T <= from_R, traceString 55;
-			T <= from_Y, traceString 32;
+			T <= from_S, traceString 52;
+			T <= from_R, traceString 52;
+			T <= from_YLo, traceString 53;		// this traces 32 bits, YHi and YLo
 			T <= ExpStack, ExpStack <= pop2, DBGINDEX <= crlf;		
 trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
-			if DBG_READY then next else repeat;
 			if DBG_READY then next else repeat;
 			DBGINDEX <= zero, back;				// clear the serial debug output register and return
 					

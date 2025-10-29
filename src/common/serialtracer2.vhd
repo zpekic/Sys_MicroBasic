@@ -93,16 +93,16 @@ constant debug_rom: rom512x8 := (
 		c('M'), c('T'), c(' '), X"00", X"00", X"00", X"00", X"00",
 		c('W'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		c('G'), c('O'), c(' '), X"00", X"00", X"00", X"00", X"00",
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
+		c('C'), c('P'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
 		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
 		BEL, c('*'), c('N'), c('o'), c(' '), c('P'), c('r'), c('g'),
-		X"88", X"89", X"8A", X"8B", c('.'), X"00", X"00", X"00",			-- Basic Line number
-		c('L'), c('#'), c('='), X"88", X"89", X"8A", X"8B", c(' '),
-		c('T'), c(' '), c('='), X"8C", X"8D", X"8E", X"8F", c(' '),
-		c('S'), c(' '), c('='), X"8C", X"8D", X"8E", X"8F", c(' '),
-		c('R'), c(' '), c('='), X"8C", X"8D", X"8E", X"8F", c(' '),
+		X"88", X"89", X"8A", X"8B", c('.'), X"00", X"00", X"00",			-- output lino (basic line number as hex)
+		X"8C", X"8D", X"8E", X"8F", c(' '), X"00", X"00", X"00",			-- output registers (as hex)
+		X"88", X"89", X"8A", X"8B", X"8C", X"8D", X"8E", X"8F",
+		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00", 
+		BEL, c('*'), c('B'), c('r'), c('e'), c('a'), c('k'), X"00",
 		X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", 			-- used to trace stack depth
 		BEL, c('*'), c('D'), c('i'), c('v'), c('B'), c('y'), c('0'),	-- Div by 0
 		BEL, c('*'), c('O'), c('v'), c('F'), c('l'), c('o'), c('w'),	-- Overflow (parse, or operation result)

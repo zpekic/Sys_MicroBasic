@@ -163,7 +163,7 @@ signal cpu_debug: std_logic_vector(31 downto 0);
 signal hexdata, showdigit: std_logic_vector(3 downto 0);
 signal freqcnt_in: std_logic;
 signal debug_txd: std_logic;
-signal cpu_bp: std_logic_vector(15 downto 0);
+signal cpu_t: std_logic_vector(15 downto 0);
 
 signal prescale_baud, prescale_power: integer range 0 to 65535;
 
@@ -196,7 +196,7 @@ signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
 signal x80, x64, y60, y32: std_logic_vector(7 downto 0);
 signal is_program, is_ram, cursor: std_logic;
 signal ram_address: std_logic_vector(10 downto 0);	
-signal ram_char: std_logic_vector(7 downto 0);
+signal ram_char, complement: std_logic_vector(7 downto 0);
 
 begin
 
@@ -279,10 +279,10 @@ cpu: entity work.MicroBasic Port map (
 		-- debug / trace
 		traceEnable => not sw_cpuclk(2),
 		baudrate => baudrate_x1,
-		debug_bp => cpu_bp,		-- use to display "cursor" at the BP register position
+		debug_t => cpu_t,					-- use to highlight T position
 		debug_txd => debug_txd, 
-		debug_sel => sw(1 downto 0),
-		debug_bus => cpu_debug
+		debug_sel => sw(1 downto 0),	-- select 1 of 4 internal registers to visualize on LED and VGA
+		debug_bus => cpu_debug			
 	);
 
 -- ROM containing the IL language instructions
@@ -406,9 +406,11 @@ y32 <= std_logic_vector(unsigned(y60) - 14);
 is_program <= '1' when (unsigned(y32) > 3) else '0';	-- color program area differently than input buffer
 is_ram <= not(y32(7) or y32(6) or y32(5) or x64(7) or x64(6));
 ram_address <= y32(4 downto 0) & x64(5 downto 0);	
-ram_char <= ram(to_integer(unsigned(ram_address)));
+ram_char <= complement xor ram(to_integer(unsigned(ram_address)));
 --cursor <= freq2 when (cpu_bp(10 downto 0) = ram_address) else '0';
 cursor <= freq2 when (cpu_debug(10 downto 0) = ram_address) else '0';
+complement <= X"80" when (ram_address = cpu_t(10 downto 0)) else X"00";
+
 end;
 
 

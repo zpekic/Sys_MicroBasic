@@ -73,9 +73,9 @@ constant palette: table8x12 :=(
 	color8_blue,
 	color8_cyan,
 	color8_blue,
-	color8_cyan,
+	color8_yellow,
 	color8_black,
-	color8_red,
+	color8_cyan,
 	color8_black,
 	color8_yellow
 	);

@@ -58,7 +58,7 @@ entity MicroBasic is
 			  traceEnable: in STD_LOGIC;
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
-			  debug_bp: out STD_LOGIC_VECTOR(15 downto 0);
+			  debug_t: out STD_LOGIC_VECTOR(15 downto 0);
 			  debug_sel: in STD_LOGIC_VECTOR(1 downto 0);
            debug_bus : out STD_LOGIC_VECTOR(31 downto 0));
 end MicroBasic;
@@ -67,13 +67,13 @@ architecture Behavioral of MicroBasic is
 
 type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
 type ram16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
-type ram8x11 is array (0 to 7) of std_logic_vector(10 downto 0);
+type ram8x16 is array (0 to 7) of std_logic_vector(15 downto 0);
 
 -- control unit
 signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
 signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
 
--- Intermediate languge
+-- Intermediate language
 signal IL_PC, XQhere: std_logic_vector(10 downto 0); -- 9 bits enough, but keep it compatible with other implementations
 signal IL_OP: std_logic_vector(7 downto 0);
 alias IL_OP5: std_logic_vector(4 downto 0) is IL_OP(4 downto 0);
@@ -86,13 +86,13 @@ signal CHAROUT_SEND, CHAROUT_READY: std_logic;
 
 -- single char input
 signal CHARIN: std_logic_vector(7 downto 0);
-signal charin_equ_db, charin_printable, charin_ready: std_logic; 
+signal charin_equ_db, charin_printable, charin_ready, charin_is_break: std_logic; 
 
 -- serial debug port
 signal DBGINDEX: std_logic_vector(5 downto 0); -- 64 entries supported
 signal DBG_READY, dbg_start: std_logic;
 
--- external memory related
+-- external memory interface (stores Basic code and input buffer)
 signal MAR: std_logic_vector(15 downto 0);
 signal MDR, MDR_UpperCase: std_logic_vector(7 downto 0);
 signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase, mdr_matches_ilcodebyte: std_logic;
@@ -106,6 +106,7 @@ signal BP, SvPt, BP_temp, BE: std_logic_vector(15 downto 0);
 signal bp_in_inpline, svp_in_inpline: std_logic;
 signal InlEnd, LS, LE, PrgEnd: std_logic_vector(15 downto 0);
 signal inlend_max, inlend_min: std_logic;
+signal inlend_max_or_basline_found, inlend_min_or_impline_empty, basline_found, impline_empty: std_logic;
 
 -- expression stack, 16 bytes == 8 words
 signal ExpStack: ram16x8;
@@ -115,40 +116,49 @@ signal estack_is_full, estack_is_empty: std_logic;
 signal SwapR, SwapS: std_logic_vector(7 downto 0);
 signal ExpSTHi, ExpSTLo: std_logic_vector(7 downto 0);
 
--- IL return stack
-signal RetStack: ram8x11;
+-- IL return stack (JS / RT)
+signal RetStack: ram8x16;
 signal RetSP: std_logic_vector(2 downto 0);					-- stack pointer points to free word
 signal rstack_is_empty, rstack_is_full: std_logic;
+
+-- Basic stack (GOSUB/RETURN)
+signal BasStack: ram8x16;
+signal BasSP: std_logic_vector(2 downto 0);					-- stack pointer points to free word
+signal bstack_is_empty, bstack_is_full: std_logic;
 
 -- stack error conditions
 signal stack_is_full, stack_is_empty: std_logic;
 
--- Basic variables, A-Z are stored internally in 32*16 RAM
+-- Basic variables A-Z are stored internally in 32*16 RAM, few locations unused
 signal vars: ram32x16;
-signal vars_index: std_logic_vector(7 downto 0); 			-- 8 bits to make some arithmetic easier
+signal vars_index: std_logic_vector(7 downto 0); 	-- 8 bits to make some arithmetic easier
 
--- ALU
-signal bcd_sum: std_logic_vector(23 downto 0);	-- 24 bits to contain BCD digits e.g. 032767
-signal Y: std_logic_vector(31 downto 0);			-- double size needed for MUL, DIV
+-- ALU with own internal state
+signal bcd_sum: std_logic_vector(23 downto 0);		-- 24 bits to contain BCD digits e.g. 032767
+signal Y, Y_saved: std_logic_vector(31 downto 0);	-- double size needed for MUL, DIV
+alias ListFrom: std_logic_vector(15 downto 0) is Y(31 downto 16);
+alias ListTo: std_logic_vector(15 downto 0) is Y(15 downto 0);
 signal R, S: std_logic_vector(15 downto 0);		-- ALU input arguments are 16 bit
-signal s_plus_r, s_minus_r, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
+signal s_plus_r, s_minus_r, r_minus_s, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
 signal s_mul_r: std_logic_vector(31 downto 0);	-- output of combinatorial multiplier
 signal subc: std_logic_vector(16 downto 0);		-- 17 bits, MSB is carry out which we need 
 signal y_zero, r_is_zero: std_logic;				-- combinatorial state of Y and R
 signal alu_sign, alu_overflow, alu_ready, leading_zero: std_logic;	-- state needed for BCD, signed division
 alias ls_params_ok: std_logic is alu_ready;
-alias ls_in_range: std_logic is alu_ready;
+alias cp_skip: std_logic is alu_ready;
+alias ls_in_range: std_logic is alu_sign;
 alias ls_passed_end: std_logic is alu_overflow;
-signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul_neg16: std_logic;
+signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul_neg16, s_equ_r, s_gt_r: std_logic;
 
 -- Basic line number
 signal Lino: std_logic_vector(15 downto 0) := X"0000";
 signal is_runmode: std_logic;		-- 0 for commands, 1 for RUN
 
 -- other
-signal T: std_logic_vector(15 downto 0);
+signal T, LinoY: std_logic_vector(15 downto 0);
 signal tab_cnt: std_logic_vector(7 downto 0);
 signal at_tab: std_logic;
+signal ready_or_break: std_logic;
 
 begin
 
@@ -229,11 +239,11 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_ILCODEBYTE_BIT7) => il_codebyte(7),
 			cond(seq_cond_CHAROUT_READY) => outchar_ready,
 			cond(seq_cond_IL_A_VALID) => IL_A_VALID,
-			cond(seq_cond_DBG_READY) => DBG_READY,
+			cond(seq_cond_DBG_READY) => ready_or_break,
 			cond(seq_cond_MDR_EQU_DB) => mdr_equ_db,
 			cond(seq_cond_nBUSACK) => nBUSACK,
-			cond(seq_cond_INLEND_MAX) => inlend_max,
-			cond(seq_cond_INLEND_MIN) => inlend_min,
+			cond(seq_cond_INLEND_MAX) => inlend_max_or_basline_found,
+			cond(seq_cond_INLEND_MIN) => inlend_min_or_impline_empty,
 			cond(seq_cond_CHARIN_PRINTABLE) => charin_printable,
 			cond(seq_cond_CHARIN_EQU_DB) => charin_equ_db,
 			cond(seq_cond_CHARIN_READY) => charin_ready,
@@ -262,7 +272,14 @@ cu_mb: entity work.microbasic_control_unit
 			ui_address => ui_address
 		);
 
---mdr_matches_ilcodebyte <= '1' when (MDR(6 downto 0) = il_codeByte(6 downto 0)) else '0';
+-- few condition codes come from two very different sources, but we can always (?) differentiate
+ready_or_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
+-- inlend max and min only used in GL (get line, opcode 0x27)
+basline_found <= '0' when ((LS = X"0000") or (LE = X"0000")) else '1';
+inlend_max_or_basline_found <= inlend_max when (IL_OP = X"27") else basline_found;
+impline_empty <= '1' when (BE <= BP) else '0';
+inlend_min_or_impline_empty <= inlend_min when (IL_OP = X"27") else impline_empty;
+
 mdr_matches_ilcodebyte <= '1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
 mdr_equ_db <=			'1' when (MDR = mb_directByte) else '0';
 mdr_is_num <=			'1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
@@ -329,7 +346,7 @@ update_IL_PC: process(clk, mb_IL_PC)
 			when IL_PC_RetStack =>
 				-- RetSP points to first free location
 				-- we cannot modify RetSP here, so must be combined with "pop" operation on RetStack
-				IL_PC <= RetStack(to_integer(unsigned(RetSP) - 1));
+				IL_PC <= RetStack(to_integer(unsigned(RetSP) - 1))(10 downto 0);
 			when others =>
 				null;
 		end case;
@@ -365,7 +382,7 @@ end process;
 			when RetStack_pop =>
 				RetSP <= std_logic_vector(unsigned(RetSP) - 1);
 			when RetStack_push_IL_PC_PLUS_1 =>
-				RetStack(to_integer(unsigned(RetSP))) <= std_logic_vector(unsigned(IL_PC) + 1);
+				RetStack(to_integer(unsigned(RetSP))) <= "00000" & std_logic_vector(unsigned(IL_PC) + 1);
 				RetSP <= std_logic_vector(unsigned(RetSP) + 1);
 			when others =>
 				null;
@@ -387,7 +404,7 @@ begin
 				T <= vars(to_integer(unsigned(vars_index(4 downto 0))));
 			when T_ExpStack =>
 				T <= ExpSTHi & ExpSTLo;
-			when T_from_Y =>
+			when T_from_YLo =>
 				T <= Y(15 downto 0);
 			when T_codeByte =>
 				T <= X"00" & il_codeByte;	
@@ -537,7 +554,10 @@ end process;
  end if;
  end process;
 	
+-------------------------------------------------------------------------------	
 -- output port (1 ASCII char at a time, usually goes to UART)
+-- TODO: implement outgoing FIFO
+-------------------------------------------------------------------------------
  update_CHAROUT: process(clk, mb_CHAROUT)
  begin
 	if (rising_edge(clk)) then
@@ -591,16 +611,28 @@ end process;
 -- see http://www.ittybittycomputers.com/IttyBitty/TinyBasic/TinyBasic.c line 776
 outchar <= CHAROUT and X"7F";
  
+------------------------------------------------------------------------------------ 
 -- input character
+-- external device presents the char code at inchar input port and raises inchar_ready signal
+-- inchar_ready is a condition for microcode to know there is a new char, but must raise 
+-- mb_gotChar to reset the charin_ready flag
+-- TODO: implement incoming FIFO
+------------------------------------------------------------------------------------
 on_inchar_ready: process(reset, inchar_ready, mb_gotChar)
 begin
 	if ((reset or mb_gotChar) = '1') then
 		--CHARIN <= (others => '0');
 		charin_ready <= '0';
+		charin_is_break <= '0';
 	else
 		if (rising_edge(inchar_ready)) then
 			CHARIN <= inchar;
 			charin_ready <= '1';
+			if (inchar = STX) then
+				charin_is_break <= '1';
+			else
+				charin_is_break <= '0';
+			end if;
 		end if;
 	end if;
 end process;
@@ -616,14 +648,16 @@ end process;
 --				alu <= alu;
 			when alu_reset0 =>
 				R <= (others => '0');
+				Y_saved <= (others => '0');
 				S <= (others => '0');
 				Y <= (others => '0');
 				alu_ready <= '0';
 				alu_overflow <= '0';
 			when alu_reset1 =>
 				R <= (others => '1');
+				Y_saved <= (others => '0');
 				S <= (others => '0');
-				Y <= (others => '0');
+				--Y <= (others => '0');
 				alu_ready <= '0';
 				alu_overflow <= '0';
 			when alu_R_fromStack =>
@@ -638,6 +672,10 @@ end process;
 				Y <= X"0000" & s_minus_r;
 				alu_ready <= '1';
 				alu_overflow <= minus_overflow;
+--			when alu_R_minus_S =>
+--				Y <= X"0000" & r_minus_s;
+--				alu_ready <= '1';
+--				alu_overflow <= minus_overflow;
 			when alu_neg_R =>
 				Y <= X"0000" & neg_r;
 				alu_ready <= '1';
@@ -745,40 +783,51 @@ end process;
 				R <= T;
 			when alu_S_fromLino =>
 				S <= Lino;
-			when alu_copy_setup =>
+			when alu_copy_del =>
 				S <= std_logic_vector(unsigned(LE) + 1);
 				R <= LS;
 				Y <= X"0000" & std_logic_vector(unsigned(PrgEnd) - unsigned(LE));
-			when alu_copy_next =>
+			when alu_copy_inc =>
 				S <= std_logic_vector(unsigned(S) + 1);
 				R <= std_logic_vector(unsigned(R) + 1);
 				Y <= std_logic_vector(unsigned(Y) - 1);
 			when alu_ls_load =>
 				-- initialize for LS (list) opcode
 				-- S = start line, R = end line, store both to Y and check values
-				if (unsigned(R) < unsigned(S)) then
-					if (S = X"FFFF") then
+				if (S = X"FFFF") then
+					-- 1 param given on command line, so start and end should be that
+					Y <= R & R;				
+					ls_params_ok <= '1';					
+				else 
+					-- two or no params on command line, check that start <= end
+					if (unsigned(R) <= unsigned(S)) then
+						Y <= R & S;
 						ls_params_ok <= '1';
-						S <= R;
-						Y <= R & R;
 					else
 						ls_params_ok <= '0';
 					end if;
-				else
-					ls_params_ok <= '1';
-					Y <= S & R;
 				end if;
 			when alu_ls_check =>
 				-- check if current line with number R is in range previously saved in Y
-				if (unsigned(R) >= unsigned(Y(31 downto 16))) then
-					if (unsigned(R) <= unsigned(Y(15 downto 0))) then
+				if (unsigned(R) > unsigned(ListTo)) then
+					ls_passed_end <= '1';
+					ls_in_range <= '0';
+				else
+					ls_passed_end <= '0';
+					if (unsigned(R) >= unsigned(ListFrom)) then
 						ls_in_range <= '1';
 					else
 						ls_in_range <= '0';
 					end if;
-				else
-					ls_in_range <= '0';
 				end if;
+			when alu_Y_save =>
+				Y_saved <= Y;
+			when alu_Y_recall => 
+				Y <= Y_saved;
+			when alu_cp =>
+				-- cp_skip is alias for alu_ready
+				-- because of the dummy push to even the stack, the CC byte is in MSB
+				cp_skip <= (T(10) and s_gt_r) or (T(9) and s_equ_r) or (T(8) and s_minus_r(15));
 			when others =>
 				null;
 		end case;
@@ -801,7 +850,10 @@ s_plus_r <= std_logic_vector(signed(S) + signed(R));
 plus_overflow <= ((not R(15)) and (not S(15))) when (s_plus_r(15) = '1') else (R(15) and S(15));
 
 s_minus_r <= std_logic_vector(signed(S) - signed(R));
+r_minus_s <= std_logic_vector(signed(R) - signed(S));
 minus_overflow <= '0';
+s_equ_r <= '1' when (s_minus_r = X"0000") else '0';
+s_gt_r <= not(s_minus_r(15)) and not(s_equ_r);
 
 neg_r <= std_logic_vector(0 - signed(R));
 neg_overflow <= '1' when (R = X"8000") else '0';	-- can't negate -32768
@@ -868,7 +920,7 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 -------------------------------------------------------------------
 -- Built-in debug and tracer components
 -------------------------------------------------------------------
-debug_bp <= BP;
+debug_t <= T;
 
 -- paralled debug port
 	--with debug_sel select debug_bus(15 downto 0) <= 
@@ -919,11 +971,14 @@ tracer: entity work.serialtracer2 Port map (
 		data(23 downto 20) => MDR(7 downto 4),
 		data(27 downto 24) => MDR(3 downto 0),
 		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
-		data(47 downto 32) => Lino,
+		data(47 downto 32) => LinoY,
 		data(63 downto 48) => T,
 		txd => debug_txd,
 		ready => DBG_READY
 		);
+
+-- Hack to display high-word of Y too	
+LinoY <= Y(31 downto 16) when (unsigned(DBGINDEX) = 53) else Lino;
 	
  update_DBGINDEX: process(clk, mb_DBGINDEX)
  begin
