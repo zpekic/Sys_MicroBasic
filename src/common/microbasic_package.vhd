@@ -14,19 +14,24 @@ use IEEE.NUMERIC_STD.ALL;
 package microbasic_package is
 
 constant NUL: std_logic_vector(7 downto 0) := X"00";
-constant STX: std_logic_vector(7 downto 0) := X"03";	-- CTRL/C
+constant STX: std_logic_vector(7 downto 0) := X"03";	-- CTRL/C, BREAK
 constant BEL: std_logic_vector(7 downto 0) := X"07";
 constant BS: std_logic_vector(7 downto 0) := X"08";
 constant CR: std_logic_vector(7 downto 0) := X"0D";
 constant LF: std_logic_vector(7 downto 0) := X"0A";
+constant CARET: std_logic_vector(7 downto 0) := X"5E"; -- ^, used for escaping control characters
 
 impure function c(char: in character) return std_logic_vector;
 
 type rom512x8 is array (0 to 511) of std_logic_vector(7 downto 0);
+type rom256x8 is array(0 to 255) of std_logic_vector(7 downto 0);
 type rom64x8 is array (0 to 63) of std_logic_vector(7 downto 0);
+type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
+type rom16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
+type ram16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
+type ram8x16 is array (0 to 7) of std_logic_vector(15 downto 0);
 
-type lookup is array(0 to 15) of std_logic_vector(7 downto 0);
-constant hex2ascii: lookup := (
+constant hex2ascii: rom16x8 := (
 	c('0'),
 	c('1'),
 	c('2'),
@@ -45,7 +50,6 @@ constant hex2ascii: lookup := (
 	c('F')
 );
 
-type rom256x8 is array(0 to 255) of std_logic_vector(7 downto 0);
 constant bin2bcd: rom256x8 := (
 	X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09",
 	X"10", X"11", X"12", X"13", X"14", X"15", X"16", X"17", X"18", X"19",
@@ -75,26 +79,6 @@ constant bin2bcd: rom256x8 := (
 	X"30", X"31", X"32", X"33", X"34", X"35", X"36", X"37", X"38", X"39",
 	X"40", X"41", X"42", X"43", X"44", X"45", X"46", X"47", X"48", X"49",
 	X"50", X"51", X"52", X"53", X"54", X"55"
-);
-
-type table_16x16 is array (0 to 15) of std_logic_vector(15 downto 0);
-constant decode4to16: table_16x16 := (
-	"0000000000000001",
-	"0000000000000010",
-	"0000000000000100",
-	"0000000000001000",
-	"0000000000010000",
-	"0000000000100000",
-	"0000000001000000",
-	"0000000010000000",
-	"0000000100000000",
-	"0000001000000000",
-	"0000010000000000",
-	"0000100000000000",
-	"0001000000000000",
-	"0010000000000000",
-	"0100000000000000",
-	"1000000000000000"
 );
 
 -- type <new_type> is

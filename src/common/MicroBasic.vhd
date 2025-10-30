@@ -67,24 +67,27 @@ end MicroBasic;
 
 architecture Behavioral of MicroBasic is
 
-type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
-type ram16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
-type ram8x16 is array (0 to 7) of std_logic_vector(15 downto 0);
-
 -- control unit
 signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
 signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
 
 -- Intermediate language
-signal IL_PC, XQhere: std_logic_vector(10 downto 0); -- 9 bits enough, but keep it compatible with other implementations
-signal IL_OP: std_logic_vector(7 downto 0);
+signal IL_PC, XQhere: std_logic_vector(10 downto 0);	-- 9 bits enough, but keep it compatible with other implementations
+signal IL_OP: std_logic_vector(7 downto 0);				-- CPU instruction register			
 alias IL_OP5: std_logic_vector(4 downto 0) is IL_OP(4 downto 0);
 alias il_codeByte: std_logic_vector(7 downto 0) is IL_D;
 signal off_is_zero: std_logic;
+-- some IL opcodes that are useful to be known to hardware, not just the microcode
+constant OP_GS: std_logic_vector(7 downto 0) := X"14";	-- Go Subroutine (push to Basic return stack)
+constant OP_RS: std_logic_vector(7 downto 0) := X"15";	-- ReStore (pop from Basic return stack)
+constant OP_CP: std_logic_vector(7 downto 0) := X"1C";	-- ComPare
+constant OP_PQ: std_logic_vector(7 downto 0) := X"21";	-- Print basic string (from RAM to output)
+constant OP_GL: std_logic_vector(7 downto 0) := X"27";	-- Get Line
+constant OP_RT: std_logic_vector(7 downto 0) := X"2F";	-- ReTurn (pop from IL return stack)
 
 -- single char output
-signal CHAROUT, CHAROUT_OLD: std_logic_vector(7 downto 0);
-signal CHAROUT_SEND, CHAROUT_READY: std_logic;
+signal CHAROUT: std_logic_vector(7 downto 0);
+signal CHAROUT_SEND, CHAROUT_READY, caret_escape, is_pq: std_logic;
 
 -- single char input
 signal CHARIN: std_logic_vector(7 downto 0);
@@ -96,14 +99,15 @@ signal DBG_READY, dbg_start: std_logic;
 
 -- external memory interface (stores Basic code and input buffer)
 signal MAR: std_logic_vector(15 downto 0);
-signal MDR, MDR_UpperCase, MDR_ESCAPED, mdr_maybe_escaped: std_logic_vector(7 downto 0);
+signal MDR, MDR_UpperCase: std_logic_vector(7 downto 0);
 signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase, mdr_matches_ilcodebyte: std_logic;
 
--- key pointers
-constant Inline_Start: std_logic_vector(15 downto 0) := X"0000"; 
-constant Inline_End: std_logic_vector(15 downto 0) := X"00FF";  
-constant Prog_Start: std_logic_vector(15 downto 0) := X"0100"; 
-constant Core_End: std_logic_vector(15 downto 0) := X"07FF"; -- TODO, use it for safety!
+-- key pointers (memory map constants, TODO: make them variable to configure RAM layout and size) 
+constant Inline_Start: std_logic_vector(15 downto 0) := X"0000";	-- input buffer at start of RAM
+constant Inline_End: std_logic_vector(15 downto 0) := X"00FF";		-- input buffer up to 256 characters  	
+constant Prog_Start: std_logic_vector(15 downto 0) := X"0100"; 	-- Basic program right after that
+constant Core_End: std_logic_vector(15 downto 0) := X"07FF";		-- up to 2k (but can go up to 64k)
+-- key pointers (for parsing)
 signal BP, SvPt, BP_temp, BE: std_logic_vector(15 downto 0);
 signal bp_in_inpline, svp_in_inpline: std_logic;
 signal InlEnd, LS, LE, PrgEnd: std_logic_vector(15 downto 0);
@@ -281,14 +285,14 @@ ready_alt_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
 
 -- inlend max and min only used in GL (Get Line, opcode 0x27)
 basline_found <= '0' when ((LS = X"0000") or (LE = X"0000")) else '1';
-inlend_max_alt_basline_found <= inlend_max when (IL_OP = X"27") else basline_found;
+inlend_max_alt_basline_found <= inlend_max when (IL_OP = OP_GL) else basline_found;
 
 impline_empty <= '1' when (BE <= BP) else '0';
-inlend_min_alt_impline_empty <= inlend_min when (IL_OP = X"27") else impline_empty;
+inlend_min_alt_impline_empty <= inlend_min when (IL_OP = OP_GL) else impline_empty;
 
 -- Basic condition pass is only meaningful during CP (ComPare, opcode 0x1C) instruction
 cp_skip <= (T(10) and s_gt_r) or (T(9) and s_equ_r) or (T(8) and s_minus_r(15));
-y_zero_alt_cp_skip <= cp_skip when (IL_OP = X"1C") else y_zero;
+y_zero_alt_cp_skip <= cp_skip when (IL_OP = OP_CP) else y_zero;
 
 mdr_matches_ilcodebyte <= '1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
 mdr_equ_db <=			'1' when (MDR(6 downto 0) = mb_directByte) else '0';
@@ -317,14 +321,14 @@ MDR_UpperCase <= std_logic_vector(unsigned(MDR) - X"20") when (mdr_is_lowercase 
 
 -- select right stack condition based on IL_OP (currently executed opcode)
 with IL_OP select stack_is_empty <= 
-	rstack_is_empty when X"2F",	-- RT
-	bstack_is_empty when X"15",	-- RS (Basic RETURN)
+	rstack_is_empty when OP_RT,	-- RT
+	bstack_is_empty when OP_RS,	-- RS (Basic RETURN)
 	estack_is_empty when others;
 	-- TODO: add Basic stack empty
 	
 with IL_OP select stack_is_full <= 
 	rstack_is_full when X"30" | X"31" | X"32" | X"33" | X"34" | X"35" | X"36" | X"37", -- JS
-	bstack_is_full when X"14",		-- GS (Basic GOSUB)
+	bstack_is_full when OP_GS,		-- GS (Basic GOSUB)
 	estack_is_full when others;
 	-- TODO: add Basic stack full
 		
@@ -570,6 +574,8 @@ end process;
 -- output port (1 ASCII char at a time, usually goes to UART)
 -- TODO: implement outgoing FIFO
 -------------------------------------------------------------------------------
+ is_pq <= '1' when (IL_OP = OP_PQ) else '0';
+ 
  update_CHAROUT: process(clk, mb_CHAROUT)
  begin
 	if (rising_edge(clk)) then
@@ -588,9 +594,35 @@ end process;
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
 				CHAROUT <= CHARIN;
 			when CHAROUT_from_MDR =>
-				CHAROUT_SEND <= '1';					-- pulse high when data loaded
-				CHAROUT_OLD <= CHAROUT;
-				CHAROUT <= MDR_ESCAPED;
+				if (caret_escape = '1') then
+					-- escaping is on, always output a char and turn escaping off
+					CHAROUT_SEND <= '1';
+					caret_escape <= '0';				
+					if (MDR = CARET) then
+						-- ^^ means we want to display the ^ and kill the escape mode
+						CHAROUT <= MDR;
+					else
+						if (mdr_is_uppercase = '1') then
+							-- ^ is followed by A..Z, this is now a control character!
+							CHAROUT <= std_logic_vector(unsigned(MDR) - 64);
+						else 
+							-- escape has no effect on any other characters
+							CHAROUT <= MDR;
+						end if;
+					end if;
+				else
+					-- check if is off, check if it needs to be turned on
+					CHAROUT <= MDR;
+					if (MDR = CARET) then
+						-- detected 1st ^ in sequence, turn on escaping, no send pulse
+						caret_escape <= is_pq;			-- escaping only works in PQ instruction
+						CHAROUT_SEND <= not(is_pq);	-- only swallow if in PQ
+					else
+						-- any other char in
+						caret_escape <= '0';
+						CHAROUT_SEND <= '1';			
+					end if;
+				end if;
 			when CHAROUT_from_YtoAlpha =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
 				CHAROUT <= hex2ascii(to_integer(unsigned(Y(31 downto 28))));
@@ -599,9 +631,6 @@ end process;
 		end case;
  end if;
  end process;
-
-MDR_ESCAPED <= mdr_maybe_escaped when (mdr_is_uppercase = '1') else MDR;
-mdr_maybe_escaped <= std_logic_vector(unsigned(MDR) - 64) when (CHAROUT_OLD = X"5E") else MDR; -- previous was a caret ^?
   
 -- watch the output characters to update the TAB counter
 on_charout_send: process(CHAROUT_SEND, reset)
@@ -855,8 +884,8 @@ end process;
 -- 17 bit subtract for division step
 subc <= std_logic_vector(unsigned('0' & Y(31 downto 16)) + unsigned('0' & R));
 
--- 6 digit BCD adder
-adder: entity work.bcdadder Port map (
+-- 6 digit BIN to BCD converter (unsigned)
+converter: entity work.bin2bcd Port map (
 		power => S(3 downto 0),
 		sel => R(0),
 		sum_in => Y(31 downto 8),
@@ -941,36 +970,13 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 debug_t <= T;
 
 -- paralled debug port
-	--with debug_sel select debug_bus(15 downto 0) <= 
-		--tab_cnt & CHAROUT & CHARIN when "00",
-		--vars_index & Vars(to_integer(unsigned(vars_index(4 downto 0)))) when "00",
-		--R(11 downto 0) & S(11 downto 0) when "01",
-		--Y(23 downto 0) when "10",
-		-- convert microcode address to BCD for easier tracking
-		--il_op & bin2bcd(to_integer(unsigned(ui_address(7 downto 0)))) when "10",
-		--MAR(15 downto 0) & MDR when others;
-		--(X"00" & PrgEnd) when "00",
-		--BP(11 downto 0) & BE(11 downto 0) when "01",
-		--LS(11 downto 0) & LE(11 downto 0) when "10",
-		--ExpSTHi & ExpSTLo & X"0" & ExpSP when others;
-		--X"DEAD" when "00",
-		--BS when "01",
-		--LS when "10",
-		--LE when others;
-
 	with debug_sel select debug_bus(23 downto 0) <= 
 		(X"15" & LS) when "00",
 		(X"1E" & LE) when "01",
 		(X"B5" & BP) when "10",
 		(X"5E" & PrgEnd) when others;
 
-	debug_bus(31 downto 24) <= "00010000";
-	
---	with debug_sel select debug_bus(31 downto 24) <= 
---		"00010000" when "00",
---		"00010000" when "10",
---		"00010000" when "01",
---		"00010000" when others;
+	debug_bus(31 downto 24) <= "00010000"; -- indicate "name.value" on LEDs
 
 -- serial debug port
 tracer: entity work.serialtracer2 Port map (

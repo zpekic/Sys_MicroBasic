@@ -30,51 +30,37 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity bcdadder is
-    Port ( power : in  STD_LOGIC_VECTOR (3 downto 0);
-           sel : in  STD_LOGIC;
-           sum_in : in  STD_LOGIC_VECTOR (23 downto 0);
-           sum_out : out  STD_LOGIC_VECTOR (23 downto 0));
+    Generic (
+			DIGITS : positive);
+    Port ( 
+			carry_in: in STD_LOGIC;
+			a : in STD_LOGIC_VECTOR(DIGITS * 4 - 1 downto 0);
+			b : in STD_LOGIC_VECTOR(DIGITS * 4 - 1 downto 0);
+			sum : out STD_LOGIC_VECTOR(DIGITS * 4 - 1 downto 0);
+         carry_out : out STD_LOGIC);
 end bcdadder;
 
 architecture Behavioral of bcdadder is
 
-type rom16x24 is array (0 to 15) of std_logic_vector(23 downto 0);
-signal bin2bcd: rom16x24 := (
-	X"000001",
-	X"000002",
-	X"000004",
-	X"000008",
-	X"000016",
-	X"000032",
-	X"000064",
-	X"000128",
-	X"000256",
-	X"000512",
-	X"001024",
-	X"002048",
-	X"004096",
-	X"008192",
-	X"016384",
-	X"032768"
-);
-signal carry: std_logic_vector(6 downto 0);
+
+signal carry: std_logic_vector(DIGITS downto 0);
 signal bcd_a: std_logic_vector(23 downto 0);
 
 begin
 
-bcd_a <= bin2bcd(to_integer(unsigned(power))) when (sel = '1') else X"000000";
-carry(0) <= '0';
+carry(0) <= carry_in;
+carry_out <= carry(DIGITS);
 
-na_generate: for i in 0 to 5 generate
+na_generate: for i in 0 to (DIGITS - 1) generate
 begin
 	na: entity work.nibbleadder Port map ( 
 				cin => carry(i),
-				a => bcd_a((3 + 4 * i) downto (4 * i)),
-				b => sum_in((3 + 4 * i) downto (4 * i)),
+				a => a((3 + 4 * i) downto (4 * i)),
+				b => b((3 + 4 * i) downto (4 * i)),
 				na => '0',
 				nb => '0',
 				bcd => '1',
-				y => sum_out((3 + 4 * i) downto (4 * i)),
+				y => sum((3 + 4 * i) downto (4 * i)),
 				cout => carry(i + 1)
 			);
 end generate;
