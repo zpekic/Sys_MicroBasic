@@ -278,6 +278,8 @@ cpu: entity work.MicroBasic Port map (
 		inchar_ready => RXD_READY,
 		-- debug / trace
 		traceEnable => not sw_cpuclk(2),
+		trace0 => button(2),
+		trace1 => button(3),
 		baudrate => baudrate_x1,
 		debug_t => cpu_t,					-- use to highlight T position
 		debug_txd => debug_txd, 

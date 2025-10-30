@@ -5,7 +5,7 @@
 			.code 9, 80, microBasic_code.mif, microBasic_code.cgf, microBasic_code.coe, mb:microBasic_code.vhd, microBasic_code.hex, microBasic_code.bin, 10;
 			.mapper 8, 16, microBasic_map.mif, microBasic_map.cgf, microBasic_map.coe, mb:microBasic_map.vhd, microBasic_map.hex, microBasic_map.bin, 2;
 			.controller microBasic_control_unit.vhd, 4;
-			//.symbol 9, 256, microBasic_sym.mif, microBasic_sym.cgf, microBasic_sym.coe, mb:microBasic_sym.vhd, microBasic_sym.hex, microBasic_sym.bin, 32;
+			.symbol 9, 256, microBasic_sym.mif, microBasic_sym.cgf, microBasic_sym.coe, mb:microBasic_sym.vhd, microBasic_sym.hex, microBasic_sym.bin, 32;
 
 // System interface signals
 nBUSREQ			.valfield 1 values 0, 1 default 1;
@@ -36,24 +36,24 @@ seq_cond:		.if 5 values
 				STACK_IS_EMPTY,
 				MDR_MATCHES_ILCODEBYTE,
 				R_IS_ZERO,
-				Y_ZERO,
+				Y_ZERO			| CP_SKIP,
 				Y_SIGN,
-				ALU_READY		| LS_PARAMS_OK | CP_SKIP,
+				ALU_READY		| LS_PARAMS_OK,
 				ALU_OVERFLOW 	| LS_PASSED_END,
 				ALU_SIGN		| LS_IN_RANGE,
 				AT_TAB,
 				OFF_IS_ZERO,
 				LEADING_ZERO,
 				IS_RUNMODE,
-				dummy29,
-				dummy30,
+				TRACE0,			// external flag 0
+				TRACE1,			// external flag 1
 				false			// hard-code to 0
 				default true;
 seq_then:	.then 9 values next, repeat, return, fork, @ default next;						// any label
 seq_else:	.else 9 values next, repeat, return, fork, 0b000000..0b111111, @ default next;	// any value as it can be a trace char
 
 // Direct byte, usually ASCII code
-directByte	.valfield 8 values 0x00..0xFF default 0xFF;
+directByte	.valfield 7 values 0x00..0x7F default 0x7F;
 
 // 16 bit temporary register
 T			.regfield 4 values
@@ -142,7 +142,7 @@ MDR:			.regfield 3 values
 				ToUpper,
 				from_SHi,
 				from_SLo,
-				-
+				from_microcode
 				default same;
 
 // 16-bit pointer to input buffer
@@ -226,7 +226,7 @@ alu				.regfield 5 values
 				ls_check,
 				Y_save,
 				Y_recall,
-				cp,
+				-,
 				-,
 				-,
 				-,
@@ -264,7 +264,7 @@ PrgEnd			.regfield 1 values
 				default same;
 				
 // placeholder
-dummy:			.valfield 2 values * default 0;
+dummy:			.valfield 3 values * default 0;
 						
 //	useful aliases, these are evaluated as simple text replacement of label with everything between .alias and ; 
 NULL: 		.alias 0x00;
@@ -277,7 +277,7 @@ LF:			.alias 0x0A;
 CR:			.alias 0x0D;
 //SPACE:		.alias 0x20;
 //DQUOTE:		.alias 0x22;
-clear:		.alias DBGINDEX <= zero, IL_PC <= zero, ExpStack <= clear, RetStack <= clear, alu <= reset0;
+clear:		.alias DBGINDEX <= zero, IL_PC <= zero, ExpStack <= clear, RetStack <= clear, alu <= reset0; // TODO: also BasStack <= clear
 nop:		.alias if true then next;
 goto:		.alias if false then next else;
 noop:		.alias if true then next else next;
@@ -295,6 +295,7 @@ dump_input:	.sub;
 trace:		.sub DBGINDEX;
 outCRLF:	.sub;
 outChar:	.sub CHAROUT;
+outNZChar:	.sub CHAROUT;
 writeCore:	.sub MAR, MDR;
 readCore:	.sub MAR;
 skipSpaces: .sub;
@@ -434,8 +435,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;		// IL_PC <= XQhere
 			alu <= R_fromStack, ExpStack <= pop2;
 			traceALU();
-			if R_IS_ZERO then next else go_find;
-			if IS_RUNMODE then stop_run else fetch;				// entering GOTO 0 on command line does nothing
+			if R_IS_ZERO then NOPROG_ERR;
 go_find:	T <= from_R;
 			Lino <= T, T <= Prog_start;							// new non-zero Lino picked up from evaluation stack
 go_search:	alu <= reset1, readCore(T);
@@ -447,7 +447,7 @@ go_search:	alu <= reset1, readCore(T);
 			findNextCR(same);
 			T <= inc, goto go_search;			
 go_found:	BP <= T, goto fetch;			
-
+			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)
 			////////////////////////////////////////////////////////////////////////////////
@@ -499,8 +499,7 @@ div_done:	alu <= div_end, goto alu_done;
 			ExpStack <= push_TByte;						// push dummy byte to make it even
 			T <= ExpStack, ExpStack <= pop2;			// load condition mask into T (16 bit)
 			alu <= S_fromStack, ExpStack <= pop2;
-			traceALU();
-			alu <= cp;
+			//traceALU();
 			if CP_SKIP then next else fetch;
 			IL_PC <= inc, goto fetch;
 
@@ -516,8 +515,7 @@ nx_run:		findNextCR(BP);
 			readCore16(BP);
 			if R_IS_ZERO then nx_err;
 			BP <= T, T <= from_R;						// BP at start of statement text, load T with new line number
-			Lino <= T;									// new current executing statement line number 
-			T <= XQhere;
+			Lino <= T, T <= XQhere;						// new current executing statement line number 
 			IL_PC <= T;									// IL_PC <= XQhere
 			traceLino;
 			traceBP();
@@ -532,27 +530,28 @@ nx_err:		directByte = BEEP, outChar(from_microcode);	// TODO - write some error 
 			alu <= reset1, if IS_RUNMODE then badop;	// S == from == 0, R == to == 65535			
 ls_parload:	T <= from_R, if STACK_IS_EMPTY then ls_parchk;
 			alu <= S_fromT;
-			alu <= R_fromStack, ExpStack <= pop2;
-			traceALU(); 
-			goto ls_parload;
-ls_parchk:  alu <= ls_load;									// loads Y with S and R, also checks that R >= S and neither are 0
+			alu <= R_fromStack, ExpStack <= pop2, goto ls_parload;
+ls_parchk:  alu <= ls_load;								// loads Y with S and R, also checks that R >= S and neither are 0
 			if LS_PARAMS_OK then next else SYNTAX_ERR;
 ls_start:	T <= Prog_start, traceALU();
-ls_lineloop:if CHARIN_READY then next else ls_continue;		// check if a character came in
+ls_lineloop:if CHARIN_READY then next else ls_continue;	// check if a character came in
 			if KBD_BREAK then BREAK;
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;	// SPACE pauses/resumes listing
 ls_pause:	if CHARIN_READY then next else repeat;			// SPACE detected, now wait for next char
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause; 
-ls_continue:gotChar = 1, alu <= Y_save, readCore16(same); 	// read line number into R
-			traceALU();
-			alu <= ls_check, if R_IS_ZERO then crlf_fetch;	// end of program, bail
-			if LS_PASSED_END then crlf_fetch;				// passed the end, bail
+ls_continue:gotChar = 1, readCore16(same); 	// read line number into R
+			//traceALU();
+			alu <= ls_check, if R_IS_ZERO then fetch;	// end of program, bail
+			if LS_PASSED_END then fetch;				// passed the end, bail
 			if LS_IN_RANGE then next else ls_nextLine;
-			printDecR();									// output line number (in decimal!) - this trashes Y so we need to restore it after
-			alu <= Y_recall, directByte = ' ', outChar(from_microcode);		// followed by a single space
+			alu <= Y_save, printDecR();									// output line number (in decimal!) - this trashes Y so we need to restore it after
+			alu <= Y_recall, directByte = ' ', outChar(from_microcode);	// followed by a single space
 ls_charloop:readCore(T);
 			outChar(from_MDR);
-ls_nextchar:T <= inc, directByte = CR, if MDR_EQU_DB then ls_lineloop else ls_charloop;  // loop until CR found, which is end of Basic line
+ls_nextchar:directByte = CR, if MDR_EQU_DB then next else ls_next;  // loop until CR found, which is end of Basic line
+			directByte = LF, outChar(from_microcode);				// CR was already printed, so just LF
+			T <= inc, goto ls_lineloop;
+ls_next:	T <= inc, goto ls_charloop;
 ls_nextLine:findNextCR(same);
 			T <= inc, goto ls_lineloop;
 			
@@ -611,7 +610,7 @@ gl_char:	if CHARIN_PRINTABLE then gl_print;
 			directByte = CR, if CHARIN_EQU_DB then gl_cr;
 			directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
 			directByte = ESC, if CHARIN_EQU_DB then gl_esc;
-			//directByte = TAB, if CHARIN_EQU_DB then gl_tab;		// TODO - implement TAB
+			directByte = TAB, if CHARIN_EQU_DB then gl_tab;	// TODO - implement TAB (for now just replace with space)
 			// fall into ignorable characters
 gl_ignore:	directByte = BEEP, outChar(from_microcode); // BEEP, then get next char
 			gotChar = 1, goto gl_loop;
@@ -636,6 +635,12 @@ gl_cr:		writeCore(InlEnd, CHARIN), InlEnd <= inc;
 			outCRLF();
 			gotChar = 1, BP <= Inline_start, goto fetch;	
 
+gl_tab:		if INLEND_MAX then gl_ignore;
+gl_tabloop:	if AT_TAB then gl_write0;
+			directByte = ' ', outChar(from_microcode);			// replace tab with spaces (and update tab counter to make AT_TAB condition work)
+			directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
+			goto gl_tabloop;
+
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2A;									// IL (insert Basic line)
 			////////////////////////////////////////////////////////////////////////////////
@@ -655,9 +660,9 @@ il_findBE:	BE <= T, readCore(T);
 il_fork:	if IMPLINE_EMPTY then next else changeLine;
 
 deleteLine:	scanProgram();
-			if BASLINE_FOUND then next else WarmStart;
-			if Y_ZERO then next else WarmStart;
-			delBasLine();
+			if BASLINE_FOUND then next else WarmStart;	// bail if no line found at all
+			if Y_ZERO then next else WarmStart;			// bail if no exact line number found
+			delBasLine();								// delete the line with number in S
 			goto WarmStart;
 			
 changeLine:	scanProgram();
@@ -684,10 +689,13 @@ app_loop:	readCore(BP);								// copy from input buffer
 scanProgram:alu <= reset0;
 			T <= from_R;
 			LS <= T, LE <= T, T <= Prog_start;
+			PrgEnd <= T;
 scan_loop:  readCore16(same);								// assume this will be LS (LE also needed to make it "found")
-			alu <= S_fromLino, if R_IS_ZERO then scan_done;	// found end of Basic program (2 NULLs)
-			alu <= S_minus_R;								// Lino - current line, T at first character of the Basic statement text
 			traceALU();
+			alu <= S_fromLino, if R_IS_ZERO then next else scan_check;	// found end of Basic program (2 NULLs)?
+			T <= dec;										// yes, save to PrgEnd and exit
+			PrgEnd <= T, goto scan_exit;
+scan_check:	alu <= S_minus_R;								// Lino - current line, T at first character of the Basic statement text
 			if Y_ZERO then scan_found else next; 
 			if Y_SIGN then scan_found else next;			// we care only about same or higher
 scan_next:	findNextCR(same);								// skip to end of current line
@@ -699,9 +707,7 @@ scan_found:	if BASLINE_FOUND then scan_next;
 			findNextCR(inc);								// search for CR only after the line number, as some 16-bit numbers have 0x0D in them :-)
 			LE <= T, T <= from_R;							// LE to last char of found statement
 			ExpStack <= push_TWord, goto scan_line;			// save R (found line number) to stack
-scan_done:  alu <= S_fromLino, T <= dec;					// get back line number
-			PrgEnd <= T;									// update PrgEnd pointer (points to last of 2 NULLs)
-			if BASLINE_FOUND then next else scan_exit;
+scan_done:	alu <= S_fromLino, if BASLINE_FOUND then next else scan_exit;
 			alu <= R_fromStack, ExpStack <= pop2;			// if we found the line, reload it into R
 scan_exit:	alu <= S_minus_R, back;							// compare Lino - found line
 		
@@ -893,20 +899,15 @@ printDecR:	alu <= bcd_start;
 			//traceY();
 			if ALU_SIGN then next else pn_5;
 			directByte = '-', outChar(from_microcode); 				// print minus sign
-pn_5:		if LEADING_ZERO then pn_4; 
-			outChar(from_YtoAlpha);
+pn_5:		outNZChar(from_YtoAlpha);
 pn_4:		alu <= Yx16;
-			if LEADING_ZERO then pn_3;
-			outChar(from_YtoAlpha);
+			outNZChar(from_YtoAlpha);
 pn_3:		alu <= Yx16;
-			if LEADING_ZERO then pn_2;
-			outChar(from_YtoAlpha);
+			outNZChar(from_YtoAlpha);
 pn_2:		alu <= Yx16;
-			if LEADING_ZERO then pn_1;
-			outChar(from_YtoAlpha);
+			outNZChar(from_YtoAlpha);
 pn_1:		alu <= Yx16;
-			if LEADING_ZERO then pn_0;
-			outChar(from_YtoAlpha);
+			outNZChar(from_YtoAlpha);
 pn_0:		alu <= Yx16;
 			CHAROUT <= from_YtoAlpha, goto outChar;			// saving 1 microinstruction here...
 				
@@ -923,6 +924,8 @@ outCRLF:	directByte = CR, outChar(from_microcode);
 			directByte = LF, CHAROUT <= from_microcode;		// use the old fall-through trick to save time and space
 outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
 			if CHAROUT_READY then return else repeat;
+			
+outNZChar:	if LEADING_ZERO then return else outChar;
 			
 writeCore:	nBUSREQ = 0, if nBUSACK then repeat else next;
 			nBUSREQ = 0, nWR = 0, back;

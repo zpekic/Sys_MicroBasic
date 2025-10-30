@@ -56,6 +56,8 @@ entity MicroBasic is
 			  inchar_ready: in STD_LOGIC;
 			  -- debug / trace UART output
 			  traceEnable: in STD_LOGIC;
+			  trace0: in STD_LOGIC;
+			  trace1: in STD_LOGIC;
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
 			  debug_t: out STD_LOGIC_VECTOR(15 downto 0);
@@ -81,7 +83,7 @@ alias il_codeByte: std_logic_vector(7 downto 0) is IL_D;
 signal off_is_zero: std_logic;
 
 -- single char output
-signal CHAROUT: std_logic_vector(7 downto 0);
+signal CHAROUT, CHAROUT_OLD: std_logic_vector(7 downto 0);
 signal CHAROUT_SEND, CHAROUT_READY: std_logic;
 
 -- single char input
@@ -94,7 +96,7 @@ signal DBG_READY, dbg_start: std_logic;
 
 -- external memory interface (stores Basic code and input buffer)
 signal MAR: std_logic_vector(15 downto 0);
-signal MDR, MDR_UpperCase: std_logic_vector(7 downto 0);
+signal MDR, MDR_UpperCase, MDR_ESCAPED, mdr_maybe_escaped: std_logic_vector(7 downto 0);
 signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase, mdr_matches_ilcodebyte: std_logic;
 
 -- key pointers
@@ -106,7 +108,7 @@ signal BP, SvPt, BP_temp, BE: std_logic_vector(15 downto 0);
 signal bp_in_inpline, svp_in_inpline: std_logic;
 signal InlEnd, LS, LE, PrgEnd: std_logic_vector(15 downto 0);
 signal inlend_max, inlend_min: std_logic;
-signal inlend_max_or_basline_found, inlend_min_or_impline_empty, basline_found, impline_empty: std_logic;
+signal inlend_max_alt_basline_found, inlend_min_alt_impline_empty, basline_found, impline_empty: std_logic;
 
 -- expression stack, 16 bytes == 8 words
 signal ExpStack: ram16x8;
@@ -142,10 +144,9 @@ signal R, S: std_logic_vector(15 downto 0);		-- ALU input arguments are 16 bit
 signal s_plus_r, s_minus_r, r_minus_s, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
 signal s_mul_r: std_logic_vector(31 downto 0);	-- output of combinatorial multiplier
 signal subc: std_logic_vector(16 downto 0);		-- 17 bits, MSB is carry out which we need 
-signal y_zero, r_is_zero: std_logic;				-- combinatorial state of Y and R
+signal y_zero, r_is_zero, y_zero_alt_cp_skip, cp_skip: std_logic;				-- combinatorial state of Y and R
 signal alu_sign, alu_overflow, alu_ready, leading_zero: std_logic;	-- state needed for BCD, signed division
 alias ls_params_ok: std_logic is alu_ready;
-alias cp_skip: std_logic is alu_ready;
 alias ls_in_range: std_logic is alu_sign;
 alias ls_passed_end: std_logic is alu_overflow;
 signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul_neg16, s_equ_r, s_gt_r: std_logic;
@@ -158,7 +159,7 @@ signal is_runmode: std_logic;		-- 0 for commands, 1 for RUN
 signal T, LinoY: std_logic_vector(15 downto 0);
 signal tab_cnt: std_logic_vector(7 downto 0);
 signal at_tab: std_logic;
-signal ready_or_break: std_logic;
+signal ready_alt_break: std_logic;
 
 begin
 
@@ -209,6 +210,8 @@ begin
 				MDR <= S(15 downto 8);
 			when MDR_from_SLo =>
 				MDR <= S(7 downto 0);
+			when MDR_from_microcode =>
+				MDR <= '0' & mb_directByte;
 			when others =>
 				null;
 		end case;
@@ -239,11 +242,11 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_ILCODEBYTE_BIT7) => il_codebyte(7),
 			cond(seq_cond_CHAROUT_READY) => outchar_ready,
 			cond(seq_cond_IL_A_VALID) => IL_A_VALID,
-			cond(seq_cond_DBG_READY) => ready_or_break,
+			cond(seq_cond_DBG_READY) => ready_alt_break,
 			cond(seq_cond_MDR_EQU_DB) => mdr_equ_db,
 			cond(seq_cond_nBUSACK) => nBUSACK,
-			cond(seq_cond_INLEND_MAX) => inlend_max_or_basline_found,
-			cond(seq_cond_INLEND_MIN) => inlend_min_or_impline_empty,
+			cond(seq_cond_INLEND_MAX) => inlend_max_alt_basline_found,
+			cond(seq_cond_INLEND_MIN) => inlend_min_alt_impline_empty,
 			cond(seq_cond_CHARIN_PRINTABLE) => charin_printable,
 			cond(seq_cond_CHARIN_EQU_DB) => charin_equ_db,
 			cond(seq_cond_CHARIN_READY) => charin_ready,
@@ -255,7 +258,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_STACK_IS_EMPTY) => stack_is_empty,
 			cond(seq_cond_MDR_MATCHES_ILCODEBYTE) => mdr_matches_ilcodebyte,
 			cond(seq_cond_R_IS_ZERO) => r_is_zero,
-			cond(seq_cond_Y_ZERO) => y_zero,
+			cond(seq_cond_Y_ZERO) => y_zero_alt_cp_skip,
 			cond(seq_cond_Y_SIGN) => Y(15),
 			cond(seq_cond_ALU_READY) => alu_ready,
 			cond(seq_cond_ALU_OVERFLOW) => alu_overflow,
@@ -264,8 +267,8 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_LEADING_ZERO) => leading_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
-			cond(seq_cond_dummy29) => '1',
-			cond(seq_cond_dummy30) => '1',
+			cond(seq_cond_TRACE0) => trace0,	-- 1 when trace is not enabled
+			cond(seq_cond_TRACE1) => trace1,	-- 1 when trace is not enabled
 			cond(seq_cond_false) => '0',
 			-- outputs
 			ui_nextinstr => ui_nextinstr,
@@ -273,22 +276,29 @@ cu_mb: entity work.microbasic_control_unit
 		);
 
 -- few condition codes come from two very different sources, but we can always (?) differentiate
-ready_or_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
--- inlend max and min only used in GL (get line, opcode 0x27)
+-- simply ignore CTRL/C while the trace output is ongoing
+ready_alt_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
+
+-- inlend max and min only used in GL (Get Line, opcode 0x27)
 basline_found <= '0' when ((LS = X"0000") or (LE = X"0000")) else '1';
-inlend_max_or_basline_found <= inlend_max when (IL_OP = X"27") else basline_found;
+inlend_max_alt_basline_found <= inlend_max when (IL_OP = X"27") else basline_found;
+
 impline_empty <= '1' when (BE <= BP) else '0';
-inlend_min_or_impline_empty <= inlend_min when (IL_OP = X"27") else impline_empty;
+inlend_min_alt_impline_empty <= inlend_min when (IL_OP = X"27") else impline_empty;
+
+-- Basic condition pass is only meaningful during CP (ComPare, opcode 0x1C) instruction
+cp_skip <= (T(10) and s_gt_r) or (T(9) and s_equ_r) or (T(8) and s_minus_r(15));
+y_zero_alt_cp_skip <= cp_skip when (IL_OP = X"1C") else y_zero;
 
 mdr_matches_ilcodebyte <= '1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
-mdr_equ_db <=			'1' when (MDR = mb_directByte) else '0';
+mdr_equ_db <=			'1' when (MDR(6 downto 0) = mb_directByte) else '0';
 mdr_is_num <=			'1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
 mdr_is_lowercase <=	'1' when ((unsigned(MDR) > 96) and (unsigned(MDR) < 123)) else '0';
 mdr_is_uppercase <=	'1' when ((unsigned(MDR) > 64) and (unsigned(MDR) < 91)) else '0';
 mdr_is_alpha <= 		mdr_is_lowercase or mdr_is_uppercase;
 estack_is_full <= 	'1' when (ExpSP = X"F") else '0';
 estack_is_empty <=	'1' when (ExpSP = X"0") else '0';
-charin_equ_db <=		'1' when (CHARIN = mb_directByte) else '0';
+charin_equ_db <=		'1' when (CHARIN(6 downto 0) = mb_directByte) else '0';
 charin_printable <=	'0' when (CHARIN(7 downto 5) = "000") else (not CHARIN(7)); -- TODO: Add 0x7F 
 inlend_max <=			'1' when (InlEnd = InLine_End) else '0';
 inlend_min <=			'1' when (InlEnd = InLine_Start) else '0';
@@ -307,12 +317,14 @@ MDR_UpperCase <= std_logic_vector(unsigned(MDR) - X"20") when (mdr_is_lowercase 
 
 -- select right stack condition based on IL_OP (currently executed opcode)
 with IL_OP select stack_is_empty <= 
-	rstack_is_empty when X"2F", -- RT
+	rstack_is_empty when X"2F",	-- RT
+	bstack_is_empty when X"15",	-- RS (Basic RETURN)
 	estack_is_empty when others;
 	-- TODO: add Basic stack empty
 	
 with IL_OP select stack_is_full <= 
 	rstack_is_full when X"30" | X"31" | X"32" | X"33" | X"34" | X"35" | X"36" | X"37", -- JS
+	bstack_is_full when X"14",		-- GS (Basic GOSUB)
 	estack_is_full when others;
 	-- TODO: add Basic stack full
 		
@@ -571,13 +583,14 @@ end process;
 				CHAROUT <= il_codeByte;
 			when CHAROUT_from_microcode =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
-				CHAROUT <= mb_directByte;
+				CHAROUT <= '0' & mb_directByte;	-- because we store only 7-bit ASCII in microcode
 			when CHAROUT_from_charin =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
 				CHAROUT <= CHARIN;
 			when CHAROUT_from_MDR =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
-				CHAROUT <= MDR;
+				CHAROUT_OLD <= CHAROUT;
+				CHAROUT <= MDR_ESCAPED;
 			when CHAROUT_from_YtoAlpha =>
 				CHAROUT_SEND <= '1';					-- pulse high when data loaded
 				CHAROUT <= hex2ascii(to_integer(unsigned(Y(31 downto 28))));
@@ -586,7 +599,10 @@ end process;
 		end case;
  end if;
  end process;
- 
+
+MDR_ESCAPED <= mdr_maybe_escaped when (mdr_is_uppercase = '1') else MDR;
+mdr_maybe_escaped <= std_logic_vector(unsigned(MDR) - 64) when (CHAROUT_OLD = X"5E") else MDR; -- previous was a caret ^?
+  
 -- watch the output characters to update the TAB counter
 on_charout_send: process(CHAROUT_SEND, reset)
 begin
@@ -799,12 +815,18 @@ end process;
 					Y <= R & R;				
 					ls_params_ok <= '1';					
 				else 
-					-- two or no params on command line, check that start <= end
-					if (unsigned(R) <= unsigned(S)) then
-						Y <= R & S;
+					if (R = X"FFFF") then
+						-- no parameters? assume full range
+						Y <= S & R;
 						ls_params_ok <= '1';
 					else
-						ls_params_ok <= '0';
+						-- two or no params on command line, check that start <= end
+						if (unsigned(R) <= unsigned(S)) then
+							Y <= R & S;
+							ls_params_ok <= '1';
+						else
+							ls_params_ok <= '0';
+						end if;
 					end if;
 				end if;
 			when alu_ls_check =>
@@ -824,10 +846,6 @@ end process;
 				Y_saved <= Y;
 			when alu_Y_recall => 
 				Y <= Y_saved;
-			when alu_cp =>
-				-- cp_skip is alias for alu_ready
-				-- because of the dummy push to even the stack, the CC byte is in MSB
-				cp_skip <= (T(10) and s_gt_r) or (T(9) and s_equ_r) or (T(8) and s_minus_r(15));
 			when others =>
 				null;
 		end case;
