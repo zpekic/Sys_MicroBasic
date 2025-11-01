@@ -165,7 +165,7 @@ signal freqcnt_in: std_logic;
 signal debug_txd: std_logic;
 signal cpu_t: std_logic_vector(15 downto 0);
 
-signal prescale_baud, prescale_power: integer range 0 to 65535;
+signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
 signal cnt50MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 100MHz
 alias vga_clk: std_logic is cnt50MHz(1);
@@ -175,6 +175,7 @@ alias freq19200: std_logic is cnt307200(4);
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
 signal cpu_clk: std_logic;
+signal freq1kHz: std_logic;
 
 -- single char UART output
 signal cpu_outchar_ready, cpu_outchar_send: std_logic;
@@ -221,17 +222,26 @@ begin
 	else
 		if (rising_edge(CLK)) then
 			cnt50MHz <= std_logic_vector(unsigned(cnt50MHz) + 1);
+			-- baudrate clock generation
 			if (prescale_baud = 0) then
 				cnt307200 <= std_logic_vector(unsigned(cnt307200) + 1);
 				prescale_baud <= (50000000 / 307200) - 1;
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
+			-- slow clock to get to 2Hz
 			if (prescale_power = 0) then
 				cnt4096 <= std_logic_vector(unsigned(cnt4096) + 1);
 				prescale_power <= (50000000 / 4096);
 			else
 				prescale_power <= prescale_power - 1;
+			end if;
+			-- 1000Hz for CPU ticks (to measure elapsed time in milliseconds)
+			if (prescale_ms = 0) then
+				prescale_ms <= (50000000 / 1000);
+				freq1kHz <= not freq1kHz;
+			else
+				prescale_ms <= prescale_ms - 1;
 			end if;
 		end if;
 	end if;
@@ -258,6 +268,8 @@ nBUSACK <= '0';	-- nothing competes for the RAM
 cpu: entity work.MicroBasic Port map (
 		reset => RESET,
 		clk => cpu_clk,
+		clk_tick => freq1kHz,
+		cond_external => button(1),
 		-- Intermediate language (IL) read-only memory
 		IL_A => il_a,
 		IL_D => il_d,
@@ -278,8 +290,6 @@ cpu: entity work.MicroBasic Port map (
 		inchar_ready => RXD_READY,
 		-- debug / trace
 		traceEnable => not sw_cpuclk(2),
-		trace0 => button(2),
-		trace1 => button(3),
 		baudrate => baudrate_x1,
 		debug_t => cpu_t,					-- use to highlight T position
 		debug_txd => debug_txd, 
@@ -311,10 +321,11 @@ with sw_cpuclk select cpu_clk <=
 		cnt4096(10) when O"1",		-- 4Hz
 		cnt4096(6) when O"2",		-- 64Hz
 		cnt4096(0) when O"3",		-- 4.096kHz
-		cnt50MHz(3) when O"4",		-- 6.125MHz
+		cnt50MHz(3) when O"4",		-- 6.25MHz
 		cnt50MHz(2) when O"5",		-- 12.5MHz
 		cnt50MHz(1) when O"6",		-- 25MHz 
-		cnt50MHz(0) when others; 	-- 50MHz
+--		cnt50MHz(0) when others; 	-- 50MHz
+		CLK when others;
 			 
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.sixdigitsevensegled port map ( 

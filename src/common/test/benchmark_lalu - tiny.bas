@@ -3,30 +3,30 @@
 102 REM See http://www.mtmscientific.com/lalu.html
 103 REM	-------------------------------------
 104 REM https://archive.org/details/InterfaceAge198006/page/n131/mode/2up
-105 REM   SW210    CPU (MHz) Result (s)
-106 REM   100     01.5625 52m23   3143
-107 REM   101     03.1250 26m12   1572
-108 REM   110     06.2500 13m06   786
-109 REM   111     25.0000 3m17    197
+105 REM   SW432   CPU (MHz)	Result (s)
+106 REM   100     6.25		250.076
+107 REM   101     ?
+108 REM   110     ?
+109 REM   111     100.00	16.130
 110 REM   -------------------------------------
-130 PRINT "^GStarting."
+130 PRINT "^GStarting.^M^J"
 140 LET N = 1
 141 IF N > 1000 THEN GOTO 250
 150 	GOSUB 300
 240 	LET N = N + 1
 241 	GOTO 141
-250 PRINT "^GFinished."
-260 STOP
+250 PRINT "^M^J^GFinished."
+260 END
 300 LET K = 2
 301 IF K > 500 THEN GOTO 380
 310 	M=N/K
 312 	J=N-M*K
-320 	IF K=N GOTO 380
-330 	IF M=0 RETURN
-340 	IF M=1 GOTO 370
-350 	IF J>0 GOTO 370
-360 	IF J=0 RETURN
+320 	IF K=N THEN GOTO 380
+330 	IF M=0 THEN RETURN
+340 	IF M=1 THEN GOTO 370
+350 	IF J>0 THEN GOTO 370
+360 	IF J=0 THEN RETURN
 370 	LET K = K + 1
 371 	GOTO 301
-380 PRINT N, "";
+380 PRINT N,
 390 RETURN
