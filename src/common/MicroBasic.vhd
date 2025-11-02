@@ -38,6 +38,9 @@ entity MicroBasic is
            clk : in  STD_LOGIC;
 			  clk_tick: in STD_LOGIC;
 			  cond_external: in STD_LOGIC;
+			  -- GOTO cache state
+			  cache_empty : out STD_LOGIC;
+			  cache_full : out STD_LOGIC;
 			  -- Intermediate language (IL) read-only memory
 			  IL_A: out STD_LOGIC_VECTOR(10 downto 0);
 			  IL_D: in STD_LOGIC_VECTOR(7 downto 0);
@@ -162,10 +165,22 @@ signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul
 -- Basic line number
 signal Lino: std_logic_vector(15 downto 0) := X"0000";
 signal is_runmode: std_logic;		-- 0 for commands, 1 for RUN
+-- GOTO cache lookup convenience
+alias Lino_index: std_logic_vector(4 downto 0) is Lino(4 downto 0);
+alias Lino_tag: std_logic_vector(10 downto 0) is Lino(15 downto 5);
 
 -- built in counter, counts in "ticks" while Basic program is running
 signal cnt_tick, cnt_tick_inc: std_logic_vector(31 downto 0);
 signal lino_tick: std_logic_vector(15 downto 0);
+
+-- GOTO cache
+signal cache: ram32x32;
+signal cache_valid: std_logic_vector(31 downto 0) := (others => '0');
+signal lino_clk: std_logic_vector(15 downto 0);
+signal cache_entry: std_logic_vector(31 downto 0);
+alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5); 
+alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
+signal cache_hit: std_logic;
 
 -- other
 signal T, T_saved: std_logic_vector(15 downto 0);
@@ -174,6 +189,12 @@ signal at_tab: std_logic;
 signal ready_alt_break: std_logic;
 
 begin
+
+-- GOTO cache
+cache_empty <= '1' when (cache_valid = X"00000000") else '0';	-- all 32 entries free
+cache_full <= '1' when (cache_valid = X"FFFFFFFF") else '0';	-- all 32 entries used
+cache_entry <= cache(to_integer(unsigned(Lino_index)));			-- cache entry pointed to by Lino 
+cache_hit <= '1' when (cache_tag = Lino_tag) else '0';
 
 -- Tristate system bus (64k address, bidirectional 8-bit data to Basic RAM "core")
 nRD <= mb_nRD when (nBUSACK = '0') else 'Z';
@@ -284,8 +305,8 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
 			cond(seq_cond_EXTERNAL) => cond_external,	-- boolean signal from outside of the CPU
-			cond(seq_cond_RESERVED29) => '0',
-			cond(seq_cond_RESERVED30) => '0',
+			cond(seq_cond_CACHE_VALID) => cache_valid(to_integer(unsigned(Lino_index))),
+			cond(seq_cond_CACHE_HIT) => cache_hit,
 			cond(seq_cond_false) => '0',
 			-- outputs
 			ui_nextinstr => ui_nextinstr,
@@ -488,6 +509,8 @@ begin
 				T <= BasStack(to_integer(unsigned(BasSP) - 1))(31 downto 16);
 			when T_BasStack_Lo =>
 				T <= BasStack(to_integer(unsigned(BasSP) - 1))(15 downto 0);
+			when T_Cache_Data =>
+				T <= cache_data;
 			when others =>
 				null;
 		end case;
@@ -754,6 +777,11 @@ end process;
  update_alu: process(clk, mb_alu)
  begin
 	if (rising_edge(clk)) then
+		-- clear cache valid bits at start of run (when Lino goes from 0 to some valid Basic line number)
+		lino_clk <= Lino;
+		if ((is_runmode = '1') and (lino_clk = X"0000")) then
+			cache_valid <= (others => '0');
+		end if;
 		case mb_alu is
 --			when alu_nop =>
 --				alu <= alu;
@@ -933,6 +961,9 @@ end process;
 				Y <= Y_saved;
 			when alu_Y_fromTicks =>
 				Y <= cnt_tick;
+			when alu_cache_store =>
+				cache(to_integer(unsigned(Lino_index))) <= BP & Lino;
+				cache_valid(to_integer(unsigned(Lino_index))) <= '1';
 			when others =>
 				null;
 		end case;
@@ -1090,7 +1121,7 @@ begin
 	else
 		if (rising_edge(clk_tick)) then
 			lino_tick <= Lino;
-			if (Lino /= X"0000") then
+			if (is_runmode = '1') then
 				if (lino_tick = X"0000") then
 					-- going from stopped to running
 					cnt_tick <= (others => '0');

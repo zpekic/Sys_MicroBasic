@@ -41,7 +41,7 @@ alias mb_nRD: 	std_logic is mb_uinstruction(78);
 ---- End boilerplate code
 
 --
--- L0018.seq_cond: .if 5 values true, ILCODEBYTE_BIT7, CHAROUT_READY, IL_A_VALID, DBG_READY | KBD_BREAK, MDR_EQU_DB, nBUSACK, INLEND_MAX | BASLINE_FOUND, INLEND_MIN | IMPLINE_EMPTY, CHARIN_PRINTABLE, CHARIN_EQU_DB, CHARIN_READY, BP_IN_INPLINE, SVP_IN_INPLINE, MDR_IS_NUM, MDR_IS_ALPHA, STACK_IS_FULL, STACK_IS_EMPTY, MDR_MATCHES_ILCODEBYTE, R_IS_ZERO, Y_ZERO   | CP_SKIP, Y_SIGN, ALU_READY  | LS_PARAMS_OK, ALU_OVERFLOW  | LS_PASSED_END, ALU_SIGN  | LS_IN_RANGE, AT_TAB, OFF_IS_ZERO, IS_RUNMODE, EXTERNAL, RESERVED29, RESERVED30, false default true;
+-- L0018.seq_cond: .if 5 values true, ILCODEBYTE_BIT7, CHAROUT_READY, IL_A_VALID, DBG_READY | KBD_BREAK, MDR_EQU_DB, nBUSACK, INLEND_MAX | BASLINE_FOUND, INLEND_MIN | IMPLINE_EMPTY, CHARIN_PRINTABLE, CHARIN_EQU_DB, CHARIN_READY, BP_IN_INPLINE, SVP_IN_INPLINE, MDR_IS_NUM, MDR_IS_ALPHA, STACK_IS_FULL, STACK_IS_EMPTY, MDR_MATCHES_ILCODEBYTE, R_IS_ZERO, Y_ZERO   | CP_SKIP, Y_SIGN, ALU_READY  | LS_PARAMS_OK, ALU_OVERFLOW  | LS_PASSED_END, ALU_SIGN  | LS_IN_RANGE, AT_TAB, OFF_IS_ZERO, IS_RUNMODE, EXTERNAL, CACHE_VALID, CACHE_HIT, false default true;
 --
 alias mb_seq_cond: 	std_logic_vector(4 downto 0) is mb_uinstruction(77 downto 73);
 constant seq_cond_true: 	integer := 0;
@@ -80,8 +80,8 @@ constant seq_cond_AT_TAB: 	integer := 25;
 constant seq_cond_OFF_IS_ZERO: 	integer := 26;
 constant seq_cond_IS_RUNMODE: 	integer := 27;
 constant seq_cond_EXTERNAL: 	integer := 28;
-constant seq_cond_RESERVED29: 	integer := 29;
-constant seq_cond_RESERVED30: 	integer := 30;
+constant seq_cond_CACHE_VALID: 	integer := 29;
+constant seq_cond_CACHE_HIT: 	integer := 30;
 constant seq_cond_false: 	integer := 31;
 ---- Start boilerplate code (use with utmost caution!)
 ---- include '.controller <filename.vhd>, <stackdepth>;' in .mcc file to generate pre-canned microcode control unit and feed 'conditions' with:
@@ -114,8 +114,8 @@ constant seq_cond_false: 	integer := 31;
 --  cond(seq_cond_OFF_IS_ZERO) => OFF_IS_ZERO,
 --  cond(seq_cond_IS_RUNMODE) => IS_RUNMODE,
 --  cond(seq_cond_EXTERNAL) => EXTERNAL,
---  cond(seq_cond_RESERVED29) => RESERVED29,
---  cond(seq_cond_RESERVED30) => RESERVED30,
+--  cond(seq_cond_CACHE_VALID) => CACHE_VALID,
+--  cond(seq_cond_CACHE_HIT) => CACHE_HIT,
 --  cond(seq_cond_false) => '0',
 ---- End boilerplate code
 
@@ -150,7 +150,7 @@ alias mb_directByte: 	std_logic_vector(6 downto 0) is mb_uinstruction(54 downto 
 ---- End boilerplate code
 
 --
--- L0059.T: .regfield 5 values same, IL_PC, XQhere, from_vars, ExpStack, from_YLo, from_YHi, zero, codeByte, MDRx2, inc, dec, BP, Prog_start, PrgEnd, from_S, from_R, save, recall, BasStack_Hi, BasStack_Lo, -, -, -, -, -, -, -, -, -, - default same;
+-- L0059.T: .regfield 5 values same, IL_PC, XQhere, from_vars, ExpStack, from_YLo, from_YHi, zero, codeByte, MDRx2, inc, dec, BP, Prog_start, PrgEnd, from_S, from_R, save, recall, BasStack_Hi, BasStack_Lo, Cache_Data, -, -, -, -, -, -, -, -, - default same;
 --
 alias mb_T: 	std_logic_vector(4 downto 0) is mb_uinstruction(47 downto 43);
 constant T_same: 	std_logic_vector(4 downto 0) := "00000";
@@ -174,7 +174,7 @@ constant T_save: 	std_logic_vector(4 downto 0) := "10001";
 constant T_recall: 	std_logic_vector(4 downto 0) := "10010";
 constant T_BasStack_Hi: 	std_logic_vector(4 downto 0) := "10011";
 constant T_BasStack_Lo: 	std_logic_vector(4 downto 0) := "10100";
--- Value "10101" not allowed (name '-' is not assignable)
+constant T_Cache_Data: 	std_logic_vector(4 downto 0) := "10101";
 -- Value "10110" not allowed (name '-' is not assignable)
 -- Value "10111" not allowed (name '-' is not assignable)
 -- Value "11000" not allowed (name '-' is not assignable)
@@ -231,6 +231,8 @@ constant T_BasStack_Lo: 	std_logic_vector(4 downto 0) := "10100";
 --				T <= BasStack_Hi;
 --			when T_BasStack_Lo =>
 --				T <= BasStack_Lo;
+--			when T_Cache_Data =>
+--				T <= Cache_Data;
 --			when others =>
 --				null;
 --		end case;
@@ -671,7 +673,7 @@ constant Vars_T: 	std_logic_vector(1 downto 0) := "10";
 ---- End boilerplate code
 
 --
--- L0227.alu: .regfield 5 values nop, reset0, reset1, R_fromStack, S_fromStack, S_plus_R, S_minus_R, neg_R, S_mul_R, Yx16, bcd_start, bcd_next, div_start, div_shift, div_subset, div_end, Yx10_plus_MDR, Rx256_plus_MDR, S_fromT, R_fromT, S_fromLino, copy_del, copy_inc, ls_load, ls_check, Y_save, Y_recall, Y_fromTicks, -, -, -, - default nop;
+-- L0227.alu: .regfield 5 values nop, reset0, reset1, R_fromStack, S_fromStack, S_plus_R, S_minus_R, neg_R, S_mul_R, Yx16, bcd_start, bcd_next, div_start, div_shift, div_subset, div_end, Yx10_plus_MDR, Rx256_plus_MDR, S_fromT, R_fromT, S_fromLino, copy_del, copy_inc, ls_load, ls_check, Y_save, Y_recall, Y_fromTicks, cache_store, -, -, - default nop;
 --
 alias mb_alu: 	std_logic_vector(4 downto 0) is mb_uinstruction(10 downto 6);
 constant alu_nop: 	std_logic_vector(4 downto 0) := "00000";
@@ -702,7 +704,7 @@ constant alu_ls_check: 	std_logic_vector(4 downto 0) := "11000";
 constant alu_Y_save: 	std_logic_vector(4 downto 0) := "11001";
 constant alu_Y_recall: 	std_logic_vector(4 downto 0) := "11010";
 constant alu_Y_fromTicks: 	std_logic_vector(4 downto 0) := "11011";
--- Value "11100" not allowed (name '-' is not assignable)
+constant alu_cache_store: 	std_logic_vector(4 downto 0) := "11100";
 -- Value "11101" not allowed (name '-' is not assignable)
 -- Value "11110" not allowed (name '-' is not assignable)
 -- Value "11111" not allowed (name '-' is not assignable)
@@ -767,6 +769,8 @@ constant alu_Y_fromTicks: 	std_logic_vector(4 downto 0) := "11011";
 --				alu <= Y_recall;
 --			when alu_Y_fromTicks =>
 --				alu <= Y_fromTicks;
+--			when alu_cache_store =>
+--				alu <= cache_store;
 --			when others =>
 --				null;
 --		end case;
@@ -872,2257 +876,2297 @@ alias mb_dummy: 	std_logic is mb_uinstruction(0);
 constant mb_microcode: mb_code_memory := (
 
 -- nop;
--- L0344@0000 C00000FF000000000000._reset:  if true then continue else repeat;
+-- L0345@0000 C00000FF000000000000._reset:  if true then continue else repeat;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 0 => '1' & '1' & "00000" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- nop;
--- L0346@0001 C00000FF000000000000._reset1:  if true then continue else repeat;
+-- L0347@0001 C00000FF000000000000._reset1:  if true then continue else repeat;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 1 => '1' & '1' & "00000" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- nop;
--- L0348@0002 C00000FF000000000000._reset2:  if true then continue else repeat;
+-- L0349@0002 C00000FF000000000000._reset2:  if true then continue else repeat;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 2 => '1' & '1' & "00000" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- nop;
--- L0350@0003 C00000FF000000000000._reset3:  if true then continue else repeat;
+-- L0351@0003 C00000FF000000000000._reset3:  if true then continue else repeat;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 3 => '1' & '1' & "00000" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 4;
--- L0354@0004 C1BFDF84020000000000.ColdStart:  trace(from_microcode), directByte = 4;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-4 => '1' & '1' & "00000" & O"677" & O"677" & "0000100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0355@0004 C1C7E384020000000000.ColdStart:  trace(from_microcode), directByte = 4;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+4 => '1' & '1' & "00000" & O"707" & O"707" & "0000100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- write2Nulls(Prog_start);
--- L0355@0005 C187C3FF680000000000.  write2Nulls(Prog_start);
---  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-5 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0356@0005 C18FC7FF680000000000.  write2Nulls(Prog_start);
+--  nWR = 1, nRD = 1, if (00000) then 110001111 else 110001111, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+5 => '1' & '1' & "00000" & O"617" & O"617" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- clear;
--- L0356@0006 C000007F3C4520000040.WarmStart:  DBGINDEX <= zero, IL_PC <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
+-- L0357@0006 C000007F3C4520000040.WarmStart:  DBGINDEX <= zero, IL_PC <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00111, DBGINDEX <= 10, IL_PC <= 001, XQhere <= 0, IL_OP <= 0, RetStack <= 01, BasStack <= 01, ExpStack <= 001, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 6 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00111" & "10" & O"1" & '0' & '0' & "01" & "01" & O"1" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero;
--- L0357@0007 C000007F380000094000.  BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero;
+-- L0358@0007 C000007F380000094000.  BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00111, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 01, BP <= 001, SvPt <= 01, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 7 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "01" & O"1" & "01" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Lino <= T;
--- L0358@0008 C000007F000000000020.  Lino <= T;
+-- L0359@0008 C000007F000000000020.  Lino <= T;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 8 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
 
 -- XQhere <= T;
--- L0359@0009 C000007F002000000000.  XQhere <= T;
+-- L0360@0009 C000007F002000000000.  XQhere <= T;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 1, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 9 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '1' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- write2Nulls(BP);
--- L0360@000A C187C3FF600000000000.  write2Nulls(BP);
---  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-10 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0361@000A C18FC7FF600000000000.  write2Nulls(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110001111 else 110001111, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+10 => '1' & '1' & "00000" & O"617" & O"617" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- trace(crlf);
--- L0362@000B C1BFDFFF060000000000.fetch:  trace(crlf);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-11 => '1' & '1' & "00000" & O"677" & O"677" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0363@000B C1C7E3FF060000000000.fetch:  trace(crlf);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+11 => '1' & '1' & "00000" & O"707" & O"707" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 51;
--- L0363@000C C1BFDFB3020000000000.  trace(from_microcode), directByte = 51;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-12 => '1' & '1' & "00000" & O"677" & O"677" & "0110011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0364@000C C1C7E3B3020000000000.  trace(from_microcode), directByte = 51;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+12 => '1' & '1' & "00000" & O"707" & O"707" & "0110011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 2;
--- L0364@000D C1BFDF82020000000000.  trace(from_microcode), directByte = 2;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-13 => '1' & '1' & "00000" & O"677" & O"677" & "0000010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0365@000D C1C7E382020000000000.  trace(from_microcode), directByte = 2;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+13 => '1' & '1' & "00000" & O"707" & O"707" & "0000010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_OP <= from_interpreter, IL_PC <= inc;
--- L0365@000E C000007F009000000000.  IL_OP <= from_interpreter, IL_PC <= inc;
+-- L0366@000E C000007F009000000000.  IL_OP <= from_interpreter, IL_PC <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 1, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 14 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"2" & '0' & '1' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceSDepth;
--- L0366@000F C1BFDFB8020000000000.  trace(from_microcode), directByte = 56;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-15 => '1' & '1' & "00000" & O"677" & O"677" & "0111000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0367@000F C1C7E3B8020000000000.  trace(from_microcode), directByte = 56;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+15 => '1' & '1' & "00000" & O"707" & O"707" & "0111000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
--- L0367@0010 C603B3FF000000000040.  alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
---  nWR = 1, nRD = 1, if (00011) then 000000011 else 101100111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-16 => '1' & '1' & "00011" & O"003" & O"547" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0368@0010 C603B7FF000000000040.  alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
+--  nWR = 1, nRD = 1, if (00011) then 000000011 else 101101111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+16 => '1' & '1' & "00011" & O"003" & O"557" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto INTERNAL_ERR;
--- L0370@0011 FE00B3FF000000000000.badop:  if false then continue else INTERNAL_ERR;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101100111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-17 => '1' & '1' & "11111" & O"000" & O"547" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0371@0011 FE00B7FF000000000000.badop:  if false then continue else INTERNAL_ERR;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+17 => '1' & '1' & "11111" & O"000" & O"557" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 15;
--- L0375@0012 C1BFDF8F020000000000.  trace(from_microcode), directByte = 15;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-18 => '1' & '1' & "00000" & O"677" & O"677" & "0001111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0376@0012 C1C7E38F020000000000.  trace(from_microcode), directByte = 15;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+18 => '1' & '1' & "00000" & O"707" & O"707" & "0001111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= startSwap;
--- L0376@0013 C000007F000040000000.  ExpStack <= startSwap;
+-- L0377@0013 C000007F000040000000.  ExpStack <= startSwap;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 010, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 19 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"2" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= endSwap;
--- L0377@0014 C000007F000060000000.  ExpStack <= endSwap;
+-- L0378@0014 C000007F000060000000.  ExpStack <= endSwap;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 011, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 20 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"3" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0378@0015 FE0005FF000000000000.  if false then continue else fetch;
+-- L0379@0015 FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 21 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 15;
--- L0381@0016 C1BFDF8F020000000000.  trace(from_microcode), directByte = 15;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-22 => '1' & '1' & "00000" & O"677" & O"677" & "0001111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0382@0016 C1C7E38F020000000000.  trace(from_microcode), directByte = 15;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+22 => '1' & '1' & "00000" & O"707" & O"707" & "0001111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0382@0017 FE0005FF000000000000.  if false then continue else fetch;
+-- L0383@0017 FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 23 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 12;
--- L0387@0018 C1BFDF8C020000000000.  trace(from_microcode), directByte = 12;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-24 => '1' & '1' & "00000" & O"677" & O"677" & "0001100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0388@0018 C1C7E38C020000000000.  trace(from_microcode), directByte = 12;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+24 => '1' & '1' & "00000" & O"707" & O"707" & "0001100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0388@0019 FE0005FF000000000000.  if false then continue else fetch;
+-- L0389@0019 FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 25 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 28;
--- L0393@001A C1BFDF9C020000000000.  trace(from_microcode), directByte = 28;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-26 => '1' & '1' & "00000" & O"677" & O"677" & "0011100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0394@001A C1C7E39C020000000000.  trace(from_microcode), directByte = 28;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+26 => '1' & '1' & "00000" & O"707" & O"707" & "0011100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 3, T <= codeByte;
--- L0394@001B C1BFDF83420000000000.lb_push:  trace(from_microcode), directByte = 3, T <= codeByte;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 01000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-27 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "01000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0395@001B C1C7E383420000000000.lb_push:  trace(from_microcode), directByte = 3, T <= codeByte;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 01000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+27 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "01000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TByte;
--- L0395@001C C000007F0000A0000000.  ExpStack <= push_TByte;
+-- L0396@001C C000007F0000A0000000.  ExpStack <= push_TByte;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 101, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 28 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"5" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else fetch;
--- L0396@001D E16905FF008000000000.  IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else fetch;
---  nWR = 1, nRD = 1, if (10000) then 101101001 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-29 => '1' & '1' & "10000" & O"551" & O"013" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0397@001D E17105FF008000000000.  IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else fetch;
+--  nWR = 1, nRD = 1, if (10000) then 101110001 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+29 => '1' & '1' & "10000" & O"561" & O"013" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 29;
--- L0401@001E C1BFDF9D020000000000.  trace(from_microcode), directByte = 29;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-30 => '1' & '1' & "00000" & O"677" & O"677" & "0011101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0402@001E C1C7E39D020000000000.  trace(from_microcode), directByte = 29;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+30 => '1' & '1' & "00000" & O"707" & O"707" & "0011101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 3, T <= codeByte;
--- L0402@001F C1BFDF83420000000000.  trace(from_microcode), directByte = 3, T <= codeByte;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 01000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-31 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "01000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0403@001F C1C7E383420000000000.  trace(from_microcode), directByte = 3, T <= codeByte;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 01000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+31 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "01000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TByte;
--- L0403@0020 C000007F0000A0000000.  ExpStack <= push_TByte;
+-- L0404@0020 C000007F0000A0000000.  ExpStack <= push_TByte;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 101, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 32 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"5" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else lb_push;
--- L0404@0021 E1690DFF008000000000.  IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else lb_push;
---  nWR = 1, nRD = 1, if (10000) then 101101001 else 000011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-33 => '1' & '1' & "10000" & O"551" & O"033" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0405@0021 E1710DFF008000000000.  IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else lb_push;
+--  nWR = 1, nRD = 1, if (10000) then 101110001 else 000011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+33 => '1' & '1' & "10000" & O"561" & O"033" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 38;
--- L0409@0022 C1BFDFA6020000000000.  trace(from_microcode), directByte = 38;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-34 => '1' & '1' & "00000" & O"677" & O"677" & "0100110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0410@0022 C1C7E3A6020000000000.  trace(from_microcode), directByte = 38;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+34 => '1' & '1' & "00000" & O"707" & O"707" & "0100110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0410@0023 E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-35 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0411@0023 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+35 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= ExpStack, if STACK_IS_FULL then ESTACK_ERR;
--- L0411@0024 E169007F200000000000.  T <= ExpStack, if STACK_IS_FULL then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10000) then 101101001 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-36 => '1' & '1' & "10000" & O"551" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0412@0024 E171007F200000000000.  T <= ExpStack, if STACK_IS_FULL then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10000) then 101110001 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+36 => '1' & '1' & "10000" & O"561" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TWord, goto fetch;
--- L0412@0025 FE0005FF000080000000.  ExpStack <= push_TWord, if false then continue else fetch;
+-- L0413@0025 FE0005FF000080000000.  ExpStack <= push_TWord, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 37 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 34;
--- L0417@0026 C1BFDFA2020000000000.  trace(from_microcode), directByte = 34;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-38 => '1' & '1' & "00000" & O"677" & O"677" & "0100010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0418@0026 C1C7E3A2020000000000.  trace(from_microcode), directByte = 34;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+38 => '1' & '1' & "00000" & O"707" & O"707" & "0100010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0418@0027 E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-39 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0419@0027 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+39 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= pop2, goto fetch;
--- L0419@0028 FE0005FF0000C0000000.  ExpStack <= pop2, if false then continue else fetch;
+-- L0420@0028 FE0005FF0000C0000000.  ExpStack <= pop2, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 40 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 10;
--- L0424@0029 C1BFDF8A020000000000.  trace(from_microcode), directByte = 10;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-41 => '1' & '1' & "00000" & O"677" & O"677" & "0001010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0425@0029 C1C7E38A020000000000.  trace(from_microcode), directByte = 10;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+41 => '1' & '1' & "00000" & O"707" & O"707" & "0001010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if BP_IN_INPLINE then next else ptr_exc;
--- L0425@002A D800187F000000000000.  if BP_IN_INPLINE then next else ptr_exc;
+-- L0426@002A D800187F000000000000.  if BP_IN_INPLINE then next else ptr_exc;
 --  nWR = 1, nRD = 1, if (01100) then 000000000 else 000110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 42 => '1' & '1' & "01100" & O"000" & O"060" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- SvPt <= BP;
--- L0426@002B C000007F000000008000.save_bp:  SvPt <= BP;
+-- L0427@002B C000007F000000008000.save_bp:  SvPt <= BP;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 10, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 43 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "10" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceBP();
--- L0427@002C C1B2D97F000000000000.bp_done:  traceBP();
---  nWR = 1, nRD = 1, if (00000) then 110110010 else 110110010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-44 => '1' & '1' & "00000" & O"662" & O"662" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0428@002C C1BADD7F000000000000.bp_done:  traceBP();
+--  nWR = 1, nRD = 1, if (00000) then 110111010 else 110111010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+44 => '1' & '1' & "00000" & O"672" & O"672" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0428@002D FE0005FF000000000000.  if false then continue else fetch;
+-- L0429@002D FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 45 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 11;
--- L0433@002E C1BFDF8B020000000000.  trace(from_microcode), directByte = 11;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-46 => '1' & '1' & "00000" & O"677" & O"677" & "0001011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0434@002E C1C7E38B020000000000.  trace(from_microcode), directByte = 11;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+46 => '1' & '1' & "00000" & O"707" & O"707" & "0001011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if SVP_IN_INPLINE then save_bp;
--- L0434@002F DA2B007F000000000000.  if SVP_IN_INPLINE then save_bp;
+-- L0435@002F DA2B007F000000000000.  if SVP_IN_INPLINE then save_bp;
 --  nWR = 1, nRD = 1, if (01101) then 000101011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 47 => '1' & '1' & "01101" & O"053" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- SvPt <= BP, BP <= SvPt, goto bp_done;
--- L0435@0030 FE00167F000000028000.ptr_exc:  SvPt <= BP, BP <= SvPt, if false then continue else bp_done;
+-- L0436@0030 FE00167F000000028000.ptr_exc:  SvPt <= BP, BP <= SvPt, if false then continue else bp_done;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 010, SvPt <= 10, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 48 => '1' & '1' & "11111" & O"000" & O"054" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"2" & "10" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 36;
--- L0440@0031 C1BFDFA4020000000000.  trace(from_microcode), directByte = 36;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-49 => '1' & '1' & "00000" & O"677" & O"677" & "0100100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0441@0031 C1C7E3A4020000000000.  trace(from_microcode), directByte = 36;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+49 => '1' & '1' & "00000" & O"707" & O"707" & "0100100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0441@0032 E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-50 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0442@0032 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+50 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Vars <= indexFromExpStack;
--- L0442@0033 C000007F000000000800.  Vars <= indexFromExpStack;
+-- L0443@0033 C000007F000000000800.  Vars <= indexFromExpStack;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 01, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 51 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "01" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_vars, ExpStack <= pop1;
--- L0443@0034 C000007F1800E0000000.  T <= from_vars, ExpStack <= pop1;
+-- L0444@0034 C000007F1800E0000000.  T <= from_vars, ExpStack <= pop1;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 111, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 52 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"7" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TWord, goto fetch;
--- L0444@0035 FE0005FF000080000000.  ExpStack <= push_TWord, if false then continue else fetch;
+-- L0445@0035 FE0005FF000080000000.  ExpStack <= push_TWord, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 53 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 37;
--- L0449@0036 C1BFDFA5020000000000.  trace(from_microcode), directByte = 37;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-54 => '1' & '1' & "00000" & O"677" & O"677" & "0100101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0450@0036 C1C7E3A5020000000000.  trace(from_microcode), directByte = 37;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+54 => '1' & '1' & "00000" & O"707" & O"707" & "0100101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0450@0037 E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-55 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0451@0037 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+55 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= ExpStack, ExpStack <= pop2;
--- L0451@0038 C000007F2000C0000000.  T <= ExpStack, ExpStack <= pop2;
+-- L0452@0038 C000007F2000C0000000.  T <= ExpStack, ExpStack <= pop2;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 56 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0452@0039 E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-57 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0453@0039 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+57 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Vars <= indexFromExpStack, ExpStack <= pop1;
--- L0453@003A C000007F0000E0000800.  Vars <= indexFromExpStack, ExpStack <= pop1;
+-- L0454@003A C000007F0000E0000800.  Vars <= indexFromExpStack, ExpStack <= pop1;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 111, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 01, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 58 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"7" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "01" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Vars <= T, goto fetch;
--- L0454@003B FE0005FF000000001000.  Vars <= T, if false then continue else fetch;
+-- L0455@003B FE0005FF000000001000.  Vars <= T, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 10, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 59 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "10" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 47;
--- L0459@003C C1BFDFAF020000000000.  trace(from_microcode), directByte = 47;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-60 => '1' & '1' & "00000" & O"677" & O"677" & "0101111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0460@003C C1C7E3AF020000000000.  trace(from_microcode), directByte = 47;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+60 => '1' & '1' & "00000" & O"707" & O"707" & "0101111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if IS_RUNMODE then next else INTERNAL_ERR;
--- L0460@003D F600B3FF000000000000.  if IS_RUNMODE then next else INTERNAL_ERR;
---  nWR = 1, nRD = 1, if (11011) then 000000000 else 101100111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-61 => '1' & '1' & "11011" & O"000" & O"547" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0461@003D F600B7FF000000000000.  if IS_RUNMODE then next else INTERNAL_ERR;
+--  nWR = 1, nRD = 1, if (11011) then 000000000 else 101101111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+61 => '1' & '1' & "11011" & O"000" & O"557" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_FULL then BSTACK_ERR;
--- L0461@003E E16D007F000000000000.  if STACK_IS_FULL then BSTACK_ERR;
---  nWR = 1, nRD = 1, if (10000) then 101101101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-62 => '1' & '1' & "10000" & O"555" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0462@003E E175007F000000000000.  if STACK_IS_FULL then BSTACK_ERR;
+--  nWR = 1, nRD = 1, if (10000) then 101110101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+62 => '1' & '1' & "10000" & O"565" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BasStack <= push_Lino_and_BP, goto fetch;
--- L0462@003F FE0005FF000300000000.  BasStack <= push_Lino_and_BP, if false then continue else fetch;
+-- L0463@003F FE0005FF000300000000.  BasStack <= push_Lino_and_BP, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 11, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 63 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "11" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 48;
--- L0467@0040 C1BFDFB0020000000000.  trace(from_microcode), directByte = 48;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-64 => '1' & '1' & "00000" & O"677" & O"677" & "0110000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0468@0040 C1C7E3B0020000000000.  trace(from_microcode), directByte = 48;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+64 => '1' & '1' & "00000" & O"707" & O"707" & "0110000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if IS_RUNMODE then next else INTERNAL_ERR;
--- L0468@0041 F600B3FF000000000000.  if IS_RUNMODE then next else INTERNAL_ERR;
---  nWR = 1, nRD = 1, if (11011) then 000000000 else 101100111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-65 => '1' & '1' & "11011" & O"000" & O"547" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0469@0041 F600B7FF000000000000.  if IS_RUNMODE then next else INTERNAL_ERR;
+--  nWR = 1, nRD = 1, if (11011) then 000000000 else 101101111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+65 => '1' & '1' & "11011" & O"000" & O"557" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then BSTACK_ERR;
--- L0469@0042 E36D007F000000000000.  if STACK_IS_EMPTY then BSTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-66 => '1' & '1' & "10001" & O"555" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0470@0042 E375007F000000000000.  if STACK_IS_EMPTY then BSTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+66 => '1' & '1' & "10001" & O"565" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= BasStack_Hi;
--- L0470@0043 C000007F980000000000.  T <= BasStack_Hi;
+-- L0471@0043 C000007F980000000000.  T <= BasStack_Hi;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 67 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Lino <= T, T <= BasStack_Lo;
--- L0471@0044 C000007FA00000000020.  Lino <= T, T <= BasStack_Lo;
+-- L0472@0044 C000007FA00000000020.  Lino <= T, T <= BasStack_Lo;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 68 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= T, BasStack <= pop, goto fetch;
--- L0472@0045 FE0005FF000200060000.  BP <= T, BasStack <= pop, if false then continue else fetch;
+-- L0473@0045 FE0005FF000200060000.  BP <= T, BasStack <= pop, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 10, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 69 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "10" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 45;
--- L0477@0046 C1BFDFAD020000000000.  trace(from_microcode), directByte = 45;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-70 => '1' & '1' & "00000" & O"677" & O"677" & "0101101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0478@0046 C1C7E3AD020000000000.  trace(from_microcode), directByte = 45;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+70 => '1' & '1' & "00000" & O"707" & O"707" & "0101101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= XQhere;
--- L0478@0047 C000007F100000000000.  T <= XQhere;
+-- L0479@0047 C000007F100000000000.  T <= XQhere;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 71 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;
--- L0479@0048 E369007F00C000000000.  IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 011, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-72 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"3" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0480@0048 E371007F00C000000000.  IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 011, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+72 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"3" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= R_fromStack, ExpStack <= pop2;
--- L0480@0049 C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
+-- L0481@0049 C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 73 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceALU();
--- L0481@004A C1B8DC7F000000000000.  traceALU();
---  nWR = 1, nRD = 1, if (00000) then 110111000 else 110111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-74 => '1' & '1' & "00000" & O"670" & O"670" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if R_IS_ZERO then NOPROG_ERR;
--- L0482@004B E75F007F000000000000.  if R_IS_ZERO then NOPROG_ERR;
---  nWR = 1, nRD = 1, if (10011) then 101011111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-75 => '1' & '1' & "10011" & O"537" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
 -- T <= from_R;
--- L0483@004C C000007F800000000000.go_find:  T <= from_R;
+-- L0482@004A C000007F800000000000.  T <= from_R;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-76 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+74 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- Lino <= T, T <= Prog_start;
--- L0484@004D C000007F680000000020.  Lino <= T, T <= Prog_start;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-77 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= reset1, readCore(T);
--- L0485@004E C1A9D4FF000003000080.go_search:  alu <= reset1, readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-78 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00010" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= Rx256_plus_MDR, T <= inc;
--- L0486@004F C000007F500000000440.  alu <= Rx256_plus_MDR, T <= inc;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-79 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= S_fromLino, readCore(T);
--- L0487@0050 C1A9D4FF000003000500.  alu <= S_fromLino, readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-80 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= Rx256_plus_MDR, T <= inc;
--- L0488@0051 C000007F500000000440.  alu <= Rx256_plus_MDR, T <= inc;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-81 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= S_minus_R, if R_IS_ZERO then stop_run;
--- L0489@0052 E722007F000000000180.  alu <= S_minus_R, if R_IS_ZERO then stop_run;
---  nWR = 1, nRD = 1, if (10011) then 100100010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-82 => '1' & '1' & "10011" & O"442" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if Y_ZERO then go_found;
--- L0490@0053 E856007F000000000000.  if Y_ZERO then go_found;
---  nWR = 1, nRD = 1, if (10100) then 001010110 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-83 => '1' & '1' & "10100" & O"126" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- findNextCR(same);
--- L0491@0054 C17FBFFF000000000000.  findNextCR(same);
---  nWR = 1, nRD = 1, if (00000) then 101111111 else 101111111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-84 => '1' & '1' & "00000" & O"577" & O"577" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= inc, goto go_search;
--- L0492@0055 FE00277F500000000000.  T <= inc, if false then continue else go_search;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 001001110, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-85 => '1' & '1' & "11111" & O"000" & O"116" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- BP <= T, goto fetch;
--- L0493@0056 FE0005FF000000060000.go_found:  BP <= T, if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-86 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 25;
--- L0498@0057 C1BFDF99020000000000.  trace(from_microcode), directByte = 25;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-87 => '1' & '1' & "00000" & O"677" & O"677" & "0011001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= R_fromStack, if STACK_IS_EMPTY then ESTACK_ERR;
--- L0499@0058 E369007F0000000000C0.  alu <= R_fromStack, if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-88 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- ExpStack <= pop2;
--- L0500@0059 C000007F0000C0000000.  ExpStack <= pop2;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-89 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= neg_R, if ALU_READY then alu_done else repeat;
--- L0501@005A EC5E00FF0000000001C0.  alu <= neg_R, if ALU_READY then alu_done else repeat;
---  nWR = 1, nRD = 1, if (10110) then 001011110 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00111, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-90 => '1' & '1' & "10110" & O"136" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00111" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 22;
--- L0506@005B C1BFDF96020000000000.  trace(from_microcode), directByte = 22;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-91 => '1' & '1' & "00000" & O"677" & O"677" & "0010110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- pullRS();
--- L0507@005C C18AC57F000000000000.  pullRS();
---  nWR = 1, nRD = 1, if (00000) then 110001010 else 110001010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-92 => '1' & '1' & "00000" & O"612" & O"612" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= S_plus_R, if ALU_READY then next else repeat;
--- L0508@005D EC0000FF000000000140.  alu <= S_plus_R, if ALU_READY then next else repeat;
---  nWR = 1, nRD = 1, if (10110) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00101, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-93 => '1' & '1' & "10110" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00101" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceALU();
--- L0509@005E C1B8DC7F000000000000.alu_done:  traceALU();
---  nWR = 1, nRD = 1, if (00000) then 110111000 else 110111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-94 => '1' & '1' & "00000" & O"670" & O"670" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
--- L0510@005F EF63007F280000000000.  T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
---  nWR = 1, nRD = 1, if (10111) then 101100011 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-95 => '1' & '1' & "10111" & O"543" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- ExpStack <= push_TWord, goto fetch;
--- L0511@0060 FE0005FF000080000000.  ExpStack <= push_TWord, if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-96 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 23;
--- L0516@0061 C1BFDF97020000000000.  trace(from_microcode), directByte = 23;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-97 => '1' & '1' & "00000" & O"677" & O"677" & "0010111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- pullRS();
--- L0517@0062 C18AC57F000000000000.  pullRS();
---  nWR = 1, nRD = 1, if (00000) then 110001010 else 110001010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-98 => '1' & '1' & "00000" & O"612" & O"612" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= S_minus_R, if ALU_READY then alu_done else repeat;
--- L0518@0063 EC5E00FF000000000180.  alu <= S_minus_R, if ALU_READY then alu_done else repeat;
---  nWR = 1, nRD = 1, if (10110) then 001011110 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-99 => '1' & '1' & "10110" & O"136" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 24;
--- L0523@0064 C1BFDF98020000000000.  trace(from_microcode), directByte = 24;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-100 => '1' & '1' & "00000" & O"677" & O"677" & "0011000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- pullRS();
--- L0524@0065 C18AC57F000000000000.  pullRS();
---  nWR = 1, nRD = 1, if (00000) then 110001010 else 110001010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-101 => '1' & '1' & "00000" & O"612" & O"612" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= S_mul_R, if ALU_READY then alu_done else repeat;
--- L0525@0066 EC5E00FF000000000200.  alu <= S_mul_R, if ALU_READY then alu_done else repeat;
---  nWR = 1, nRD = 1, if (10110) then 001011110 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-102 => '1' & '1' & "10110" & O"136" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 35;
--- L0530@0067 C1BFDFA3020000000000.  trace(from_microcode), directByte = 35;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-103 => '1' & '1' & "00000" & O"677" & O"677" & "0100011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- pullRS();
--- L0531@0068 C18AC57F000000000000.  pullRS();
---  nWR = 1, nRD = 1, if (00000) then 110001010 else 110001010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-104 => '1' & '1' & "00000" & O"612" & O"612" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
--- L0532@0069 E761007F000000000300.  alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
---  nWR = 1, nRD = 1, if (10011) then 101100001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-105 => '1' & '1' & "10011" & O"541" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01100" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= div_shift;
--- L0533@006A C000007F000000000340.div_loop:  alu <= div_shift;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01101, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-106 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01101" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if ALU_READY then div_done;
--- L0534@006B EC6D007F000000000000.  if ALU_READY then div_done;
---  nWR = 1, nRD = 1, if (10110) then 001101101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-107 => '1' & '1' & "10110" & O"155" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= div_subset, goto div_loop;
--- L0535@006C FE00357F000000000380.  alu <= div_subset, if false then continue else div_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 001101010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-108 => '1' & '1' & "11111" & O"000" & O"152" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01110" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= div_end, goto alu_done;
--- L0536@006D FE002F7F0000000003C0.div_done:  alu <= div_end, if false then continue else alu_done;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 001011110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01111, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-109 => '1' & '1' & "11111" & O"000" & O"136" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01111" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 46;
--- L0541@006E C1BFDFAE020000000000.  trace(from_microcode), directByte = 46;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-110 => '1' & '1' & "00000" & O"677" & O"677" & "0101110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= R_fromStack, ExpStack <= pop2;
--- L0542@006F C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-111 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- ExpStack <= push_TByte;
--- L0543@0070 C000007F0000A0000000.  ExpStack <= push_TByte;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 101, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-112 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"5" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= ExpStack, ExpStack <= pop2;
--- L0544@0071 C000007F2000C0000000.  T <= ExpStack, ExpStack <= pop2;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-113 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= S_fromStack, ExpStack <= pop2;
--- L0545@0072 C000007F0000C0000100.  alu <= S_fromStack, ExpStack <= pop2;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-114 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00100" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if CP_SKIP then next else fetch;
--- L0547@0073 E80005FF000000000000.  if CP_SKIP then next else fetch;
---  nWR = 1, nRD = 1, if (10100) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-115 => '1' & '1' & "10100" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- IL_PC <= inc, goto fetch;
--- L0548@0074 FE0005FF008000000000.  IL_PC <= inc, if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-116 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 39;
--- L0553@0075 C1BFDFA7020000000000.  trace(from_microcode), directByte = 39;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-117 => '1' & '1' & "00000" & O"677" & O"677" & "0100111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if IS_RUNMODE then nx_run;
--- L0554@0076 F678007F000000000000.  if IS_RUNMODE then nx_run;
---  nWR = 1, nRD = 1, if (11011) then 001111000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-118 => '1' & '1' & "11011" & O"170" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- IL_PC <= zero, goto fetch;
--- L0555@0077 FE0005FF004000000000.  IL_PC <= zero, if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 001, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-119 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"1" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- findNextCR(BP);
--- L0556@0078 C17FBFFF600000000000.nx_run:  findNextCR(BP);
---  nWR = 1, nRD = 1, if (00000) then 101111111 else 101111111, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-120 => '1' & '1' & "00000" & O"577" & O"577" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= inc;
--- L0557@0079 C000007F500000000000.  T <= inc;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-121 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- BP <= T;
--- L0558@007A C000007F000000060000.  BP <= T;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-122 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- readCore16(BP);
--- L0559@007B C183C1FF600000000000.  readCore16(BP);
---  nWR = 1, nRD = 1, if (00000) then 110000011 else 110000011, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-123 => '1' & '1' & "00000" & O"603" & O"603" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if R_IS_ZERO then nx_err;
--- L0560@007C E683007F000000000000.  if R_IS_ZERO then nx_err;
---  nWR = 1, nRD = 1, if (10011) then 010000011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-124 => '1' & '1' & "10011" & O"203" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- BP <= T, T <= from_R;
--- L0561@007D C000007F800000060000.  BP <= T, T <= from_R;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-125 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- Lino <= T, T <= XQhere;
--- L0562@007E C000007F100000000020.  Lino <= T, T <= XQhere;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-126 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
-
--- IL_PC <= T;
--- L0563@007F C000007F00C000000000.  IL_PC <= T;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 011, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-127 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"3" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- Lino <= T, if R_IS_ZERO then NOPROG_ERR;
+-- L0483@004B E767007F000000000020.  Lino <= T, if R_IS_ZERO then NOPROG_ERR;
+--  nWR = 1, nRD = 1, if (10011) then 101100111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+75 => '1' & '1' & "10011" & O"547" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
 
 -- traceLino;
--- L0564@0080 C1BFDFB3020000000000.  trace(from_microcode), directByte = 51;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-128 => '1' & '1' & "00000" & O"677" & O"677" & "0110011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0484@004C C1C7E3B3020000000000.  trace(from_microcode), directByte = 51;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+76 => '1' & '1' & "00000" & O"707" & O"707" & "0110011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceBP();
--- L0565@0081 C1B2D97F000000000000.  traceBP();
---  nWR = 1, nRD = 1, if (00000) then 110110010 else 110110010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-129 => '1' & '1' & "00000" & O"662" & O"662" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- if CACHE_VALID then go_cvalid;
+-- L0485@004D FA51007F000000000000.  if CACHE_VALID then go_cvalid;
+--  nWR = 1, nRD = 1, if (11101) then 001010001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+77 => '1' & '1' & "11101" & O"121" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if KBD_BREAK then BREAK else fetch;
--- L0566@0082 C95B05FF000000000000.  if KBD_BREAK then BREAK else fetch;
---  nWR = 1, nRD = 1, if (00100) then 101011011 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-130 => '1' & '1' & "00100" & O"533" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- findLino();
+-- L0487@004E C0562B7F000000000000.  findLino();
+--  nWR = 1, nRD = 1, if (00000) then 001010110 else 001010110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+78 => '1' & '1' & "00000" & O"126" & O"126" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- directByte = BEEP, outChar(from_microcode);
--- L0567@0083 C1A6D307000008000000.nx_err:  directByte = 0x07, outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-131 => '1' & '1' & "00000" & O"646" & O"646" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceALU();
+-- L0488@004F C1C0E07F000000000000.  traceALU();
+--  nWR = 1, nRD = 1, if (00000) then 111000000 else 111000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+79 => '1' & '1' & "00000" & O"700" & O"700" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- goto stop_run;
--- L0568@0084 FE00917F000000000000.  if false then continue else stop_run;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 100100010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-132 => '1' & '1' & "11111" & O"000" & O"442" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= cache_store, goto fetch;
+-- L0489@0050 FE0005FF000000000700.  alu <= cache_store, if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+80 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11100" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceString 41;
--- L0573@0085 C1BFDFA9020000000000.  trace(from_microcode), directByte = 41;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-133 => '1' & '1' & "00000" & O"677" & O"677" & "0101001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
+-- L0491@0051 FC0029FFA80000000000.go_cvalid:  T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
+--  nWR = 1, nRD = 1, if (11110) then 000000000 else 001010011, directByte = 1111111, T <= 10101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+81 => '1' & '1' & "11110" & O"000" & O"123" & "1111111" & "10101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- alu <= reset1, if IS_RUNMODE then badop;
--- L0574@0086 F611007F000000000080.  alu <= reset1, if IS_RUNMODE then badop;
---  nWR = 1, nRD = 1, if (11011) then 000010001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-134 => '1' & '1' & "11011" & O"021" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00010" & '0' & '0' & '0' & '0' & '0' & '0',
+-- BP <= T, goto fetch;
+-- L0493@0052 FE0005FF000000060000.  BP <= T, if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+82 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- T <= from_R, if STACK_IS_EMPTY then ls_parchk;
--- L0575@0087 E28A007F800000000000.ls_parload:  T <= from_R, if STACK_IS_EMPTY then ls_parchk;
---  nWR = 1, nRD = 1, if (10001) then 010001010 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-135 => '1' & '1' & "10001" & O"212" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- findLino();
+-- L0496@0053 C0562B7F000000000000.go_cmiss:  findLino();
+--  nWR = 1, nRD = 1, if (00000) then 001010110 else 001010110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+83 => '1' & '1' & "00000" & O"126" & O"126" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- alu <= S_fromT;
--- L0576@0088 C000007F000000000480.  alu <= S_fromT;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-136 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10010" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceALU();
+-- L0497@0054 C1C0E07F000000000000.  traceALU();
+--  nWR = 1, nRD = 1, if (00000) then 111000000 else 111000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+84 => '1' & '1' & "00000" & O"700" & O"700" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- alu <= R_fromStack, ExpStack <= pop2, goto ls_parload;
--- L0577@0089 FE0043FF0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010000111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-137 => '1' & '1' & "11111" & O"000" & O"207" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
+-- goto fetch;
+-- L0498@0055 FE0005FF000000000000.  if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+85 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- alu <= ls_load;
--- L0578@008A C000007F0000000005C0.ls_parchk:  alu <= ls_load;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10111, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-138 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10111" & '0' & '0' & '0' & '0' & '0' & '0',
+-- T <= Prog_start;
+-- L0500@0056 C000007F680000000000.findLino:  T <= Prog_start;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+86 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if LS_PARAMS_OK then next else SYNTAX_ERR;
--- L0579@008B EC00B2FF000000000000.  if LS_PARAMS_OK then next else SYNTAX_ERR;
---  nWR = 1, nRD = 1, if (10110) then 000000000 else 101100101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-139 => '1' & '1' & "10110" & O"000" & O"545" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= reset1, readCore(T);
+-- L0501@0057 C1B1D8FF000003000080.go_search:  alu <= reset1, readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+87 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00010" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- T <= Prog_start, traceALU();
--- L0580@008C C1B8DC7F680000000000.ls_start:  T <= Prog_start, traceALU();
---  nWR = 1, nRD = 1, if (00000) then 110111000 else 110111000, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-140 => '1' & '1' & "00000" & O"670" & O"670" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= Rx256_plus_MDR, T <= inc;
+-- L0502@0058 C000007F500000000440.  alu <= Rx256_plus_MDR, T <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+88 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if CHARIN_READY then next else ls_continue;
--- L0581@008D D600497F000000000000.ls_lineloop:  if CHARIN_READY then next else ls_continue;
---  nWR = 1, nRD = 1, if (01011) then 000000000 else 010010010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-141 => '1' & '1' & "01011" & O"000" & O"222" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= S_fromLino, readCore(T);
+-- L0503@0059 C1B1D8FF000003000500.  alu <= S_fromLino, readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+89 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if KBD_BREAK then BREAK;
--- L0582@008E C95B007F000000000000.  if KBD_BREAK then BREAK;
---  nWR = 1, nRD = 1, if (00100) then 101011011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-142 => '1' & '1' & "00100" & O"533" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= Rx256_plus_MDR, T <= inc;
+-- L0504@005A C000007F500000000440.  alu <= Rx256_plus_MDR, T <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+90 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;
--- L0583@008F D4004920000000002000.  gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;
---  nWR = 1, nRD = 1, if (01010) then 000000000 else 010010010, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-143 => '1' & '1' & "01010" & O"000" & O"222" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= S_minus_R, if R_IS_ZERO then stop_run;
+-- L0505@005B E72A007F000000000180.  alu <= S_minus_R, if R_IS_ZERO then stop_run;
+--  nWR = 1, nRD = 1, if (10011) then 100101010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+91 => '1' & '1' & "10011" & O"452" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if CHARIN_READY then next else repeat;
--- L0584@0090 D60000FF000000000000.ls_pause:  if CHARIN_READY then next else repeat;
---  nWR = 1, nRD = 1, if (01011) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-144 => '1' & '1' & "01011" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause;
--- L0585@0091 D4004820000000002000.  gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause;
---  nWR = 1, nRD = 1, if (01010) then 000000000 else 010010000, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-145 => '1' & '1' & "01010" & O"000" & O"220" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, readCore16(same);
--- L0586@0092 C183C1FF000000002000.ls_continue:  gotChar = 1, readCore16(same);
---  nWR = 1, nRD = 1, if (00000) then 110000011 else 110000011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-146 => '1' & '1' & "00000" & O"603" & O"603" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= ls_check, if R_IS_ZERO then fetch;
--- L0588@0093 E60B007F000000000600.  alu <= ls_check, if R_IS_ZERO then fetch;
---  nWR = 1, nRD = 1, if (10011) then 000001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-147 => '1' & '1' & "10011" & O"013" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if LS_PASSED_END then fetch;
--- L0589@0094 EE0B007F000000000000.  if LS_PASSED_END then fetch;
---  nWR = 1, nRD = 1, if (10111) then 000001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-148 => '1' & '1' & "10111" & O"013" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if LS_IN_RANGE then next else ls_nextLine;
--- L0590@0095 F0004F7F000000000000.  if LS_IN_RANGE then next else ls_nextLine;
---  nWR = 1, nRD = 1, if (11000) then 000000000 else 010011110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-149 => '1' & '1' & "11000" & O"000" & O"236" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= Y_save, printDecR();
--- L0591@0096 C18FC7FF000000000640.  alu <= Y_save, printDecR();
---  nWR = 1, nRD = 1, if (00000) then 110001111 else 110001111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-150 => '1' & '1' & "00000" & O"617" & O"617" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11001" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- alu <= Y_recall, directByte = ' ', outChar(from_microcode);
--- L0592@0097 C1A6D320000008000680.  alu <= Y_recall, directByte = ' ', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-151 => '1' & '1' & "00000" & O"646" & O"646" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11010" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- readCore(T);
--- L0593@0098 C1A9D4FF000003000000.ls_charloop:  readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-152 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- outChar(from_MDR);
--- L0594@0099 C1A6D37F000010000000.  outChar(from_MDR);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 100, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-153 => '1' & '1' & "00000" & O"646" & O"646" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"4" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = CR, if MDR_EQU_DB then next else ls_next;
--- L0595@009A CA004E8D000000000000.ls_nextchar:  directByte = 0x0D, if MDR_EQU_DB then next else ls_next;
---  nWR = 1, nRD = 1, if (00101) then 000000000 else 010011101, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-154 => '1' & '1' & "00101" & O"000" & O"235" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = LF, outChar(from_microcode);
--- L0596@009B C1A6D30A000008000000.  directByte = 0x0A, outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0001010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-155 => '1' & '1' & "00000" & O"646" & O"646" & "0001010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= inc, goto ls_lineloop;
--- L0597@009C FE0046FF500000000000.  T <= inc, if false then continue else ls_lineloop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010001101, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-156 => '1' & '1' & "11111" & O"000" & O"215" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= inc, goto ls_charloop;
--- L0598@009D FE004C7F500000000000.ls_next:  T <= inc, if false then continue else ls_charloop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010011000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-157 => '1' & '1' & "11111" & O"000" & O"230" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- BP <= T, if Y_ZERO then return;
+-- L0506@005C E802007F000000060000.  BP <= T, if Y_ZERO then return;
+--  nWR = 1, nRD = 1, if (10100) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+92 => '1' & '1' & "10100" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- findNextCR(same);
--- L0599@009E C17FBFFF000000000000.ls_nextLine:  findNextCR(same);
---  nWR = 1, nRD = 1, if (00000) then 101111111 else 101111111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-158 => '1' & '1' & "00000" & O"577" & O"577" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0507@005D C187C3FF000000000000.  findNextCR(same);
+--  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+93 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- T <= inc, goto ls_lineloop;
--- L0600@009F FE0046FF500000000000.  T <= inc, if false then continue else ls_lineloop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010001101, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-159 => '1' & '1' & "11111" & O"000" & O"215" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- T <= inc, goto go_search;
+-- L0508@005E FE002BFF500000000000.  T <= inc, if false then continue else go_search;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 001010111, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+94 => '1' & '1' & "11111" & O"000" & O"127" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceString 26;
--- L0605@00A0 C1BFDF9A020000000000.  trace(from_microcode), directByte = 26;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-160 => '1' & '1' & "00000" & O"677" & O"677" & "0011010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceString 25;
+-- L0513@005F C1C7E399020000000000.  trace(from_microcode), directByte = 25;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+95 => '1' & '1' & "00000" & O"707" & O"707" & "0011001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0606@00A1 E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-161 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= R_fromStack, if STACK_IS_EMPTY then ESTACK_ERR;
+-- L0514@0060 E371007F0000000000C0.  alu <= R_fromStack, if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+96 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- printDec();
--- L0607@00A2 C18EC77F000000000000.  printDec();
---  nWR = 1, nRD = 1, if (00000) then 110001110 else 110001110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-162 => '1' & '1' & "00000" & O"616" & O"616" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- ExpStack <= pop2;
+-- L0515@0061 C000007F0000C0000000.  ExpStack <= pop2;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+97 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- goto fetch;
--- L0608@00A3 FE0005FF000000000000.  if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-163 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= neg_R, if ALU_READY then alu_done else repeat;
+-- L0516@0062 EC6600FF0000000001C0.  alu <= neg_R, if ALU_READY then alu_done else repeat;
+--  nWR = 1, nRD = 1, if (10110) then 001100110 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00111, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+98 => '1' & '1' & "10110" & O"146" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00111" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceString 18;
--- L0613@00A4 C1BFDF92020000000000.  trace(from_microcode), directByte = 18;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-164 => '1' & '1' & "00000" & O"677" & O"677" & "0010010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceString 22;
+-- L0521@0063 C1C7E396020000000000.  trace(from_microcode), directByte = 22;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+99 => '1' & '1' & "00000" & O"707" & O"707" & "0010110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- BP <= inc, readCore(BP);
--- L0614@00A5 C1A9D4FF000002030000.pq_loop:  BP <= inc, readCore(BP);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-165 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- pullRS();
+-- L0522@0064 C192C97F000000000000.  pullRS();
+--  nWR = 1, nRD = 1, if (00000) then 110010010 else 110010010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+100 => '1' & '1' & "00000" & O"622" & O"622" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- directByte = '"', if MDR_EQU_DB then pq_done;
--- L0615@00A6 CAAA0022000000000000.  directByte = '"', if MDR_EQU_DB then pq_done;
---  nWR = 1, nRD = 1, if (00101) then 010101010 else 000000000, directByte = 0100010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-166 => '1' & '1' & "00101" & O"252" & O"000" & "0100010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- alu <= S_plus_R, if ALU_READY then next else repeat;
+-- L0523@0065 EC0000FF000000000140.  alu <= S_plus_R, if ALU_READY then next else repeat;
+--  nWR = 1, nRD = 1, if (10110) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00101, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+101 => '1' & '1' & "10110" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00101" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- outChar(from_MDR);
--- L0616@00A7 C1A6D37F000010000000.  outChar(from_MDR);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 100, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-167 => '1' & '1' & "00000" & O"646" & O"646" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"4" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceALU();
+-- L0524@0066 C1C0E07F000000000000.alu_done:  traceALU();
+--  nWR = 1, nRD = 1, if (00000) then 111000000 else 111000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+102 => '1' & '1' & "00000" & O"700" & O"700" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceString 3;
--- L0617@00A8 C1BFDF83020000000000.  trace(from_microcode), directByte = 3;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-168 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
+-- L0525@0067 EF6B007F280000000000.  T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
+--  nWR = 1, nRD = 1, if (10111) then 101101011 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+103 => '1' & '1' & "10111" & O"553" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- directByte = CR, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
--- L0618@00A9 CB67528D000000000000.  directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
---  nWR = 1, nRD = 1, if (00101) then 101100111 else 010100101, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-169 => '1' & '1' & "00101" & O"547" & O"245" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- ExpStack <= push_TWord, goto fetch;
+-- L0526@0068 FE0005FF000080000000.  ExpStack <= push_TWord, if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+104 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 23;
+-- L0531@0069 C1C7E397020000000000.  trace(from_microcode), directByte = 23;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+105 => '1' & '1' & "00000" & O"707" & O"707" & "0010111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- pullRS();
+-- L0532@006A C192C97F000000000000.  pullRS();
+--  nWR = 1, nRD = 1, if (00000) then 110010010 else 110010010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+106 => '1' & '1' & "00000" & O"622" & O"622" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= S_minus_R, if ALU_READY then alu_done else repeat;
+-- L0533@006B EC6600FF000000000180.  alu <= S_minus_R, if ALU_READY then alu_done else repeat;
+--  nWR = 1, nRD = 1, if (10110) then 001100110 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+107 => '1' & '1' & "10110" & O"146" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 24;
+-- L0538@006C C1C7E398020000000000.  trace(from_microcode), directByte = 24;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+108 => '1' & '1' & "00000" & O"707" & O"707" & "0011000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- pullRS();
+-- L0539@006D C192C97F000000000000.  pullRS();
+--  nWR = 1, nRD = 1, if (00000) then 110010010 else 110010010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+109 => '1' & '1' & "00000" & O"622" & O"622" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= S_mul_R, if ALU_READY then alu_done else repeat;
+-- L0540@006E EC6600FF000000000200.  alu <= S_mul_R, if ALU_READY then alu_done else repeat;
+--  nWR = 1, nRD = 1, if (10110) then 001100110 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+110 => '1' & '1' & "10110" & O"146" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 35;
+-- L0545@006F C1C7E3A3020000000000.  trace(from_microcode), directByte = 35;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+111 => '1' & '1' & "00000" & O"707" & O"707" & "0100011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- pullRS();
+-- L0546@0070 C192C97F000000000000.  pullRS();
+--  nWR = 1, nRD = 1, if (00000) then 110010010 else 110010010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+112 => '1' & '1' & "00000" & O"622" & O"622" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
+-- L0547@0071 E769007F000000000300.  alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
+--  nWR = 1, nRD = 1, if (10011) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+113 => '1' & '1' & "10011" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01100" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= div_shift;
+-- L0548@0072 C000007F000000000340.div_loop:  alu <= div_shift;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01101, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+114 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01101" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if ALU_READY then div_done;
+-- L0549@0073 EC75007F000000000000.  if ALU_READY then div_done;
+--  nWR = 1, nRD = 1, if (10110) then 001110101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+115 => '1' & '1' & "10110" & O"165" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= div_subset, goto div_loop;
+-- L0550@0074 FE00397F000000000380.  alu <= div_subset, if false then continue else div_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 001110010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+116 => '1' & '1' & "11111" & O"000" & O"162" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01110" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= div_end, goto alu_done;
+-- L0551@0075 FE00337F0000000003C0.div_done:  alu <= div_end, if false then continue else alu_done;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 001100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01111, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+117 => '1' & '1' & "11111" & O"000" & O"146" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01111" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 46;
+-- L0556@0076 C1C7E3AE020000000000.  trace(from_microcode), directByte = 46;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+118 => '1' & '1' & "00000" & O"707" & O"707" & "0101110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= R_fromStack, ExpStack <= pop2;
+-- L0557@0077 C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+119 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- ExpStack <= push_TByte;
+-- L0558@0078 C000007F0000A0000000.  ExpStack <= push_TByte;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 101, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+120 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"5" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= ExpStack, ExpStack <= pop2;
+-- L0559@0079 C000007F2000C0000000.  T <= ExpStack, ExpStack <= pop2;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+121 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= S_fromStack, ExpStack <= pop2;
+-- L0560@007A C000007F0000C0000100.  alu <= S_fromStack, ExpStack <= pop2;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+122 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00100" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if CP_SKIP then next else fetch;
+-- L0561@007B E80005FF000000000000.  if CP_SKIP then next else fetch;
+--  nWR = 1, nRD = 1, if (10100) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+123 => '1' & '1' & "10100" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- IL_PC <= inc, goto fetch;
+-- L0562@007C FE0005FF008000000000.  IL_PC <= inc, if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+124 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 39;
+-- L0567@007D C1C7E3A7020000000000.  trace(from_microcode), directByte = 39;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+125 => '1' & '1' & "00000" & O"707" & O"707" & "0100111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if IS_RUNMODE then nx_run;
+-- L0568@007E F680007F000000000000.  if IS_RUNMODE then nx_run;
+--  nWR = 1, nRD = 1, if (11011) then 010000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+126 => '1' & '1' & "11011" & O"200" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- IL_PC <= zero, goto fetch;
+-- L0569@007F FE0005FF004000000000.  IL_PC <= zero, if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 001, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+127 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"1" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- findNextCR(BP);
+-- L0570@0080 C187C3FF600000000000.nx_run:  findNextCR(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+128 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= inc;
+-- L0571@0081 C000007F500000000000.  T <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+129 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- BP <= T;
+-- L0572@0082 C000007F000000060000.  BP <= T;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+130 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- readCore16(BP);
+-- L0573@0083 C18BC5FF600000000000.  readCore16(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110001011 else 110001011, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+131 => '1' & '1' & "00000" & O"613" & O"613" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if R_IS_ZERO then nx_err;
+-- L0574@0084 E68B007F000000000000.  if R_IS_ZERO then nx_err;
+--  nWR = 1, nRD = 1, if (10011) then 010001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+132 => '1' & '1' & "10011" & O"213" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- BP <= T, T <= from_R;
+-- L0575@0085 C000007F800000060000.  BP <= T, T <= from_R;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+133 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- Lino <= T, T <= XQhere;
+-- L0576@0086 C000007F100000000020.  Lino <= T, T <= XQhere;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+134 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
+
+-- IL_PC <= T;
+-- L0577@0087 C000007F00C000000000.  IL_PC <= T;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 011, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+135 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"3" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceLino;
+-- L0578@0088 C1C7E3B3020000000000.  trace(from_microcode), directByte = 51;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+136 => '1' & '1' & "00000" & O"707" & O"707" & "0110011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceBP();
--- L0619@00AA C1B2D97F000000000000.pq_done:  traceBP();
---  nWR = 1, nRD = 1, if (00000) then 110110010 else 110110010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-170 => '1' & '1' & "00000" & O"662" & O"662" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0579@0089 C1BADD7F000000000000.  traceBP();
+--  nWR = 1, nRD = 1, if (00000) then 110111010 else 110111010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+137 => '1' & '1' & "00000" & O"672" & O"672" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if KBD_BREAK then BREAK else fetch;
+-- L0580@008A C96305FF000000000000.  if KBD_BREAK then BREAK else fetch;
+--  nWR = 1, nRD = 1, if (00100) then 101100011 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+138 => '1' & '1' & "00100" & O"543" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = BEEP, outChar(from_microcode);
+-- L0581@008B C1AED707000008000000.nx_err:  directByte = 0x07, outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+139 => '1' & '1' & "00000" & O"656" & O"656" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- goto stop_run;
+-- L0582@008C FE00957F000000000000.  if false then continue else stop_run;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 100101010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+140 => '1' & '1' & "11111" & O"000" & O"452" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 41;
+-- L0587@008D C1C7E3A9020000000000.  trace(from_microcode), directByte = 41;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+141 => '1' & '1' & "00000" & O"707" & O"707" & "0101001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= reset1, if IS_RUNMODE then badop;
+-- L0588@008E F611007F000000000080.  alu <= reset1, if IS_RUNMODE then badop;
+--  nWR = 1, nRD = 1, if (11011) then 000010001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+142 => '1' & '1' & "11011" & O"021" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00010" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= from_R, if STACK_IS_EMPTY then ls_parchk;
+-- L0589@008F E292007F800000000000.ls_parload:  T <= from_R, if STACK_IS_EMPTY then ls_parchk;
+--  nWR = 1, nRD = 1, if (10001) then 010010010 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+143 => '1' & '1' & "10001" & O"222" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= S_fromT;
+-- L0590@0090 C000007F000000000480.  alu <= S_fromT;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+144 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10010" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= R_fromStack, ExpStack <= pop2, goto ls_parload;
+-- L0591@0091 FE0047FF0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 010001111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+145 => '1' & '1' & "11111" & O"000" & O"217" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= ls_load;
+-- L0592@0092 C000007F0000000005C0.ls_parchk:  alu <= ls_load;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10111, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+146 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10111" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if LS_PARAMS_OK then next else SYNTAX_ERR;
+-- L0593@0093 EC00B6FF000000000000.  if LS_PARAMS_OK then next else SYNTAX_ERR;
+--  nWR = 1, nRD = 1, if (10110) then 000000000 else 101101101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+147 => '1' & '1' & "10110" & O"000" & O"555" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= Prog_start;
+-- L0594@0094 C000007F680000000000.ls_start:  T <= Prog_start;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+148 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if CHARIN_READY then next else ls_continue;
+-- L0595@0095 D6004D7F000000000000.ls_lineloop:  if CHARIN_READY then next else ls_continue;
+--  nWR = 1, nRD = 1, if (01011) then 000000000 else 010011010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+149 => '1' & '1' & "01011" & O"000" & O"232" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if KBD_BREAK then BREAK;
+-- L0596@0096 C963007F000000000000.  if KBD_BREAK then BREAK;
+--  nWR = 1, nRD = 1, if (00100) then 101100011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+150 => '1' & '1' & "00100" & O"543" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;
+-- L0597@0097 D4004D20000000002000.  gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;
+--  nWR = 1, nRD = 1, if (01010) then 000000000 else 010011010, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+151 => '1' & '1' & "01010" & O"000" & O"232" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if CHARIN_READY then next else repeat;
+-- L0598@0098 D60000FF000000000000.ls_pause:  if CHARIN_READY then next else repeat;
+--  nWR = 1, nRD = 1, if (01011) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+152 => '1' & '1' & "01011" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause;
+-- L0599@0099 D4004C20000000002000.  gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause;
+--  nWR = 1, nRD = 1, if (01010) then 000000000 else 010011000, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+153 => '1' & '1' & "01010" & O"000" & O"230" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, readCore16(same);
+-- L0600@009A C18BC5FF000000002000.ls_continue:  gotChar = 1, readCore16(same);
+--  nWR = 1, nRD = 1, if (00000) then 110001011 else 110001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+154 => '1' & '1' & "00000" & O"613" & O"613" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= ls_check, if R_IS_ZERO then fetch;
+-- L0601@009B E60B007F000000000600.  alu <= ls_check, if R_IS_ZERO then fetch;
+--  nWR = 1, nRD = 1, if (10011) then 000001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+155 => '1' & '1' & "10011" & O"013" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if LS_PASSED_END then fetch;
+-- L0602@009C EE0B007F000000000000.  if LS_PASSED_END then fetch;
+--  nWR = 1, nRD = 1, if (10111) then 000001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+156 => '1' & '1' & "10111" & O"013" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if LS_IN_RANGE then next else ls_nextLine;
+-- L0603@009D F000537F000000000000.  if LS_IN_RANGE then next else ls_nextLine;
+--  nWR = 1, nRD = 1, if (11000) then 000000000 else 010100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+157 => '1' & '1' & "11000" & O"000" & O"246" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= Y_save, printDecR();
+-- L0604@009E C197CBFF000000000640.  alu <= Y_save, printDecR();
+--  nWR = 1, nRD = 1, if (00000) then 110010111 else 110010111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+158 => '1' & '1' & "00000" & O"627" & O"627" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11001" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- alu <= Y_recall, directByte = ' ', outChar(from_microcode);
+-- L0605@009F C1AED720000008000680.  alu <= Y_recall, directByte = ' ', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+159 => '1' & '1' & "00000" & O"656" & O"656" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11010" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- readCore(T);
+-- L0606@00A0 C1B1D8FF000003000000.ls_charloop:  readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+160 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- outChar(from_MDR);
+-- L0607@00A1 C1AED77F000010000000.  outChar(from_MDR);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 100, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+161 => '1' & '1' & "00000" & O"656" & O"656" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"4" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = CR, if MDR_EQU_DB then next else ls_next;
+-- L0608@00A2 CA00528D000000000000.ls_nextchar:  directByte = 0x0D, if MDR_EQU_DB then next else ls_next;
+--  nWR = 1, nRD = 1, if (00101) then 000000000 else 010100101, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+162 => '1' & '1' & "00101" & O"000" & O"245" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = LF, outChar(from_microcode);
+-- L0609@00A3 C1AED70A000008000000.  directByte = 0x0A, outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0001010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+163 => '1' & '1' & "00000" & O"656" & O"656" & "0001010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= inc, goto ls_lineloop;
+-- L0610@00A4 FE004AFF500000000000.  T <= inc, if false then continue else ls_lineloop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 010010101, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+164 => '1' & '1' & "11111" & O"000" & O"225" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= inc, goto ls_charloop;
+-- L0611@00A5 FE00507F500000000000.ls_next:  T <= inc, if false then continue else ls_charloop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 010100000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+165 => '1' & '1' & "11111" & O"000" & O"240" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- findNextCR(same);
+-- L0612@00A6 C187C3FF000000000000.ls_nextLine:  findNextCR(same);
+--  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+166 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= inc, goto ls_lineloop;
+-- L0613@00A7 FE004AFF500000000000.  T <= inc, if false then continue else ls_lineloop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 010010101, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+167 => '1' & '1' & "11111" & O"000" & O"225" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 26;
+-- L0618@00A8 C1C7E39A020000000000.  trace(from_microcode), directByte = 26;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+168 => '1' & '1' & "00000" & O"707" & O"707" & "0011010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if STACK_IS_EMPTY then ESTACK_ERR;
+-- L0619@00A9 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+169 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- printDec();
+-- L0620@00AA C196CB7F000000000000.  printDec();
+--  nWR = 1, nRD = 1, if (00000) then 110010110 else 110010110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+170 => '1' & '1' & "00000" & O"626" & O"626" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0620@00AB FE0005FF000000000000.  if false then continue else fetch;
+-- L0621@00AB FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 171 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceString 27;
--- L0625@00AC C1BFDF9B020000000000.  trace(from_microcode), directByte = 27;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-172 => '1' & '1' & "00000" & O"677" & O"677" & "0011011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceString 18;
+-- L0626@00AC C1C7E392020000000000.  trace(from_microcode), directByte = 18;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+172 => '1' & '1' & "00000" & O"707" & O"707" & "0010010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if AT_TAB then fetch;
--- L0626@00AD F20B007F000000000000.pt_loop:  if AT_TAB then fetch;
---  nWR = 1, nRD = 1, if (11001) then 000001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-173 => '1' & '1' & "11001" & O"013" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- BP <= inc, readCore(BP);
+-- L0627@00AD C1B1D8FF000002030000.pq_loop:  BP <= inc, readCore(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+173 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- directByte = ' ', outChar(from_microcode);
--- L0627@00AE C1A6D320000008000000.  directByte = ' ', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-174 => '1' & '1' & "00000" & O"646" & O"646" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- directByte = '"', if MDR_EQU_DB then pq_done;
+-- L0628@00AE CAB20022000000000000.  directByte = '"', if MDR_EQU_DB then pq_done;
+--  nWR = 1, nRD = 1, if (00101) then 010110010 else 000000000, directByte = 0100010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+174 => '1' & '1' & "00101" & O"262" & O"000" & "0100010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- goto pt_loop;
--- L0628@00AF FE0056FF000000000000.  if false then continue else pt_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010101101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-175 => '1' & '1' & "11111" & O"000" & O"255" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 6;
--- L0633@00B0 C1BFDF86020000000000.  trace(from_microcode), directByte = 6;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-176 => '1' & '1' & "00000" & O"677" & O"677" & "0000110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- outCRLF();
--- L0634@00B1 C1A4D27F000000000000.crlf_fetch:  outCRLF();
---  nWR = 1, nRD = 1, if (00000) then 110100100 else 110100100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-177 => '1' & '1' & "00000" & O"644" & O"644" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- goto fetch;
--- L0635@00B2 FE0005FF000000000000.  if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-178 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- traceString 5;
--- L0640@00B3 C1BFDF85020000000000.  trace(from_microcode), directByte = 5;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-179 => '1' & '1' & "00000" & O"677" & O"677" & "0000101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- outChar(from_interpreter);
--- L0641@00B4 C1A6D37F000004000000.pc_loop:  outChar(from_interpreter);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 001, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-180 => '1' & '1' & "00000" & O"646" & O"646" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"1" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- outChar(from_MDR);
+-- L0629@00AF C1AED77F000010000000.  outChar(from_MDR);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 100, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+175 => '1' & '1' & "00000" & O"656" & O"656" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"4" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 3;
--- L0642@00B5 C1BFDF83020000000000.  trace(from_microcode), directByte = 3;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-181 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0630@00B0 C1C7E383020000000000.  trace(from_microcode), directByte = 3;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+176 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;
--- L0643@00B6 C20B5A7F008000000000.  IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;
---  nWR = 1, nRD = 1, if (00001) then 000001011 else 010110100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-182 => '1' & '1' & "00001" & O"013" & O"264" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- directByte = CR, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
+-- L0631@00B1 CB6F568D000000000000.  directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
+--  nWR = 1, nRD = 1, if (00101) then 101101111 else 010101101, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+177 => '1' & '1' & "00101" & O"557" & O"255" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- traceString 8;
--- L0648@00B7 C1BFDF88020000000000.  trace(from_microcode), directByte = 8;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-183 => '1' & '1' & "00000" & O"677" & O"677" & "0001000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceBP();
+-- L0632@00B2 C1BADD7F000000000000.pq_done:  traceBP();
+--  nWR = 1, nRD = 1, if (00000) then 110111010 else 110111010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+178 => '1' & '1' & "00000" & O"672" & O"672" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- InlEnd <= InLine_start;
--- L0649@00B8 C000007F000000080000.gl:  InlEnd <= InLine_start;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 01, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-184 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "01" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- goto fetch;
+-- L0633@00B3 FE0005FF000000000000.  if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+179 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if CHARIN_READY then next else repeat;
--- L0650@00B9 D60000FF000000000000.gl_loop:  if CHARIN_READY then next else repeat;
---  nWR = 1, nRD = 1, if (01011) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-185 => '1' & '1' & "01011" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- traceString 27;
+-- L0638@00B4 C1C7E39B020000000000.  trace(from_microcode), directByte = 27;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+180 => '1' & '1' & "00000" & O"707" & O"707" & "0011011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- if KBD_BREAK then next else gl_char;
--- L0651@00BA C8005E7F000000000000.  if KBD_BREAK then next else gl_char;
---  nWR = 1, nRD = 1, if (00100) then 000000000 else 010111100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-186 => '1' & '1' & "00100" & O"000" & O"274" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
--- L0652@00BB F722647F000000002000.  gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
---  nWR = 1, nRD = 1, if (11011) then 100100010 else 011001000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-187 => '1' & '1' & "11011" & O"442" & O"310" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if CHARIN_PRINTABLE then gl_print;
--- L0653@00BC D2C3007F000000000000.gl_char:  if CHARIN_PRINTABLE then gl_print;
---  nWR = 1, nRD = 1, if (01001) then 011000011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-188 => '1' & '1' & "01001" & O"303" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = CR, if CHARIN_EQU_DB then gl_cr;
--- L0654@00BD D4CE000D000000000000.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
---  nWR = 1, nRD = 1, if (01010) then 011001110 else 000000000, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-189 => '1' & '1' & "01010" & O"316" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
--- L0655@00BE D4CB0008000000000000.  directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
---  nWR = 1, nRD = 1, if (01010) then 011001011 else 000000000, directByte = 0001000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-190 => '1' & '1' & "01010" & O"313" & O"000" & "0001000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = ESC, if CHARIN_EQU_DB then gl_esc;
--- L0656@00BF D4C8001B000000000000.  directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
---  nWR = 1, nRD = 1, if (01010) then 011001000 else 000000000, directByte = 0011011, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-191 => '1' & '1' & "01010" & O"310" & O"000" & "0011011" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = TAB, if CHARIN_EQU_DB then gl_tab;
--- L0657@00C0 D4D30009000000000000.  directByte = 0x09, if CHARIN_EQU_DB then gl_tab;
---  nWR = 1, nRD = 1, if (01010) then 011010011 else 000000000, directByte = 0001001, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-192 => '1' & '1' & "01010" & O"323" & O"000" & "0001001" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = BEEP, outChar(from_microcode);
--- L0659@00C1 C1A6D307000008000000.gl_ignore:  directByte = 0x07, outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-193 => '1' & '1' & "00000" & O"646" & O"646" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, goto gl_loop;
--- L0660@00C2 FE005CFF000000002000.  gotChar = 1, if false then continue else gl_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010111001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-194 => '1' & '1' & "11111" & O"000" & O"271" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if INLEND_MAX then gl_ignore;
--- L0662@00C3 CEC1007F000000000000.gl_print:  if INLEND_MAX then gl_ignore;
---  nWR = 1, nRD = 1, if (00111) then 011000001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-195 => '1' & '1' & "00111" & O"301" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- outChar(from_charin);
--- L0663@00C4 C1A6D37F00000C000000.  outChar(from_charin);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 011, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-196 => '1' & '1' & "00000" & O"646" & O"646" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"3" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- writeCore(InlEnd, CHARIN), InlEnd <= inc;
--- L0664@00C5 C1A8D47F000001700000.  writeCore(InlEnd, CHARIN), InlEnd <= inc;
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 011, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-197 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"3" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- writeCore(InlEnd, zero);
--- L0665@00C6 C1A8D47F000001400000.gl_write0:  writeCore(InlEnd, zero);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-198 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, goto gl_loop;
--- L0666@00C7 FE005CFF000000002000.  gotChar = 1, if false then continue else gl_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010111001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-199 => '1' & '1' & "11111" & O"000" & O"271" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = BEEP, outChar(from_microcode);
--- L0668@00C8 C1A6D307000008000000.gl_esc:  directByte = 0x07, outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-200 => '1' & '1' & "00000" & O"646" & O"646" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- outCRLF();
--- L0669@00C9 C1A4D27F000000000000.  outCRLF();
---  nWR = 1, nRD = 1, if (00000) then 110100100 else 110100100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-201 => '1' & '1' & "00000" & O"644" & O"644" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, goto gl;
--- L0670@00CA FE005C7F000000002000.  gotChar = 1, if false then continue else gl;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 010111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-202 => '1' & '1' & "11111" & O"000" & O"270" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if INLEND_MIN then gl_ignore;
--- L0672@00CB D0C1007F000000000000.gl_bs:  if INLEND_MIN then gl_ignore;
---  nWR = 1, nRD = 1, if (01000) then 011000001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-203 => '1' & '1' & "01000" & O"301" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- directByte = BACKSPACE, outChar(from_microcode);
--- L0673@00CC C1A6D308000008000000.  directByte = 0x08, outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0001000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-204 => '1' & '1' & "00000" & O"646" & O"646" & "0001000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- InlEnd <= dec, goto gl_write0;
--- L0674@00CD FE00637F000000180000.  InlEnd <= dec, if false then continue else gl_write0;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 011000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 11, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-205 => '1' & '1' & "11111" & O"000" & O"306" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "11" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- writeCore(InlEnd, CHARIN), InlEnd <= inc;
--- L0676@00CE C1A8D47F000001700000.gl_cr:  writeCore(InlEnd, CHARIN), InlEnd <= inc;
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 011, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-206 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"3" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- writeCore(InlEnd, zero);
--- L0677@00CF C1A8D47F000001400000.  writeCore(InlEnd, zero);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-207 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- dump_input();
--- L0678@00D0 C1ABD5FF000000000000.  dump_input();
---  nWR = 1, nRD = 1, if (00000) then 110101011 else 110101011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-208 => '1' & '1' & "00000" & O"653" & O"653" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- outCRLF();
--- L0679@00D1 C1A4D27F000000000000.  outCRLF();
---  nWR = 1, nRD = 1, if (00000) then 110100100 else 110100100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-209 => '1' & '1' & "00000" & O"644" & O"644" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- gotChar = 1, BP <= Inline_start, goto fetch;
--- L0680@00D2 FE0005FF000000012000.  gotChar = 1, BP <= Inline_start, if false then continue else fetch;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 001, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-210 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"1" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if INLEND_MAX then gl_ignore;
--- L0682@00D3 CEC1007F000000000000.gl_tab:  if INLEND_MAX then gl_ignore;
---  nWR = 1, nRD = 1, if (00111) then 011000001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-211 => '1' & '1' & "00111" & O"301" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if AT_TAB then gl_write0;
--- L0683@00D4 F2C6007F000000000000.gl_tabloop:  if AT_TAB then gl_write0;
---  nWR = 1, nRD = 1, if (11001) then 011000110 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-212 => '1' & '1' & "11001" & O"306" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- if AT_TAB then fetch;
+-- L0639@00B5 F20B007F000000000000.pt_loop:  if AT_TAB then fetch;
+--  nWR = 1, nRD = 1, if (11001) then 000001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+181 => '1' & '1' & "11001" & O"013" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = ' ', outChar(from_microcode);
--- L0684@00D5 C1A6D320000008000000.  directByte = ' ', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-213 => '1' & '1' & "00000" & O"646" & O"646" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0640@00B6 C1AED720000008000000.  directByte = ' ', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+182 => '1' & '1' & "00000" & O"656" & O"656" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- goto pt_loop;
+-- L0641@00B7 FE005AFF000000000000.  if false then continue else pt_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 010110101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+183 => '1' & '1' & "11111" & O"000" & O"265" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 6;
+-- L0646@00B8 C1C7E386020000000000.  trace(from_microcode), directByte = 6;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+184 => '1' & '1' & "00000" & O"707" & O"707" & "0000110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- outCRLF();
+-- L0647@00B9 C1ACD67F000000000000.crlf_fetch:  outCRLF();
+--  nWR = 1, nRD = 1, if (00000) then 110101100 else 110101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+185 => '1' & '1' & "00000" & O"654" & O"654" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- goto fetch;
+-- L0648@00BA FE0005FF000000000000.  if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+186 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 5;
+-- L0653@00BB C1C7E385020000000000.  trace(from_microcode), directByte = 5;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+187 => '1' & '1' & "00000" & O"707" & O"707" & "0000101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- outChar(from_interpreter);
+-- L0654@00BC C1AED77F000004000000.pc_loop:  outChar(from_interpreter);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 001, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+188 => '1' & '1' & "00000" & O"656" & O"656" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"1" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 3;
+-- L0655@00BD C1C7E383020000000000.  trace(from_microcode), directByte = 3;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+189 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;
+-- L0656@00BE C20B5E7F008000000000.  IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;
+--  nWR = 1, nRD = 1, if (00001) then 000001011 else 010111100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+190 => '1' & '1' & "00001" & O"013" & O"274" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- traceString 8;
+-- L0661@00BF C1C7E388020000000000.  trace(from_microcode), directByte = 8;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+191 => '1' & '1' & "00000" & O"707" & O"707" & "0001000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- InlEnd <= InLine_start;
+-- L0662@00C0 C000007F000000080000.gl:  InlEnd <= InLine_start;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 01, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+192 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "01" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if CHARIN_READY then next else repeat;
+-- L0663@00C1 D60000FF000000000000.gl_loop:  if CHARIN_READY then next else repeat;
+--  nWR = 1, nRD = 1, if (01011) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+193 => '1' & '1' & "01011" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if KBD_BREAK then next else gl_char;
+-- L0664@00C2 C800627F000000000000.  if KBD_BREAK then next else gl_char;
+--  nWR = 1, nRD = 1, if (00100) then 000000000 else 011000100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+194 => '1' & '1' & "00100" & O"000" & O"304" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
+-- L0665@00C3 F72A687F000000002000.  gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
+--  nWR = 1, nRD = 1, if (11011) then 100101010 else 011010000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+195 => '1' & '1' & "11011" & O"452" & O"320" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if CHARIN_PRINTABLE then gl_print;
+-- L0666@00C4 D2CB007F000000000000.gl_char:  if CHARIN_PRINTABLE then gl_print;
+--  nWR = 1, nRD = 1, if (01001) then 011001011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+196 => '1' & '1' & "01001" & O"313" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = CR, if CHARIN_EQU_DB then gl_cr;
+-- L0667@00C5 D4D6000D000000000000.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
+--  nWR = 1, nRD = 1, if (01010) then 011010110 else 000000000, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+197 => '1' & '1' & "01010" & O"326" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = BACKSPACE, if CHARIN_EQU_DB then gl_bs;
+-- L0668@00C6 D4D30008000000000000.  directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
+--  nWR = 1, nRD = 1, if (01010) then 011010011 else 000000000, directByte = 0001000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+198 => '1' & '1' & "01010" & O"323" & O"000" & "0001000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = ESC, if CHARIN_EQU_DB then gl_esc;
+-- L0669@00C7 D4D0001B000000000000.  directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
+--  nWR = 1, nRD = 1, if (01010) then 011010000 else 000000000, directByte = 0011011, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+199 => '1' & '1' & "01010" & O"320" & O"000" & "0011011" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = TAB, if CHARIN_EQU_DB then gl_tab;
+-- L0670@00C8 D4DB0009000000000000.  directByte = 0x09, if CHARIN_EQU_DB then gl_tab;
+--  nWR = 1, nRD = 1, if (01010) then 011011011 else 000000000, directByte = 0001001, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+200 => '1' & '1' & "01010" & O"333" & O"000" & "0001001" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = BEEP, outChar(from_microcode);
+-- L0672@00C9 C1AED707000008000000.gl_ignore:  directByte = 0x07, outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+201 => '1' & '1' & "00000" & O"656" & O"656" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, goto gl_loop;
+-- L0673@00CA FE0060FF000000002000.  gotChar = 1, if false then continue else gl_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 011000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+202 => '1' & '1' & "11111" & O"000" & O"301" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if INLEND_MAX then gl_ignore;
+-- L0675@00CB CEC9007F000000000000.gl_print:  if INLEND_MAX then gl_ignore;
+--  nWR = 1, nRD = 1, if (00111) then 011001001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+203 => '1' & '1' & "00111" & O"311" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- outChar(from_charin);
+-- L0676@00CC C1AED77F00000C000000.  outChar(from_charin);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 011, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+204 => '1' & '1' & "00000" & O"656" & O"656" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"3" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- writeCore(InlEnd, CHARIN), InlEnd <= inc;
+-- L0677@00CD C1B0D87F000001700000.  writeCore(InlEnd, CHARIN), InlEnd <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 011, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+205 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"3" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- writeCore(InlEnd, zero);
+-- L0678@00CE C1B0D87F000001400000.gl_write0:  writeCore(InlEnd, zero);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+206 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, goto gl_loop;
+-- L0679@00CF FE0060FF000000002000.  gotChar = 1, if false then continue else gl_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 011000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+207 => '1' & '1' & "11111" & O"000" & O"301" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = BEEP, outChar(from_microcode);
+-- L0681@00D0 C1AED707000008000000.gl_esc:  directByte = 0x07, outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+208 => '1' & '1' & "00000" & O"656" & O"656" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- outCRLF();
+-- L0682@00D1 C1ACD67F000000000000.  outCRLF();
+--  nWR = 1, nRD = 1, if (00000) then 110101100 else 110101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+209 => '1' & '1' & "00000" & O"654" & O"654" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, goto gl;
+-- L0683@00D2 FE00607F000000002000.  gotChar = 1, if false then continue else gl;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 011000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+210 => '1' & '1' & "11111" & O"000" & O"300" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if INLEND_MIN then gl_ignore;
+-- L0685@00D3 D0C9007F000000000000.gl_bs:  if INLEND_MIN then gl_ignore;
+--  nWR = 1, nRD = 1, if (01000) then 011001001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+211 => '1' & '1' & "01000" & O"311" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = BACKSPACE, outChar(from_microcode);
+-- L0686@00D4 C1AED708000008000000.  directByte = 0x08, outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0001000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+212 => '1' & '1' & "00000" & O"656" & O"656" & "0001000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- InlEnd <= dec, goto gl_write0;
+-- L0687@00D5 FE00677F000000180000.  InlEnd <= dec, if false then continue else gl_write0;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 011001110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 11, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+213 => '1' & '1' & "11111" & O"000" & O"316" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "11" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- writeCore(InlEnd, CHARIN), InlEnd <= inc;
+-- L0689@00D6 C1B0D87F000001700000.gl_cr:  writeCore(InlEnd, CHARIN), InlEnd <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 011, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+214 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"3" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- writeCore(InlEnd, zero);
+-- L0690@00D7 C1B0D87F000001400000.  writeCore(InlEnd, zero);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+215 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- dump_input();
+-- L0691@00D8 C1B3D9FF000000000000.  dump_input();
+--  nWR = 1, nRD = 1, if (00000) then 110110011 else 110110011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+216 => '1' & '1' & "00000" & O"663" & O"663" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- outCRLF();
+-- L0692@00D9 C1ACD67F000000000000.  outCRLF();
+--  nWR = 1, nRD = 1, if (00000) then 110101100 else 110101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+217 => '1' & '1' & "00000" & O"654" & O"654" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- gotChar = 1, BP <= Inline_start, goto fetch;
+-- L0693@00DA FE0005FF000000012000.  gotChar = 1, BP <= Inline_start, if false then continue else fetch;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 001, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+218 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"1" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if INLEND_MAX then gl_ignore;
+-- L0695@00DB CEC9007F000000000000.gl_tab:  if INLEND_MAX then gl_ignore;
+--  nWR = 1, nRD = 1, if (00111) then 011001001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+219 => '1' & '1' & "00111" & O"311" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if AT_TAB then gl_write0;
+-- L0696@00DC F2CE007F000000000000.gl_tabloop:  if AT_TAB then gl_write0;
+--  nWR = 1, nRD = 1, if (11001) then 011001110 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+220 => '1' & '1' & "11001" & O"316" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- directByte = ' ', outChar(from_microcode);
+-- L0697@00DD C1AED720000008000000.  directByte = ' ', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+221 => '1' & '1' & "00000" & O"656" & O"656" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
--- L0685@00D6 C1A8D420000001F00000.  directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 111, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-214 => '1' & '1' & "00000" & O"650" & O"650" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"7" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0698@00DE C1B0D820000001F00000.  directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 111, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+222 => '1' & '1' & "00000" & O"660" & O"660" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"7" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto gl_tabloop;
--- L0686@00D7 FE006A7F000000000000.  if false then continue else gl_tabloop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 011010100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-215 => '1' & '1' & "11111" & O"000" & O"324" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0699@00DF FE006E7F000000000000.  if false then continue else gl_tabloop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 011011100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+223 => '1' & '1' & "11111" & O"000" & O"334" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 40;
--- L0691@00D8 C1BFDFA8020000000000.  trace(from_microcode), directByte = 40;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-216 => '1' & '1' & "00000" & O"677" & O"677" & "0101000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0704@00E0 C1C7E3A8020000000000.  trace(from_microcode), directByte = 40;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+224 => '1' & '1' & "00000" & O"707" & O"707" & "0101000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_fromStack, ExpStack <= pop2;
--- L0692@00D9 C000007F0000C0000100.  alu <= S_fromStack, ExpStack <= pop2;
+-- L0705@00E1 C000007F0000C0000100.  alu <= S_fromStack, ExpStack <= pop2;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-217 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00100" & '0' & '0' & '0' & '0' & '0' & '0',
+225 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00100" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_plus_R;
--- L0693@00DA C000007F000000000140.  alu <= S_plus_R;
+-- L0706@00E2 C000007F000000000140.  alu <= S_plus_R;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00101, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-218 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00101" & '0' & '0' & '0' & '0' & '0' & '0',
+226 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00101" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_YLo, if Y_SIGN then SYNTAX_ERR;
--- L0694@00DB EB65007F280000000000.  T <= from_YLo, if Y_SIGN then SYNTAX_ERR;
---  nWR = 1, nRD = 1, if (10101) then 101100101 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-219 => '1' & '1' & "10101" & O"545" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0707@00E3 EB6D007F280000000000.  T <= from_YLo, if Y_SIGN then SYNTAX_ERR;
+--  nWR = 1, nRD = 1, if (10101) then 101101101 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+227 => '1' & '1' & "10101" & O"555" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Lino <= T, if Y_ZERO then SYNTAX_ERR;
--- L0695@00DC E965007F000000000020.  Lino <= T, if Y_ZERO then SYNTAX_ERR;
---  nWR = 1, nRD = 1, if (10100) then 101100101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-220 => '1' & '1' & "10100" & O"545" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
+-- L0708@00E4 E96D007F000000000020.  Lino <= T, if Y_ZERO then SYNTAX_ERR;
+--  nWR = 1, nRD = 1, if (10100) then 101101101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+228 => '1' & '1' & "10100" & O"555" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
 
 -- traceALU();
--- L0696@00DD C1B8DC7F000000000000.  traceALU();
---  nWR = 1, nRD = 1, if (00000) then 110111000 else 110111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-221 => '1' & '1' & "00000" & O"670" & O"670" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0709@00E5 C1C0E07F000000000000.  traceALU();
+--  nWR = 1, nRD = 1, if (00000) then 111000000 else 111000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+229 => '1' & '1' & "00000" & O"700" & O"700" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- skipSpaces();
--- L0698@00DE C19DCEFF000000000000.  skipSpaces();
---  nWR = 1, nRD = 1, if (00000) then 110011101 else 110011101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-222 => '1' & '1' & "00000" & O"635" & O"635" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0711@00E6 C1A5D2FF000000000000.  skipSpaces();
+--  nWR = 1, nRD = 1, if (00000) then 110100101 else 110100101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+230 => '1' & '1' & "00000" & O"645" & O"645" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= BP;
--- L0699@00DF C000007F600000000000.  T <= BP;
+-- L0712@00E7 C000007F600000000000.  T <= BP;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-223 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+231 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BE <= T, readCore(T);
--- L0700@00E0 C1A9D4FF000003000010.il_findBE:  BE <= T, readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 1, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-224 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '1' & '0' & '0' & '0' & '0',
+-- L0713@00E8 C1B1D8FF000003000010.il_findBE:  BE <= T, readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 1, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+232 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '1' & '0' & '0' & '0' & '0',
 
 -- directByte = CR, if MDR_EQU_DB then il_fork;
--- L0701@00E1 CAE3000D000000000000.  directByte = 0x0D, if MDR_EQU_DB then il_fork;
---  nWR = 1, nRD = 1, if (00101) then 011100011 else 000000000, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-225 => '1' & '1' & "00101" & O"343" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0714@00E9 CAEB000D000000000000.  directByte = 0x0D, if MDR_EQU_DB then il_fork;
+--  nWR = 1, nRD = 1, if (00101) then 011101011 else 000000000, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+233 => '1' & '1' & "00101" & O"353" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= inc, goto il_findBE;
--- L0702@00E2 FE00707F500000000000.  T <= inc, if false then continue else il_findBE;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 011100000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-226 => '1' & '1' & "11111" & O"000" & O"340" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0715@00EA FE00747F500000000000.  T <= inc, if false then continue else il_findBE;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 011101000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+234 => '1' & '1' & "11111" & O"000" & O"350" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if IMPLINE_EMPTY then next else changeLine;
--- L0704@00E3 D00074FF000000000000.il_fork:  if IMPLINE_EMPTY then next else changeLine;
---  nWR = 1, nRD = 1, if (01000) then 000000000 else 011101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-227 => '1' & '1' & "01000" & O"000" & O"351" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0717@00EB D00078FF000000000000.il_fork:  if IMPLINE_EMPTY then next else changeLine;
+--  nWR = 1, nRD = 1, if (01000) then 000000000 else 011110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+235 => '1' & '1' & "01000" & O"000" & O"361" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- scanProgram();
--- L0706@00E4 C0F97CFF000000000000.deleteLine:  scanProgram();
---  nWR = 1, nRD = 1, if (00000) then 011111001 else 011111001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-228 => '1' & '1' & "00000" & O"371" & O"371" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0719@00EC C10180FF000000000000.deleteLine:  scanProgram();
+--  nWR = 1, nRD = 1, if (00000) then 100000001 else 100000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+236 => '1' & '1' & "00000" & O"401" & O"401" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if BASLINE_FOUND then next else WarmStart;
--- L0707@00E5 CE00037F000000000000.  if BASLINE_FOUND then next else WarmStart;
+-- L0720@00ED CE00037F000000000000.  if BASLINE_FOUND then next else WarmStart;
 --  nWR = 1, nRD = 1, if (00111) then 000000000 else 000000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-229 => '1' & '1' & "00111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+237 => '1' & '1' & "00111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if Y_ZERO then next else WarmStart;
--- L0708@00E6 E800037F000000000000.  if Y_ZERO then next else WarmStart;
+-- L0721@00EE E800037F000000000000.  if Y_ZERO then next else WarmStart;
 --  nWR = 1, nRD = 1, if (10100) then 000000000 else 000000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-230 => '1' & '1' & "10100" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+238 => '1' & '1' & "10100" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- delBasLine();
--- L0709@00E7 C11188FF000000000000.  delBasLine();
---  nWR = 1, nRD = 1, if (00000) then 100010001 else 100010001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-231 => '1' & '1' & "00000" & O"421" & O"421" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0722@00EF C1198CFF000000000000.  delBasLine();
+--  nWR = 1, nRD = 1, if (00000) then 100011001 else 100011001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+239 => '1' & '1' & "00000" & O"431" & O"431" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto WarmStart;
--- L0710@00E8 FE00037F000000000000.  if false then continue else WarmStart;
+-- L0723@00F0 FE00037F000000000000.  if false then continue else WarmStart;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-232 => '1' & '1' & "11111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+240 => '1' & '1' & "11111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- scanProgram();
--- L0712@00E9 C0F97CFF000000000000.changeLine:  scanProgram();
---  nWR = 1, nRD = 1, if (00000) then 011111001 else 011111001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-233 => '1' & '1' & "00000" & O"371" & O"371" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0725@00F1 C10180FF000000000000.changeLine:  scanProgram();
+--  nWR = 1, nRD = 1, if (00000) then 100000001 else 100000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+241 => '1' & '1' & "00000" & O"401" & O"401" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if BASLINE_FOUND then next else appendLine;
--- L0713@00EA CE00777F000000000000.  if BASLINE_FOUND then next else appendLine;
---  nWR = 1, nRD = 1, if (00111) then 000000000 else 011101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-234 => '1' & '1' & "00111" & O"000" & O"356" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0726@00F2 CE007B7F000000000000.  if BASLINE_FOUND then next else appendLine;
+--  nWR = 1, nRD = 1, if (00111) then 000000000 else 011110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+242 => '1' & '1' & "00111" & O"000" & O"366" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if Y_ZERO then next else insertLine;
--- L0714@00EB E80076FF000000000000.  if Y_ZERO then next else insertLine;
---  nWR = 1, nRD = 1, if (10100) then 000000000 else 011101101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-235 => '1' & '1' & "10100" & O"000" & O"355" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0727@00F3 E8007AFF000000000000.  if Y_ZERO then next else insertLine;
+--  nWR = 1, nRD = 1, if (10100) then 000000000 else 011110101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+243 => '1' & '1' & "10100" & O"000" & O"365" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto RSTACK_ERR;
--- L0716@00EC FE00B5FF000000000000.replaceLine:  if false then continue else RSTACK_ERR;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-236 => '1' & '1' & "11111" & O"000" & O"553" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0729@00F4 FE00B9FF000000000000.replaceLine:  if false then continue else RSTACK_ERR;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+244 => '1' & '1' & "11111" & O"000" & O"563" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto ESTACK_ERR;
--- L0718@00ED FE00B4FF000000000000.insertLine:  if false then continue else ESTACK_ERR;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-237 => '1' & '1' & "11111" & O"000" & O"551" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0731@00F5 FE00B8FF000000000000.insertLine:  if false then continue else ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+245 => '1' & '1' & "11111" & O"000" & O"561" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_fromLino, T <= dec;
--- L0720@00EE C000007F580000000500.appendLine:  alu <= S_fromLino, T <= dec;
+-- L0733@00F6 C000007F580000000500.appendLine:  alu <= S_fromLino, T <= dec;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-238 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
+246 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- writeCore(T, from_SHi);
--- L0721@00EF C1A8D47F000003A00000.  writeCore(T, from_SHi);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 101, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-239 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"5" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0734@00F7 C1B0D87F000003A00000.  writeCore(T, from_SHi);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 101, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+247 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"5" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= inc;
--- L0722@00F0 C000007F500000000000.  T <= inc;
+-- L0735@00F8 C000007F500000000000.  T <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-240 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+248 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- writeCore(T, from_SLo);
--- L0723@00F1 C1A8D47F000003C00000.  writeCore(T, from_SLo);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 110, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-241 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"6" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0736@00F9 C1B0D87F000003C00000.  writeCore(T, from_SLo);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 110, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+249 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"6" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= inc;
--- L0724@00F2 C000007F500000000000.  T <= inc;
+-- L0737@00FA C000007F500000000000.  T <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-242 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+250 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(BP);
--- L0725@00F3 C1A9D4FF000002000000.app_loop:  readCore(BP);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-243 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0738@00FB C1B1D8FF000002000000.app_loop:  readCore(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+251 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- writeCore(T, same);
--- L0726@00F4 C1A8D47F000003000000.  writeCore(T, same);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-244 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0739@00FC C1B0D87F000003000000.  writeCore(T, same);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+252 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= inc, T <= inc;
--- L0727@00F5 C000007F500000030000.  BP <= inc, T <= inc;
+-- L0740@00FD C000007F500000030000.  BP <= inc, T <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-245 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+253 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = CR, if MDR_EQU_DB then next else app_loop;
--- L0728@00F6 CA00798D000000000000.  directByte = 0x0D, if MDR_EQU_DB then next else app_loop;
---  nWR = 1, nRD = 1, if (00101) then 000000000 else 011110011, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-246 => '1' & '1' & "00101" & O"000" & O"363" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0741@00FE CA007D8D000000000000.  directByte = 0x0D, if MDR_EQU_DB then next else app_loop;
+--  nWR = 1, nRD = 1, if (00101) then 000000000 else 011111011, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+254 => '1' & '1' & "00101" & O"000" & O"373" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- write2Nulls(same);
--- L0729@00F7 C187C3FF000000000000.  write2Nulls(same);
---  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-247 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0742@00FF C18FC7FF000000000000.  write2Nulls(same);
+--  nWR = 1, nRD = 1, if (00000) then 110001111 else 110001111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+255 => '1' & '1' & "00000" & O"617" & O"617" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto WarmStart;
--- L0730@00F8 FE00037F000000000000.  if false then continue else WarmStart;
+-- L0743@0100 FE00037F000000000000.  if false then continue else WarmStart;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-248 => '1' & '1' & "11111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+256 => '1' & '1' & "11111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= reset0;
--- L0733@00F9 C000007F000000000040.scanProgram:  alu <= reset0;
+-- L0746@0101 C000007F000000000040.scanProgram:  alu <= reset0;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-249 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
+257 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= zero;
--- L0734@00FA C000007F380000000000.  T <= zero;
+-- L0747@0102 C000007F380000000000.  T <= zero;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00111, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-250 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+258 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- LS <= T, LE <= T, T <= Prog_start;
--- L0735@00FB C000007F68000000000C.  LS <= T, LE <= T, T <= Prog_start;
+-- L0748@0103 C000007F68000000000C.  LS <= T, LE <= T, T <= Prog_start;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 1, LE <= 1, PrgEnd <= 0, dummy = 0;
-251 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '1' & '1' & '0' & '0',
+259 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '1' & '1' & '0' & '0',
 
 -- PrgEnd <= T;
--- L0736@00FC C000007F000000000002.  PrgEnd <= T;
+-- L0749@0104 C000007F000000000002.  PrgEnd <= T;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 1, dummy = 0;
-252 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '1' & '0',
+260 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '1' & '0',
 
 -- readCore16(same);
--- L0737@00FD C183C1FF000000000000.scan_loop:  readCore16(same);
---  nWR = 1, nRD = 1, if (00000) then 110000011 else 110000011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-253 => '1' & '1' & "00000" & O"603" & O"603" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0750@0105 C18BC5FF000000000000.scan_loop:  readCore16(same);
+--  nWR = 1, nRD = 1, if (00000) then 110001011 else 110001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+261 => '1' & '1' & "00000" & O"613" & O"613" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceALU();
--- L0738@00FE C1B8DC7F000000000000.  traceALU();
---  nWR = 1, nRD = 1, if (00000) then 110111000 else 110111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-254 => '1' & '1' & "00000" & O"670" & O"670" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0751@0106 C1C0E07F000000000000.  traceALU();
+--  nWR = 1, nRD = 1, if (00000) then 111000000 else 111000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+262 => '1' & '1' & "00000" & O"700" & O"700" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_fromLino, if R_IS_ZERO then next else scan_check;
--- L0739@00FF E600817F000000000500.  alu <= S_fromLino, if R_IS_ZERO then next else scan_check;
---  nWR = 1, nRD = 1, if (10011) then 000000000 else 100000010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-255 => '1' & '1' & "10011" & O"000" & O"402" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0752@0107 E600857F000000000500.  alu <= S_fromLino, if R_IS_ZERO then next else scan_check;
+--  nWR = 1, nRD = 1, if (10011) then 000000000 else 100001010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+263 => '1' & '1' & "10011" & O"000" & O"412" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= dec;
--- L0740@0100 C000007F580000000000.  T <= dec;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-256 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- PrgEnd <= T, goto scan_exit;
--- L0741@0101 FE00887F000000000002.  PrgEnd <= T, if false then continue else scan_exit;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 100010000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 1, dummy = 0;
-257 => '1' & '1' & "11111" & O"000" & O"420" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '1' & '0',
-
--- alu <= S_minus_R;
--- L0742@0102 C000007F000000000180.scan_check:  alu <= S_minus_R;
---  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-258 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if Y_ZERO then scan_found else next;
--- L0743@0103 E907007F000000000000.  if Y_ZERO then scan_found else next;
---  nWR = 1, nRD = 1, if (10100) then 100000111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-259 => '1' & '1' & "10100" & O"407" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if Y_SIGN then scan_found else next;
--- L0744@0104 EB07007F000000000000.  if Y_SIGN then scan_found else next;
---  nWR = 1, nRD = 1, if (10101) then 100000111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-260 => '1' & '1' & "10101" & O"407" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- findNextCR(same);
--- L0745@0105 C17FBFFF000000000000.scan_next:  findNextCR(same);
---  nWR = 1, nRD = 1, if (00000) then 101111111 else 101111111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-261 => '1' & '1' & "00000" & O"577" & O"577" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= inc, goto scan_loop;
--- L0746@0106 FE007EFF500000000000.scan_line:  T <= inc, if false then continue else scan_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 011111101, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-262 => '1' & '1' & "11111" & O"000" & O"375" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- if BASLINE_FOUND then scan_next;
--- L0747@0107 CF05007F000000000000.scan_found:  if BASLINE_FOUND then scan_next;
---  nWR = 1, nRD = 1, if (00111) then 100000101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-263 => '1' & '1' & "00111" & O"405" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
-
--- T <= dec;
--- L0748@0108 C000007F580000000000.  T <= dec;
+-- L0753@0108 C000007F580000000000.  T <= dec;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 264 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
+-- PrgEnd <= T, goto scan_exit;
+-- L0754@0109 FE008C7F000000000002.  PrgEnd <= T, if false then continue else scan_exit;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 100011000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 1, dummy = 0;
+265 => '1' & '1' & "11111" & O"000" & O"430" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '1' & '0',
+
+-- alu <= S_minus_R;
+-- L0755@010A C000007F000000000180.scan_check:  alu <= S_minus_R;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+266 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if Y_ZERO then scan_found else next;
+-- L0756@010B E90F007F000000000000.  if Y_ZERO then scan_found else next;
+--  nWR = 1, nRD = 1, if (10100) then 100001111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+267 => '1' & '1' & "10100" & O"417" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if Y_SIGN then scan_found else next;
+-- L0757@010C EB0F007F000000000000.  if Y_SIGN then scan_found else next;
+--  nWR = 1, nRD = 1, if (10101) then 100001111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+268 => '1' & '1' & "10101" & O"417" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- findNextCR(same);
+-- L0758@010D C187C3FF000000000000.scan_next:  findNextCR(same);
+--  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+269 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= inc, goto scan_loop;
+-- L0759@010E FE0082FF500000000000.scan_line:  T <= inc, if false then continue else scan_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 100000101, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+270 => '1' & '1' & "11111" & O"000" & O"405" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- if BASLINE_FOUND then scan_next;
+-- L0760@010F CF0D007F000000000000.scan_found:  if BASLINE_FOUND then scan_next;
+--  nWR = 1, nRD = 1, if (00111) then 100001101 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+271 => '1' & '1' & "00111" & O"415" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
 -- T <= dec;
--- L0749@0109 C000007F580000000000.  T <= dec;
+-- L0761@0110 C000007F580000000000.  T <= dec;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-265 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+272 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+
+-- T <= dec;
+-- L0762@0111 C000007F580000000000.  T <= dec;
+--  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+273 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- LS <= T, T <= inc;
--- L0750@010A C000007F500000000008.  LS <= T, T <= inc;
+-- L0763@0112 C000007F500000000008.  LS <= T, T <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 1, LE <= 0, PrgEnd <= 0, dummy = 0;
-266 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '1' & '0' & '0' & '0',
+274 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '1' & '0' & '0' & '0',
 
 -- findNextCR(inc);
--- L0751@010B C17FBFFF500000000000.  findNextCR(inc);
---  nWR = 1, nRD = 1, if (00000) then 101111111 else 101111111, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-267 => '1' & '1' & "00000" & O"577" & O"577" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0764@0113 C187C3FF500000000000.  findNextCR(inc);
+--  nWR = 1, nRD = 1, if (00000) then 110000111 else 110000111, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+275 => '1' & '1' & "00000" & O"607" & O"607" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- LE <= T, T <= from_R;
--- L0752@010C C000007F800000000004.  LE <= T, T <= from_R;
+-- L0765@0114 C000007F800000000004.  LE <= T, T <= from_R;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 1, PrgEnd <= 0, dummy = 0;
-268 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '1' & '0' & '0',
+276 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '1' & '0' & '0',
 
 -- ExpStack <= push_TWord, goto scan_line;
--- L0753@010D FE00837F000080000000.  ExpStack <= push_TWord, if false then continue else scan_line;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 100000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-269 => '1' & '1' & "11111" & O"000" & O"406" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0766@0115 FE00877F000080000000.  ExpStack <= push_TWord, if false then continue else scan_line;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 100001110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+277 => '1' & '1' & "11111" & O"000" & O"416" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_fromLino, if BASLINE_FOUND then next else scan_exit;
--- L0754@010E CE00887F000000000500.scan_done:  alu <= S_fromLino, if BASLINE_FOUND then next else scan_exit;
---  nWR = 1, nRD = 1, if (00111) then 000000000 else 100010000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-270 => '1' & '1' & "00111" & O"000" & O"420" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0767@0116 CE008C7F000000000500.scan_done:  alu <= S_fromLino, if BASLINE_FOUND then next else scan_exit;
+--  nWR = 1, nRD = 1, if (00111) then 000000000 else 100011000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+278 => '1' & '1' & "00111" & O"000" & O"430" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= R_fromStack, ExpStack <= pop2;
--- L0755@010F C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
+-- L0768@0117 C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-271 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
+279 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_minus_R, back;
--- L0756@0110 C002007F000000000180.scan_exit:  alu <= S_minus_R, if true then return else continue;
+-- L0769@0118 C002007F000000000180.scan_exit:  alu <= S_minus_R, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-272 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
+280 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00110" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= copy_del;
--- L0759@0111 C000007F000000000540.delBasLine:  alu <= copy_del;
+-- L0772@0119 C000007F000000000540.delBasLine:  alu <= copy_del;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10101, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-273 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10101" & '0' & '0' & '0' & '0' & '0' & '0',
+281 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10101" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if Y_ZERO then return;
--- L0760@0112 E802007F000000000000.dbs_loop:  if Y_ZERO then return;
+-- L0773@011A E802007F000000000000.dbs_loop:  if Y_ZERO then return;
 --  nWR = 1, nRD = 1, if (10100) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-274 => '1' & '1' & "10100" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+282 => '1' & '1' & "10100" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_S;
--- L0761@0113 C000007F780000000000.  T <= from_S;
+-- L0774@011B C000007F780000000000.  T <= from_S;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01111, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-275 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+283 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(T);
--- L0762@0114 C1A9D4FF000003000000.  readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-276 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0775@011C C1B1D8FF000003000000.  readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+284 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_R;
--- L0763@0115 C000007F800000000000.  T <= from_R;
+-- L0776@011D C000007F800000000000.  T <= from_R;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-277 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+285 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- writeCore(T, same);
--- L0764@0116 C1A8D47F000003000000.  writeCore(T, same);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-278 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0777@011E C1B0D87F000003000000.  writeCore(T, same);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+286 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceALU();
--- L0765@0117 C1B8DC7F000000000000.  traceALU();
---  nWR = 1, nRD = 1, if (00000) then 110111000 else 110111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-279 => '1' & '1' & "00000" & O"670" & O"670" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0778@011F C1C0E07F000000000000.  traceALU();
+--  nWR = 1, nRD = 1, if (00000) then 111000000 else 111000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+287 => '1' & '1' & "00000" & O"700" & O"700" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= copy_inc, goto dbs_loop;
--- L0766@0118 FE00897F000000000580.  alu <= copy_inc, if false then continue else dbs_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 100010010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-280 => '1' & '1' & "11111" & O"000" & O"422" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10110" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0779@0120 FE008D7F000000000580.  alu <= copy_inc, if false then continue else dbs_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 100011010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10110, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+288 => '1' & '1' & "11111" & O"000" & O"432" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10110" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 43;
--- L0771@0119 C1BFDFAB020000000000.  trace(from_microcode), directByte = 43;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-281 => '1' & '1' & "00000" & O"677" & O"677" & "0101011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0784@0121 C1C7E3AB020000000000.  trace(from_microcode), directByte = 43;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+289 => '1' & '1' & "00000" & O"707" & O"707" & "0101011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto ColdStart;
--- L0772@011A FE00027F000000000000.  if false then continue else ColdStart;
+-- L0785@0122 FE00027F000000000000.  if false then continue else ColdStart;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000000100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-282 => '1' & '1' & "11111" & O"000" & O"004" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+290 => '1' & '1' & "11111" & O"000" & O"004" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 42;
--- L0777@011B C1BFDFAA020000000000.  trace(from_microcode), directByte = 42;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-283 => '1' & '1' & "00000" & O"677" & O"677" & "0101010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0790@0123 C1C7E3AA020000000000.  trace(from_microcode), directByte = 42;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+291 => '1' & '1' & "00000" & O"707" & O"707" & "0101010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= IL_PC;
--- L0778@011C C000007F080000000000.  T <= IL_PC;
+-- L0791@0124 C000007F080000000000.  T <= IL_PC;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-284 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+292 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- XQhere <= T, readCore16(Prog_start);
--- L0779@011D C183C1FF682000000000.  XQhere <= T, readCore16(Prog_start);
---  nWR = 1, nRD = 1, if (00000) then 110000011 else 110000011, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 1, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-285 => '1' & '1' & "00000" & O"603" & O"603" & "1111111" & "01101" & "00" & O"0" & '1' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0792@0125 C18BC5FF682000000000.  XQhere <= T, readCore16(Prog_start);
+--  nWR = 1, nRD = 1, if (00000) then 110001011 else 110001011, directByte = 1111111, T <= 01101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 1, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+293 => '1' & '1' & "00000" & O"613" & O"613" & "1111111" & "01101" & "00" & O"0" & '1' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if R_IS_ZERO then NOPROG_ERR;
--- L0780@011E E75F007F000000000000.  if R_IS_ZERO then NOPROG_ERR;
---  nWR = 1, nRD = 1, if (10011) then 101011111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-286 => '1' & '1' & "10011" & O"537" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0793@0126 E767007F000000000000.  if R_IS_ZERO then NOPROG_ERR;
+--  nWR = 1, nRD = 1, if (10011) then 101100111 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+294 => '1' & '1' & "10011" & O"547" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= T, T <= from_R;
--- L0781@011F C000007F800000060000.  BP <= T, T <= from_R;
+-- L0794@0127 C000007F800000060000.  BP <= T, T <= from_R;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 110, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-287 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+295 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"6" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- Lino <= T, goto fetch;
--- L0782@0120 FE0005FF000000000020.  Lino <= T, if false then continue else fetch;
+-- L0795@0128 FE0005FF000000000020.  Lino <= T, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 1, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-288 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
+296 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '1' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 44;
--- L0787@0121 C1BFDFAC020000000000.  trace(from_microcode), directByte = 44;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0101100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-289 => '1' & '1' & "00000" & O"677" & O"677" & "0101100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0800@0129 C1C7E3AC020000000000.  trace(from_microcode), directByte = 44;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0101100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+297 => '1' & '1' & "00000" & O"707" & O"707" & "0101100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'S', outChar(from_microcode);
--- L0788@0122 C1A6D353000008000000.stop_run:  directByte = 'S', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1010011, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-290 => '1' & '1' & "00000" & O"646" & O"646" & "1010011" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0801@012A C1AED753000008000000.stop_run:  directByte = 'S', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1010011, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+298 => '1' & '1' & "00000" & O"656" & O"656" & "1010011" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'T', outChar(from_microcode);
--- L0789@0123 C1A6D354000008000000.  directByte = 'T', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1010100, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-291 => '1' & '1' & "00000" & O"646" & O"646" & "1010100" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0802@012B C1AED754000008000000.  directByte = 'T', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1010100, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+299 => '1' & '1' & "00000" & O"656" & O"656" & "1010100" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'O', outChar(from_microcode);
--- L0790@0124 C1A6D34F000008000000.  directByte = 'O', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1001111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-292 => '1' & '1' & "00000" & O"646" & O"646" & "1001111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0803@012C C1AED74F000008000000.  directByte = 'O', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1001111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+300 => '1' & '1' & "00000" & O"656" & O"656" & "1001111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'P', outChar(from_microcode);
--- L0791@0125 C1A6D350000008000000.  directByte = 'P', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1010000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-293 => '1' & '1' & "00000" & O"646" & O"646" & "1010000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0804@012D C1AED750000008000000.  directByte = 'P', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1010000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+301 => '1' & '1' & "00000" & O"656" & O"656" & "1010000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto print_lino;
--- L0792@0126 FE00BA7F000000000000.  if false then continue else print_lino;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-294 => '1' & '1' & "11111" & O"000" & O"564" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0805@012E FE00BE7F000000000000.  if false then continue else print_lino;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101111100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+302 => '1' & '1' & "11111" & O"000" & O"574" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 19;
--- L0797@0127 C1BFDF93020000000000.  trace(from_microcode), directByte = 19;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-295 => '1' & '1' & "00000" & O"677" & O"677" & "0010011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0810@012F C1C7E393020000000000.  trace(from_microcode), directByte = 19;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+303 => '1' & '1' & "00000" & O"707" & O"707" & "0010011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then RSTACK_ERR;
--- L0798@0128 E36B007F000000000000.  if STACK_IS_EMPTY then RSTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-296 => '1' & '1' & "10001" & O"553" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0811@0130 E373007F000000000000.  if STACK_IS_EMPTY then RSTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+304 => '1' & '1' & "10001" & O"563" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= RetStack, RetStack <= pop, goto fetch;
--- L0799@0129 FE0005FF01C800000000.  IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch;
+-- L0812@0131 FE0005FF01C800000000.  IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 111, XQhere <= 0, IL_OP <= 0, RetStack <= 10, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-297 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"7" & '0' & '0' & "10" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+305 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"7" & '0' & '0' & "10" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 20;
--- L0804@012A C1BFDF94020000000000.  trace(from_microcode), directByte = 20;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-298 => '1' & '1' & "00000" & O"677" & O"677" & "0010100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0817@0132 C1C7E394020000000000.  trace(from_microcode), directByte = 20;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+306 => '1' & '1' & "00000" & O"707" & O"707" & "0010100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 3;
--- L0805@012B C1BFDF83020000000000.  trace(from_microcode), directByte = 3;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-299 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0818@0133 C1C7E383020000000000.  trace(from_microcode), directByte = 3;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+307 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_FULL then RSTACK_ERR;
--- L0806@012C E16B007F000000000000.  if STACK_IS_FULL then RSTACK_ERR;
---  nWR = 1, nRD = 1, if (10000) then 101101011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-300 => '1' & '1' & "10000" & O"553" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0819@0134 E173007F000000000000.  if STACK_IS_FULL then RSTACK_ERR;
+--  nWR = 1, nRD = 1, if (10000) then 101110011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+308 => '1' & '1' & "10000" & O"563" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- RetStack <= push_IL_PC_PLUS_1, goto jump;
--- L0807@012D FE00987F000C00000000.  RetStack <= push_IL_PC_PLUS_1, if false then continue else jump;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 100110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 11, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-301 => '1' & '1' & "11111" & O"000" & O"460" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "11" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0820@0135 FE009C7F000C00000000.  RetStack <= push_IL_PC_PLUS_1, if false then continue else jump;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 100111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 11, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+309 => '1' & '1' & "11111" & O"000" & O"470" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "11" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 21;
--- L0812@012E C1BFDF95020000000000.  trace(from_microcode), directByte = 21;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-302 => '1' & '1' & "00000" & O"677" & O"677" & "0010101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0825@0136 C1C7E395020000000000.  trace(from_microcode), directByte = 21;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+310 => '1' & '1' & "00000" & O"707" & O"707" & "0010101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 3;
--- L0813@012F C1BFDF83020000000000.  trace(from_microcode), directByte = 3;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-303 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0826@0137 C1C7E383020000000000.  trace(from_microcode), directByte = 3;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+311 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= direct11, goto fetch;
--- L0814@0130 FE0005FF018000000000.jump:  IL_PC <= direct11, if false then continue else fetch;
+-- L0827@0138 FE0005FF018000000000.jump:  IL_PC <= direct11, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 110, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-304 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"6" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+312 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"6" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 7;
--- L0819@0131 C1BFDF87020000000000.  trace(from_microcode), directByte = 7;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-305 => '1' & '1' & "00000" & O"677" & O"677" & "0000111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0832@0139 C1C7E387020000000000.  trace(from_microcode), directByte = 7;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+313 => '1' & '1' & "00000" & O"707" & O"707" & "0000111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= pc_plus_off6;
--- L0820@0132 C000007F010000000000.  IL_PC <= pc_plus_off6;
+-- L0833@013A C000007F010000000000.  IL_PC <= pc_plus_off6;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 100, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-306 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"4" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+314 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"4" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceGoto;
--- L0821@0133 C1BFDF9E020000000000.br_exit:  trace(from_microcode), directByte = 30;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-307 => '1' & '1' & "00000" & O"677" & O"677" & "0011110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0834@013B C1C7E39E020000000000.br_exit:  trace(from_microcode), directByte = 30;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+315 => '1' & '1' & "00000" & O"707" & O"707" & "0011110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0822@0134 FE0005FF000000000000.  if false then continue else fetch;
+-- L0835@013C FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-308 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+316 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 7;
--- L0827@0135 C1BFDF87020000000000.  trace(from_microcode), directByte = 7;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-309 => '1' & '1' & "00000" & O"677" & O"677" & "0000111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0840@013D C1C7E387020000000000.  trace(from_microcode), directByte = 7;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+317 => '1' & '1' & "00000" & O"707" & O"707" & "0000111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto badop;
--- L0828@0136 FE0008FF000000000000.  if false then continue else badop;
+-- L0841@013E FE0008FF000000000000.  if false then continue else badop;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000010001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-310 => '1' & '1' & "11111" & O"000" & O"021" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+318 => '1' & '1' & "11111" & O"000" & O"021" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 17;
--- L0833@0137 C1BFDF91020000000000.  trace(from_microcode), directByte = 17;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-311 => '1' & '1' & "00000" & O"677" & O"677" & "0010001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0846@013F C1C7E391020000000000.  trace(from_microcode), directByte = 17;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+319 => '1' & '1' & "00000" & O"707" & O"707" & "0010001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= IL_PC, BP <= save, skipSpaces();
--- L0834@0138 C19DCEFF080000040000.  T <= IL_PC, BP <= save, skipSpaces();
---  nWR = 1, nRD = 1, if (00000) then 110011101 else 110011101, directByte = 1111111, T <= 00001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 100, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-312 => '1' & '1' & "00000" & O"635" & O"635" & "1111111" & "00001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"4" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0847@0140 C1A5D2FF080000040000.  T <= IL_PC, BP <= save, skipSpaces();
+--  nWR = 1, nRD = 1, if (00000) then 110100101 else 110100101, directByte = 1111111, T <= 00001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 100, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+320 => '1' & '1' & "00000" & O"645" & O"645" & "1111111" & "00001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"4" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 3;
--- L0835@0139 C1BFDF83020000000000.bc_loop:  trace(from_microcode), directByte = 3;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-313 => '1' & '1' & "00000" & O"677" & O"677" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0848@0141 C1C7E383020000000000.bc_loop:  trace(from_microcode), directByte = 3;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0000011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+321 => '1' & '1' & "00000" & O"707" & O"707" & "0000011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(BP);
--- L0836@013A C1A9D4FF000002000000.  readCore(BP);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-314 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0849@0142 C1B1D8FF000002000000.  readCore(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+322 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
--- L0837@013B E400A0FF000000000000.  if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
---  nWR = 1, nRD = 1, if (10010) then 000000000 else 101000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-315 => '1' & '1' & "10010" & O"000" & O"501" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0850@0143 E400A4FF000000000000.  if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
+--  nWR = 1, nRD = 1, if (10010) then 000000000 else 101001001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+323 => '1' & '1' & "10010" & O"000" & O"511" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if ILCODEBYTE_BIT7 then bc_match;
--- L0838@013C C33E007F000000000000.  if ILCODEBYTE_BIT7 then bc_match;
---  nWR = 1, nRD = 1, if (00001) then 100111110 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-316 => '1' & '1' & "00001" & O"476" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0851@0144 C346007F000000000000.  if ILCODEBYTE_BIT7 then bc_match;
+--  nWR = 1, nRD = 1, if (00001) then 101000110 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+324 => '1' & '1' & "00001" & O"506" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= inc, IL_PC <= inc, goto bc_loop;
--- L0839@013D FE009CFF008000030000.  BP <= inc, IL_PC <= inc, if false then continue else bc_loop;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 100111001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-317 => '1' & '1' & "11111" & O"000" & O"471" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0852@0145 FE00A0FF008000030000.  BP <= inc, IL_PC <= inc, if false then continue else bc_loop;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+325 => '1' & '1' & "11111" & O"000" & O"501" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= inc, IL_PC <= inc;
--- L0840@013E C000007F008000030000.bc_match:  BP <= inc, IL_PC <= inc;
+-- L0853@0146 C000007F008000030000.bc_match:  BP <= inc, IL_PC <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 010, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-318 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+326 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"2" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceBP();
--- L0841@013F C1B2D97F000000000000.  traceBP();
---  nWR = 1, nRD = 1, if (00000) then 110110010 else 110110010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-319 => '1' & '1' & "00000" & O"662" & O"662" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0854@0147 C1BADD7F000000000000.  traceBP();
+--  nWR = 1, nRD = 1, if (00000) then 110111010 else 110111010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+327 => '1' & '1' & "00000" & O"672" & O"672" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0842@0140 FE0005FF000000000000.  if false then continue else fetch;
+-- L0855@0148 FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-320 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+328 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= recall, IL_PC <= T;
--- L0843@0141 C000007F00C000050000.bc_exit:  BP <= recall, IL_PC <= T;
+-- L0856@0149 C000007F00C000050000.bc_exit:  BP <= recall, IL_PC <= T;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 011, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 101, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-321 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"3" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"5" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+329 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"3" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"5" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceBP();
--- L0844@0142 C1B2D97F000000000000.  traceBP();
---  nWR = 1, nRD = 1, if (00000) then 110110010 else 110110010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-322 => '1' & '1' & "00000" & O"662" & O"662" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0857@014A C1BADD7F000000000000.  traceBP();
+--  nWR = 1, nRD = 1, if (00000) then 110111010 else 110111010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+330 => '1' & '1' & "00000" & O"672" & O"672" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
--- L0845@0143 F56599FF014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
---  nWR = 1, nRD = 1, if (11010) then 101100101 else 100110011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-323 => '1' & '1' & "11010" & O"545" & O"463" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0858@014B F56D9DFF014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
+--  nWR = 1, nRD = 1, if (11010) then 101101101 else 100111011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+331 => '1' & '1' & "11010" & O"555" & O"473" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 16;
--- L0850@0144 C1BFDF90020000000000.  trace(from_microcode), directByte = 16;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0010000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-324 => '1' & '1' & "00000" & O"677" & O"677" & "0010000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0863@014C C1C7E390020000000000.  trace(from_microcode), directByte = 16;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0010000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+332 => '1' & '1' & "00000" & O"707" & O"707" & "0010000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- skipSpaces();
--- L0851@0145 C19DCEFF000000000000.  skipSpaces();
---  nWR = 1, nRD = 1, if (00000) then 110011101 else 110011101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-325 => '1' & '1' & "00000" & O"635" & O"635" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0864@014D C1A5D2FF000000000000.  skipSpaces();
+--  nWR = 1, nRD = 1, if (00000) then 110100101 else 110100101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+333 => '1' & '1' & "00000" & O"645" & O"645" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;
--- L0852@0146 DF48007F000000800000.  MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;
---  nWR = 1, nRD = 1, if (01111) then 101001000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 100, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-326 => '1' & '1' & "01111" & O"510" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"4" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0865@014E DF50007F000000800000.  MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;
+--  nWR = 1, nRD = 1, if (01111) then 101010000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 100, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+334 => '1' & '1' & "01111" & O"520" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"4" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
--- L0853@0147 F56599FF014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
---  nWR = 1, nRD = 1, if (11010) then 101100101 else 100110011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-327 => '1' & '1' & "11010" & O"545" & O"463" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0866@014F F56D9DFF014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
+--  nWR = 1, nRD = 1, if (11010) then 101101101 else 100111011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+335 => '1' & '1' & "11010" & O"555" & O"473" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= MDRx2, if STACK_IS_FULL then ESTACK_ERR;
--- L0854@0148 E169007F480000000000.bv_exec:  T <= MDRx2, if STACK_IS_FULL then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10000) then 101101001 else 000000000, directByte = 1111111, T <= 01001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-328 => '1' & '1' & "10000" & O"551" & O"000" & "1111111" & "01001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0867@0150 E171007F480000000000.bv_exec:  T <= MDRx2, if STACK_IS_FULL then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10000) then 101110001 else 000000000, directByte = 1111111, T <= 01001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+336 => '1' & '1' & "10000" & O"561" & O"000" & "1111111" & "01001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TByte, BP <= inc, goto fetch;
--- L0855@0149 FE0005FF0000A0030000.  ExpStack <= push_TByte, BP <= inc, if false then continue else fetch;
+-- L0868@0151 FE0005FF0000A0030000.  ExpStack <= push_TByte, BP <= inc, if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 101, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-329 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"5" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+337 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"5" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 14;
--- L0860@014A C1BFDF8E020000000000.  trace(from_microcode), directByte = 14;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-330 => '1' & '1' & "00000" & O"677" & O"677" & "0001110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0873@0152 C1C7E38E020000000000.  trace(from_microcode), directByte = 14;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+338 => '1' & '1' & "00000" & O"707" & O"707" & "0001110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- skipSpaces();
--- L0861@014B C19DCEFF000000000000.  skipSpaces();
---  nWR = 1, nRD = 1, if (00000) then 110011101 else 110011101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-331 => '1' & '1' & "00000" & O"635" & O"635" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0874@0153 C1A5D2FF000000000000.  skipSpaces();
+--  nWR = 1, nRD = 1, if (00000) then 110100101 else 110100101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+339 => '1' & '1' & "00000" & O"645" & O"645" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= reset0, if MDR_IS_NUM then bn_loop;
--- L0862@014C DD51007F000000000040.  alu <= reset0, if MDR_IS_NUM then bn_loop;
---  nWR = 1, nRD = 1, if (01110) then 101010001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-332 => '1' & '1' & "01110" & O"521" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0875@0154 DD59007F000000000040.  alu <= reset0, if MDR_IS_NUM then bn_loop;
+--  nWR = 1, nRD = 1, if (01110) then 101011001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+340 => '1' & '1' & "01110" & O"531" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;
--- L0863@014D F411007F014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;
+-- L0876@0155 F411007F014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;
 --  nWR = 1, nRD = 1, if (11010) then 000010001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-333 => '1' & '1' & "11010" & O"021" & O"000" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+341 => '1' & '1' & "11010" & O"021" & O"000" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceY();
--- L0864@014E C1B5DAFF000000000000.bn_exit:  traceY();
---  nWR = 1, nRD = 1, if (00000) then 110110101 else 110110101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-334 => '1' & '1' & "00000" & O"665" & O"665" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0877@0156 C1BDDEFF000000000000.bn_exit:  traceY();
+--  nWR = 1, nRD = 1, if (00000) then 110111101 else 110111101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+342 => '1' & '1' & "00000" & O"675" & O"675" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceGoto;
--- L0865@014F C1BFDF9E020000000000.  trace(from_microcode), directByte = 30;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0011110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-335 => '1' & '1' & "00000" & O"677" & O"677" & "0011110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0878@0157 C1C7E39E020000000000.  trace(from_microcode), directByte = 30;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0011110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+343 => '1' & '1' & "00000" & O"707" & O"707" & "0011110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto fetch;
--- L0866@0150 FE0005FF000000000000.  if false then continue else fetch;
+-- L0879@0158 FE0005FF000000000000.  if false then continue else fetch;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000001011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-336 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+344 => '1' & '1' & "11111" & O"000" & O"013" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= Yx10_plus_MDR, BP <= inc;
--- L0867@0151 C000007F000000030400.bn_loop:  alu <= Yx10_plus_MDR, BP <= inc;
+-- L0880@0159 C000007F000000030400.bn_loop:  alu <= Yx10_plus_MDR, BP <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-337 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "10000" & '0' & '0' & '0' & '0' & '0' & '0',
+345 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "10000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if ALU_OVERFLOW then OVERFLOW_ERR;
--- L0868@0152 EF63007F000000000000.  if ALU_OVERFLOW then OVERFLOW_ERR;
---  nWR = 1, nRD = 1, if (10111) then 101100011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-338 => '1' & '1' & "10111" & O"543" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0881@015A EF6B007F000000000000.  if ALU_OVERFLOW then OVERFLOW_ERR;
+--  nWR = 1, nRD = 1, if (10111) then 101101011 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+346 => '1' & '1' & "10111" & O"553" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(BP);
--- L0869@0153 C1A9D4FF000002000000.  readCore(BP);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-339 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0882@015B C1B1D8FF000002000000.  readCore(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+347 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if MDR_IS_NUM then bn_loop;
--- L0870@0154 DD51007F000000000000.  if MDR_IS_NUM then bn_loop;
---  nWR = 1, nRD = 1, if (01110) then 101010001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-340 => '1' & '1' & "01110" & O"521" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0883@015C DD59007F000000000000.  if MDR_IS_NUM then bn_loop;
+--  nWR = 1, nRD = 1, if (01110) then 101011001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+348 => '1' & '1' & "01110" & O"531" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_YLo, if STACK_IS_FULL then ESTACK_ERR;
--- L0871@0155 E169007F280000000000.  T <= from_YLo, if STACK_IS_FULL then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10000) then 101101001 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-341 => '1' & '1' & "10000" & O"551" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0884@015D E171007F280000000000.  T <= from_YLo, if STACK_IS_FULL then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10000) then 101110001 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+349 => '1' & '1' & "10000" & O"561" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TWord, goto bn_exit;
--- L0872@0156 FE00A77F000080000000.  ExpStack <= push_TWord, if false then continue else bn_exit;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101001110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-342 => '1' & '1' & "11111" & O"000" & O"516" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0885@015E FE00AB7F000080000000.  ExpStack <= push_TWord, if false then continue else bn_exit;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101010110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+350 => '1' & '1' & "11111" & O"000" & O"526" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 13;
--- L0877@0157 C1BFDF8D020000000000.  trace(from_microcode), directByte = 13;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-343 => '1' & '1' & "00000" & O"677" & O"677" & "0001101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0890@015F C1C7E38D020000000000.  trace(from_microcode), directByte = 13;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+351 => '1' & '1' & "00000" & O"707" & O"707" & "0001101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- skipSpaces();
--- L0878@0158 C19DCEFF000000000000.  skipSpaces();
---  nWR = 1, nRD = 1, if (00000) then 110011101 else 110011101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-344 => '1' & '1' & "00000" & O"635" & O"635" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0891@0160 C1A5D2FF000000000000.  skipSpaces();
+--  nWR = 1, nRD = 1, if (00000) then 110100101 else 110100101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+352 => '1' & '1' & "00000" & O"645" & O"645" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = CR, if MDR_EQU_DB then fetch;
--- L0879@0159 CA0B000D000000000000.  directByte = 0x0D, if MDR_EQU_DB then fetch;
+-- L0892@0161 CA0B000D000000000000.  directByte = 0x0D, if MDR_EQU_DB then fetch;
 --  nWR = 1, nRD = 1, if (00101) then 000001011 else 000000000, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-345 => '1' & '1' & "00101" & O"013" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+353 => '1' & '1' & "00101" & O"013" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
--- L0881@015A F56599FF014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
---  nWR = 1, nRD = 1, if (11010) then 101100101 else 100110011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-346 => '1' & '1' & "11010" & O"545" & O"463" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0894@0162 F56D9DFF014000000000.  IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
+--  nWR = 1, nRD = 1, if (11010) then 101101101 else 100111011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 101, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+354 => '1' & '1' & "11010" & O"555" & O"473" & "1111111" & "00000" & "00" & O"5" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- gotChar = 1, traceString 55;
--- L0884@015B C1BFDFB7020000002000.BREAK:  gotChar = 1, trace(from_microcode), directByte = 55;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-347 => '1' & '1' & "00000" & O"677" & O"677" & "0110111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0897@0163 C1C7E3B7020000002000.BREAK:  gotChar = 1, trace(from_microcode), directByte = 55;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110111, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 1, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+355 => '1' & '1' & "00000" & O"707" & O"707" & "0110111" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '1' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outBeep();
--- L0885@015C C1A1D0FF000000000000.  outBeep();
---  nWR = 1, nRD = 1, if (00000) then 110100001 else 110100001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-348 => '1' & '1' & "00000" & O"641" & O"641" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0898@0164 C1A9D4FF000000000000.  outBeep();
+--  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+356 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'B', outChar(from_microcode);
--- L0886@015D C1A6D342000008000000.  directByte = 'B', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1000010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-349 => '1' & '1' & "00000" & O"646" & O"646" & "1000010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0899@0165 C1AED742000008000000.  directByte = 'B', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1000010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+357 => '1' & '1' & "00000" & O"656" & O"656" & "1000010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceDetails;
--- L0887@015E FE00B87F000000000000.  if false then continue else traceDetails;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-350 => '1' & '1' & "11111" & O"000" & O"560" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0900@0166 FE00BC7F000000000000.  if false then continue else traceDetails;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101111000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+358 => '1' & '1' & "11111" & O"000" & O"570" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 50;
--- L0889@015F C1BFDFB2020000000000.NOPROG_ERR:  trace(from_microcode), directByte = 50;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-351 => '1' & '1' & "00000" & O"677" & O"677" & "0110010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0902@0167 C1C7E3B2020000000000.NOPROG_ERR:  trace(from_microcode), directByte = 50;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+359 => '1' & '1' & "00000" & O"707" & O"707" & "0110010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0890@0160 FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-352 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0903@0168 FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+360 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 57;
--- L0891@0161 C1BFDFB9020000000000.DIVBY0_ERR:  trace(from_microcode), directByte = 57;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-353 => '1' & '1' & "00000" & O"677" & O"677" & "0111001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0904@0169 C1C7E3B9020000000000.DIVBY0_ERR:  trace(from_microcode), directByte = 57;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+361 => '1' & '1' & "00000" & O"707" & O"707" & "0111001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0892@0162 FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-354 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0905@016A FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+362 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 58;
--- L0893@0163 C1BFDFBA020000000000.OVERFLOW_ERR:  trace(from_microcode), directByte = 58;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-355 => '1' & '1' & "00000" & O"677" & O"677" & "0111010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0906@016B C1C7E3BA020000000000.OVERFLOW_ERR:  trace(from_microcode), directByte = 58;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111010, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+363 => '1' & '1' & "00000" & O"707" & O"707" & "0111010" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0894@0164 FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-356 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0907@016C FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+364 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 61;
--- L0895@0165 C1BFDFBD020000000000.SYNTAX_ERR:  trace(from_microcode), directByte = 61;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-357 => '1' & '1' & "00000" & O"677" & O"677" & "0111101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0908@016D C1C7E3BD020000000000.SYNTAX_ERR:  trace(from_microcode), directByte = 61;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111101, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+365 => '1' & '1' & "00000" & O"707" & O"707" & "0111101" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0896@0166 FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-358 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0909@016E FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+366 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 62;
--- L0897@0167 C1BFDFBE020000000000.INTERNAL_ERR:  trace(from_microcode), directByte = 62;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-359 => '1' & '1' & "00000" & O"677" & O"677" & "0111110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0910@016F C1C7E3BE020000000000.INTERNAL_ERR:  trace(from_microcode), directByte = 62;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+367 => '1' & '1' & "00000" & O"707" & O"707" & "0111110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0898@0168 FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-360 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0911@0170 FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+368 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 60;
--- L0899@0169 C1BFDFBC020000000000.ESTACK_ERR:  trace(from_microcode), directByte = 60;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-361 => '1' & '1' & "00000" & O"677" & O"677" & "0111100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0912@0171 C1C7E3BC020000000000.ESTACK_ERR:  trace(from_microcode), directByte = 60;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111100, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+369 => '1' & '1' & "00000" & O"707" & O"707" & "0111100" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0900@016A FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-362 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0913@0172 FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+370 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 59;
--- L0901@016B C1BFDFBB020000000000.RSTACK_ERR:  trace(from_microcode), directByte = 59;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0111011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-363 => '1' & '1' & "00000" & O"677" & O"677" & "0111011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0914@0173 C1C7E3BB020000000000.RSTACK_ERR:  trace(from_microcode), directByte = 59;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0111011, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+371 => '1' & '1' & "00000" & O"707" & O"707" & "0111011" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto traceError;
--- L0902@016C FE00B77F000000000000.  if false then continue else traceError;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-364 => '1' & '1' & "11111" & O"000" & O"556" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0915@0174 FE00BB7F000000000000.  if false then continue else traceError;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 101110110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+372 => '1' & '1' & "11111" & O"000" & O"566" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 54;
--- L0903@016D C1BFDFB6020000000000.BSTACK_ERR:  trace(from_microcode), directByte = 54;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-365 => '1' & '1' & "00000" & O"677" & O"677" & "0110110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0916@0175 C1C7E3B6020000000000.BSTACK_ERR:  trace(from_microcode), directByte = 54;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110110, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+373 => '1' & '1' & "00000" & O"707" & O"707" & "0110110" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outBeep();
--- L0904@016E C1A1D0FF000000000000.traceError:  outBeep();
---  nWR = 1, nRD = 1, if (00000) then 110100001 else 110100001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-366 => '1' & '1' & "00000" & O"641" & O"641" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0917@0176 C1A9D4FF000000000000.traceError:  outBeep();
+--  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+374 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'E', outChar(from_microcode);
--- L0905@016F C1A6D345000008000000.  directByte = 'E', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1000101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-367 => '1' & '1' & "00000" & O"646" & O"646" & "1000101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0918@0177 C1AED745000008000000.  directByte = 'E', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1000101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+375 => '1' & '1' & "00000" & O"656" & O"656" & "1000101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = '#', outChar(from_microcode), T <= IL_PC;
--- L0906@0170 C1A6D323080008000000.traceDetails:  directByte = '#', outChar(from_microcode), T <= IL_PC;
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100011, T <= 00001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-368 => '1' & '1' & "00000" & O"646" & O"646" & "0100011" & "00001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0919@0178 C1AED723080008000000.traceDetails:  directByte = '#', outChar(from_microcode), T <= IL_PC;
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100011, T <= 00001, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+376 => '1' & '1' & "00000" & O"656" & O"656" & "0100011" & "00001" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= dec;
--- L0907@0171 C000007F580000000000.  T <= dec;
+-- L0920@0179 C000007F580000000000.  T <= dec;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01011, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-369 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+377 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01011" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= R_fromT, printDecR();
--- L0908@0172 C18FC7FF0000000004C0.  alu <= R_fromT, printDecR();
---  nWR = 1, nRD = 1, if (00000) then 110001111 else 110001111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-370 => '1' & '1' & "00000" & O"617" & O"617" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10011" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0921@017A C197CBFF0000000004C0.  alu <= R_fromT, printDecR();
+--  nWR = 1, nRD = 1, if (00000) then 110010111 else 110010111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+378 => '1' & '1' & "00000" & O"627" & O"627" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if IS_RUNMODE then next else err_done;
--- L0909@0173 F600BE7F000000000000.  if IS_RUNMODE then next else err_done;
---  nWR = 1, nRD = 1, if (11011) then 000000000 else 101111100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-371 => '1' & '1' & "11011" & O"000" & O"574" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0922@017B F600C27F000000000000.  if IS_RUNMODE then next else err_done;
+--  nWR = 1, nRD = 1, if (11011) then 000000000 else 110000100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+379 => '1' & '1' & "11011" & O"000" & O"604" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = ' ', outChar(from_microcode);
--- L0910@0174 C1A6D320000008000000.print_lino:  directByte = ' ', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-372 => '1' & '1' & "00000" & O"646" & O"646" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0923@017C C1AED720000008000000.print_lino:  directByte = ' ', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+380 => '1' & '1' & "00000" & O"656" & O"656" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'A', outChar(from_microcode);
--- L0911@0175 C1A6D341000008000000.  directByte = 'A', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1000001, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-373 => '1' & '1' & "00000" & O"646" & O"646" & "1000001" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0924@017D C1AED741000008000000.  directByte = 'A', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1000001, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+381 => '1' & '1' & "00000" & O"656" & O"656" & "1000001" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 'T', outChar(from_microcode);
--- L0912@0176 C1A6D354000008000000.  directByte = 'T', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1010100, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-374 => '1' & '1' & "00000" & O"646" & O"646" & "1010100" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0925@017E C1AED754000008000000.  directByte = 'T', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1010100, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+382 => '1' & '1' & "00000" & O"656" & O"656" & "1010100" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
--- L0913@0177 C1A6D320000008000500.  directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-375 => '1' & '1' & "00000" & O"646" & O"646" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0926@017F C1AED720000008000500.  directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+383 => '1' & '1' & "00000" & O"656" & O"656" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10100" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_S;
--- L0914@0178 C000007F780000000000.  T <= from_S;
+-- L0927@0180 C000007F780000000000.  T <= from_S;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01111, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-376 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+384 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= R_fromT, printDecR();
--- L0915@0179 C18FC7FF0000000004C0.  alu <= R_fromT, printDecR();
---  nWR = 1, nRD = 1, if (00000) then 110001111 else 110001111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-377 => '1' & '1' & "00000" & O"617" & O"617" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10011" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0928@0181 C197CBFF0000000004C0.  alu <= R_fromT, printDecR();
+--  nWR = 1, nRD = 1, if (00000) then 110010111 else 110010111, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+385 => '1' & '1' & "00000" & O"627" & O"627" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;
--- L0916@017A C1A6D3200000080006C0.  directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-378 => '1' & '1' & "00000" & O"646" & O"646" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11011" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0929@0182 C1AED7200000080006C0.  directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 11011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+386 => '1' & '1' & "00000" & O"656" & O"656" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "11011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- printY();
--- L0917@017B C193C9FF000000000000.  printY();
---  nWR = 1, nRD = 1, if (00000) then 110010011 else 110010011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-379 => '1' & '1' & "00000" & O"623" & O"623" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0930@0183 C19BCDFF000000000000.  printY();
+--  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+387 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outCRLF();
--- L0918@017C C1A4D27F000000000000.err_done:  outCRLF();
---  nWR = 1, nRD = 1, if (00000) then 110100100 else 110100100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-380 => '1' & '1' & "00000" & O"644" & O"644" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0931@0184 C1ACD67F000000000000.err_done:  outCRLF();
+--  nWR = 1, nRD = 1, if (00000) then 110101100 else 110101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+388 => '1' & '1' & "00000" & O"654" & O"654" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- trace(crlf);
--- L0919@017D C1BFDFFF060000000000.  trace(crlf);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-381 => '1' & '1' & "00000" & O"677" & O"677" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0932@0185 C1C7E3FF060000000000.  trace(crlf);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+389 => '1' & '1' & "00000" & O"707" & O"707" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto WarmStart;
--- L0920@017E FE00037F000000000000.  if false then continue else WarmStart;
+-- L0933@0186 FE00037F000000000000.  if false then continue else WarmStart;
 --  nWR = 1, nRD = 1, if (11111) then 000000000 else 000000110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-382 => '1' & '1' & "11111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+390 => '1' & '1' & "11111" & O"000" & O"006" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(T);
--- L0922@017F C1A9D4FF000003000000.findNextCR:  readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-383 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0935@0187 C1B1D8FF000003000000.findNextCR:  readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+391 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = CR, if MDR_EQU_DB then return;
--- L0923@0180 CA02000D000000000000.  directByte = 0x0D, if MDR_EQU_DB then return;
+-- L0936@0188 CA02000D000000000000.  directByte = 0x0D, if MDR_EQU_DB then return;
 --  nWR = 1, nRD = 1, if (00101) then 000000010 else 000000000, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-384 => '1' & '1' & "00101" & O"002" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+392 => '1' & '1' & "00101" & O"002" & O"000" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = NULL, if MDR_EQU_DB then INTERNAL_ERR;
--- L0924@0181 CB670000000000000000.  directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR;
---  nWR = 1, nRD = 1, if (00101) then 101100111 else 000000000, directByte = 0000000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-385 => '1' & '1' & "00101" & O"547" & O"000" & "0000000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0937@0189 CB6F0000000000000000.  directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR;
+--  nWR = 1, nRD = 1, if (00101) then 101101111 else 000000000, directByte = 0000000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+393 => '1' & '1' & "00101" & O"557" & O"000" & "0000000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= inc, goto findNextCR;
--- L0925@0182 FE00BFFF500000000000.  T <= inc, if false then continue else findNextCR;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 101111111, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-386 => '1' & '1' & "11111" & O"000" & O"577" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0938@018A FE00C3FF500000000000.  T <= inc, if false then continue else findNextCR;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 110000111, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+394 => '1' & '1' & "11111" & O"000" & O"607" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= reset1, readCore(T);
--- L0927@0183 C1A9D4FF000003000080.readCore16:  alu <= reset1, readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-387 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00010" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0940@018B C1B1D8FF000003000080.readCore16:  alu <= reset1, readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+395 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00010" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= Rx256_plus_MDR, T <= inc;
--- L0928@0184 C000007F500000000440.  alu <= Rx256_plus_MDR, T <= inc;
+-- L0941@018C C000007F500000000440.  alu <= Rx256_plus_MDR, T <= inc;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-388 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
+396 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(T);
--- L0929@0185 C1A9D4FF000003000000.  readCore(T);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-389 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0942@018D C1B1D8FF000003000000.  readCore(T);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+397 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= Rx256_plus_MDR, T <= inc, back;
--- L0930@0186 C002007F500000000440.  alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
+-- L0943@018E C002007F500000000440.  alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 10001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-390 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
+398 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "10001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- writeCore(T, zero), T <= inc;
--- L0932@0187 C1A8D47F500003400000.write2Nulls:  writeCore(T, zero), T <= inc;
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-391 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0945@018F C1B0D87F500003400000.write2Nulls:  writeCore(T, zero), T <= inc;
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 01010, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+399 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "01010" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- writeCore(T, zero);
--- L0933@0188 C1A8D47F000003400000.  writeCore(T, zero);
---  nWR = 1, nRD = 1, if (00000) then 110101000 else 110101000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-392 => '1' & '1' & "00000" & O"650" & O"650" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0946@0190 C1B0D87F000003400000.  writeCore(T, zero);
+--  nWR = 1, nRD = 1, if (00000) then 110110000 else 110110000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 11, MDR <= 010, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+400 => '1' & '1' & "00000" & O"660" & O"660" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "11" & O"2" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- back;
--- L0934@0189 C002007F000000000000.  if true then return else continue;
+-- L0947@0191 C002007F000000000000.  if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-393 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+401 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0937@018A E369007F000000000000.pullRS:  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-394 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0950@0192 E371007F000000000000.pullRS:  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+402 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= R_fromStack, ExpStack <= pop2;
--- L0938@018B C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
+-- L0951@0193 C000007F0000C00000C0.  alu <= R_fromStack, ExpStack <= pop2;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-395 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
+403 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if STACK_IS_EMPTY then ESTACK_ERR;
--- L0939@018C E369007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
---  nWR = 1, nRD = 1, if (10001) then 101101001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-396 => '1' & '1' & "10001" & O"551" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0952@0194 E371007F000000000000.  if STACK_IS_EMPTY then ESTACK_ERR;
+--  nWR = 1, nRD = 1, if (10001) then 101110001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+404 => '1' & '1' & "10001" & O"561" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= S_fromStack, ExpStack <= pop2, back;
--- L0940@018D C002007F0000C0000100.  alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
+-- L0953@0195 C002007F0000C0000100.  alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00100, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-397 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00100" & '0' & '0' & '0' & '0' & '0' & '0',
+405 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00100" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= R_fromStack, ExpStack <= pop2;
--- L0943@018E C000007F0000C00000C0.printDec:  alu <= R_fromStack, ExpStack <= pop2;
+-- L0956@0196 C000007F0000C00000C0.printDec:  alu <= R_fromStack, ExpStack <= pop2;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-398 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
+406 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= bcd_start;
--- L0945@018F C000007F000000000280.printDecR:  alu <= bcd_start;
+-- L0958@0197 C000007F000000000280.printDecR:  alu <= bcd_start;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01010, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-399 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01010" & '0' & '0' & '0' & '0' & '0' & '0',
+407 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01010" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= bcd_next, if ALU_READY then next else repeat;
--- L0946@0190 EC0000FF0000000002C0.  alu <= bcd_next, if ALU_READY then next else repeat;
+-- L0959@0198 EC0000FF0000000002C0.  alu <= bcd_next, if ALU_READY then next else repeat;
 --  nWR = 1, nRD = 1, if (10110) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01011, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-400 => '1' & '1' & "10110" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01011" & '0' & '0' & '0' & '0' & '0' & '0',
+408 => '1' & '1' & "10110" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01011" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if ALU_SIGN then next else printY;
--- L0948@0191 F000C9FF000000000000.  if ALU_SIGN then next else printY;
---  nWR = 1, nRD = 1, if (11000) then 000000000 else 110010011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-401 => '1' & '1' & "11000" & O"000" & O"623" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0961@0199 F000CDFF000000000000.  if ALU_SIGN then next else printY;
+--  nWR = 1, nRD = 1, if (11000) then 000000000 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+409 => '1' & '1' & "11000" & O"000" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = '-', outChar(from_microcode);
--- L0949@0192 C1A6D32D000008000000.  directByte = '-', outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0101101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-402 => '1' & '1' & "00000" & O"646" & O"646" & "0101101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0962@019A C1AED72D000008000000.  directByte = '-', outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0101101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+410 => '1' & '1' & "00000" & O"656" & O"656" & "0101101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0950@0193 C19BCDFF000018000000.printY:  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-403 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0963@019B C1A3D1FF000018000000.printY:  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+411 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0951@0194 C19BCDFF000018000000.  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-404 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0964@019C C1A3D1FF000018000000.  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+412 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0952@0195 C19BCDFF000018000000.  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-405 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0965@019D C1A3D1FF000018000000.  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+413 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0953@0196 C19BCDFF000018000000.  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-406 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0966@019E C1A3D1FF000018000000.  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+414 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0954@0197 C19BCDFF000018000000.  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-407 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0967@019F C1A3D1FF000018000000.  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+415 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0955@0198 C19BCDFF000018000000.  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-408 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0968@01A0 C1A3D1FF000018000000.  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+416 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outNZChar(from_YtoAlphaZ);
--- L0956@0199 C19BCDFF000018000000.  outNZChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110011011 else 110011011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-409 => '1' & '1' & "00000" & O"633" & O"633" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0969@01A1 C1A3D1FF000018000000.  outNZChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110100011 else 110100011, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+417 => '1' & '1' & "00000" & O"643" & O"643" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- CHAROUT <= from_YtoAlpha, goto outChar;
--- L0957@019A FE00D37F000014000000.  CHAROUT <= from_YtoAlpha, if false then continue else outChar;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 110100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 101, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-410 => '1' & '1' & "11111" & O"000" & O"646" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"5" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0970@01A2 FE00D77F000014000000.  CHAROUT <= from_YtoAlpha, if false then continue else outChar;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 110101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 101, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+418 => '1' & '1' & "11111" & O"000" & O"656" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"5" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outChar(from_YtoAlphaZ);
--- L0959@019B C1A6D37F000018000000.outNZChar:  outChar(from_YtoAlphaZ);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-411 => '1' & '1' & "00000" & O"646" & O"646" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0972@01A3 C1AED77F000018000000.outNZChar:  outChar(from_YtoAlphaZ);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 110, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+419 => '1' & '1' & "00000" & O"656" & O"656" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"6" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- alu <= Yx16, back;
--- L0960@019C C002007F000000000240.out_skip:  alu <= Yx16, if true then return else continue;
+-- L0973@01A4 C002007F000000000240.out_skip:  alu <= Yx16, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 01001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-412 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01001" & '0' & '0' & '0' & '0' & '0' & '0',
+420 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "01001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(BP);
--- L0962@019D C1A9D4FF000002000000.skipSpaces:  readCore(BP);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-413 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0975@01A5 C1B1D8FF000002000000.skipSpaces:  readCore(BP);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 10, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+421 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "10" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = ' ', if MDR_EQU_DB then skipSp;
--- L0963@019E CBA00020000000000000.  directByte = ' ', if MDR_EQU_DB then skipSp;
---  nWR = 1, nRD = 1, if (00101) then 110100000 else 000000000, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-414 => '1' & '1' & "00101" & O"640" & O"000" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0976@01A6 CBA80020000000000000.  directByte = ' ', if MDR_EQU_DB then skipSp;
+--  nWR = 1, nRD = 1, if (00101) then 110101000 else 000000000, directByte = 0100000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+422 => '1' & '1' & "00101" & O"650" & O"000" & "0100000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = TAB, if MDR_EQU_DB then skipSp else return;
--- L0964@019F CBA00109000000000000.  directByte = 0x09, if MDR_EQU_DB then skipSp else return;
---  nWR = 1, nRD = 1, if (00101) then 110100000 else 000000010, directByte = 0001001, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-415 => '1' & '1' & "00101" & O"640" & O"002" & "0001001" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0977@01A7 CBA80109000000000000.  directByte = 0x09, if MDR_EQU_DB then skipSp else return;
+--  nWR = 1, nRD = 1, if (00101) then 110101000 else 000000010, directByte = 0001001, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+423 => '1' & '1' & "00101" & O"650" & O"002" & "0001001" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- BP <= inc, goto skipSpaces;
--- L0965@01A0 FE00CEFF000000030000.skipSp:  BP <= inc, if false then continue else skipSpaces;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 110011101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-416 => '1' & '1' & "11111" & O"000" & O"635" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0978@01A8 FE00D2FF000000030000.skipSp:  BP <= inc, if false then continue else skipSpaces;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 110100101, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 011, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+424 => '1' & '1' & "11111" & O"000" & O"645" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"3" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- outCRLF();
--- L0967@01A1 C1A4D27F000000000000.outBeep:  outCRLF();
---  nWR = 1, nRD = 1, if (00000) then 110100100 else 110100100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-417 => '1' & '1' & "00000" & O"644" & O"644" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0980@01A9 C1ACD67F000000000000.outBeep:  outCRLF();
+--  nWR = 1, nRD = 1, if (00000) then 110101100 else 110101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+425 => '1' & '1' & "00000" & O"654" & O"654" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- trace(crlf);
--- L0968@01A2 C1BFDFFF060000000000.  trace(crlf);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-418 => '1' & '1' & "00000" & O"677" & O"677" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0981@01AA C1C7E3FF060000000000.  trace(crlf);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+426 => '1' & '1' & "00000" & O"707" & O"707" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = BEEP, CHAROUT <= from_microcode, goto outChar;
--- L0969@01A3 FE00D307000008000000.  directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 110100110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-419 => '1' & '1' & "11111" & O"000" & O"646" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0982@01AB FE00D707000008000000.  directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 110101110, directByte = 0000111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+427 => '1' & '1' & "11111" & O"000" & O"656" & "0000111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = CR, outChar(from_microcode);
--- L0971@01A4 C1A6D30D000008000000.outCRLF:  directByte = 0x0D, outChar(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110100110 else 110100110, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-420 => '1' & '1' & "00000" & O"646" & O"646" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0984@01AC C1AED70D000008000000.outCRLF:  directByte = 0x0D, outChar(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 110101110 else 110101110, directByte = 0001101, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+428 => '1' & '1' & "00000" & O"656" & O"656" & "0001101" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = LF, CHAROUT <= from_microcode;
--- L0972@01A5 C000000A000008000000.  directByte = 0x0A, CHAROUT <= from_microcode;
+-- L0985@01AD C000000A000008000000.  directByte = 0x0A, CHAROUT <= from_microcode;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 0001010, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 010, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-421 => '1' & '1' & "00000" & O"000" & O"000" & "0001010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+429 => '1' & '1' & "00000" & O"000" & O"000" & "0001010" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"2" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if CHAROUT_READY then next else repeat;
--- L0973@01A6 C40000FF000000000000.outChar:  if CHAROUT_READY then next else repeat;
+-- L0986@01AE C40000FF000000000000.outChar:  if CHAROUT_READY then next else repeat;
 --  nWR = 1, nRD = 1, if (00010) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-422 => '1' & '1' & "00010" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+430 => '1' & '1' & "00010" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if CHAROUT_READY then return else repeat;
--- L0974@01A7 C40200FF000000000000.  if CHAROUT_READY then return else repeat;
+-- L0987@01AF C40200FF000000000000.  if CHAROUT_READY then return else repeat;
 --  nWR = 1, nRD = 1, if (00010) then 000000010 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-423 => '1' & '1' & "00010" & O"002" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+431 => '1' & '1' & "00010" & O"002" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- nWR = 0, if nBUSACK then repeat else return;
--- L0976@01A8 4C01017F000000000000.writeCore:  nWR = 0, if nBUSACK then repeat else return;
+-- L0989@01B0 4C01017F000000000000.writeCore:  nWR = 0, if nBUSACK then repeat else return;
 --  nWR = 0, nRD = 1, if (00110) then 000000001 else 000000010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-424 => '0' & '1' & "00110" & O"001" & O"002" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+432 => '0' & '1' & "00110" & O"001" & O"002" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- nRD = 0, if nBUSACK then repeat else next;
--- L0978@01A9 8C01007F000000000000.readCore:  nRD = 0, if nBUSACK then repeat else next;
+-- L0991@01B1 8C01007F000000000000.readCore:  nRD = 0, if nBUSACK then repeat else next;
 --  nWR = 1, nRD = 0, if (00110) then 000000001 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-425 => '1' & '0' & "00110" & O"001" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+433 => '1' & '0' & "00110" & O"001" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- nRD = 0, MDR <= from_Bus, back;
--- L0979@01AA 8002007F000000200000.  nRD = 0, MDR <= from_Bus, if true then return else continue;
+-- L0992@01B2 8002007F000000200000.  nRD = 0, MDR <= from_Bus, if true then return else continue;
 --  nWR = 1, nRD = 0, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 001, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-426 => '1' & '0' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"1" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+434 => '1' & '0' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"1" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- InlEnd <= InLine_start, trace(crlf);
--- L0983@01AB C1BFDFFF060000080000.dump_input:  InlEnd <= InLine_start, trace(crlf);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 01, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-427 => '1' & '1' & "00000" & O"677" & O"677" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "01" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0996@01B3 C1C7E3FF060000080000.dump_input:  InlEnd <= InLine_start, trace(crlf);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 01, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+435 => '1' & '1' & "00000" & O"707" & O"707" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "01" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- readCore(InlEnd);
--- L0984@01AC C1A9D4FF000001000000.dump_inlp:  readCore(InlEnd);
---  nWR = 1, nRD = 1, if (00000) then 110101001 else 110101001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-428 => '1' & '1' & "00000" & O"651" & O"651" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0997@01B4 C1B1D8FF000001000000.dump_inlp:  readCore(InlEnd);
+--  nWR = 1, nRD = 1, if (00000) then 110110001 else 110110001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 01, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+436 => '1' & '1' & "00000" & O"661" & O"661" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "01" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = 9, trace(from_microcode);
--- L0985@01AD C1BFDF89020000000000.  directByte = 9, trace(from_microcode);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0001001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-429 => '1' & '1' & "00000" & O"677" & O"677" & "0001001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0998@01B5 C1C7E389020000000000.  directByte = 9, trace(from_microcode);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0001001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+437 => '1' & '1' & "00000" & O"707" & O"707" & "0001001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- directByte = NULL, if MDR_EQU_DB then dump_inex;
--- L0986@01AE CBB00000000000000000.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
---  nWR = 1, nRD = 1, if (00101) then 110110000 else 000000000, directByte = 0000000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-430 => '1' & '1' & "00101" & O"660" & O"000" & "0000000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L0999@01B6 CBB80000000000000000.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
+--  nWR = 1, nRD = 1, if (00101) then 110111000 else 000000000, directByte = 0000000, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+438 => '1' & '1' & "00101" & O"670" & O"000" & "0000000" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- InlEnd <= inc, goto dump_inlp;
--- L0987@01AF FE00D67F000000100000.  InlEnd <= inc, if false then continue else dump_inlp;
---  nWR = 1, nRD = 1, if (11111) then 000000000 else 110101100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-431 => '1' & '1' & "11111" & O"000" & O"654" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1000@01B7 FE00DA7F000000100000.  InlEnd <= inc, if false then continue else dump_inlp;
+--  nWR = 1, nRD = 1, if (11111) then 000000000 else 110110100, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 10, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+439 => '1' & '1' & "11111" & O"000" & O"664" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "10" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- trace(crlf);
--- L0988@01B0 C1BFDFFF060000000000.dump_inex:  trace(crlf);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-432 => '1' & '1' & "00000" & O"677" & O"677" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1001@01B8 C1C7E3FF060000000000.dump_inex:  trace(crlf);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+440 => '1' & '1' & "00000" & O"707" & O"707" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- back;
--- L0989@01B1 C002007F000000000000.  if true then return else continue;
+-- L1002@01B9 C002007F000000000000.  if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-433 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+441 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TWord, T <= BP;
--- L0991@01B2 C000007F600080000000.traceBP:  ExpStack <= push_TWord, T <= BP;
+-- L1004@01BA C000007F600080000000.traceBP:  ExpStack <= push_TWord, T <= BP;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 01100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-434 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+442 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "01100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 33;
--- L0992@01B3 C1BFDFA1020000000000.  trace(from_microcode), directByte = 33;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-435 => '1' & '1' & "00000" & O"677" & O"677" & "0100001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1005@01BB C1C7E3A1020000000000.  trace(from_microcode), directByte = 33;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100001, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+443 => '1' & '1' & "00000" & O"707" & O"707" & "0100001" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= ExpStack, ExpStack <= pop2, back;
--- L0993@01B4 C002007F2000C0000000.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+-- L1006@01BC C002007F2000C0000000.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-436 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+444 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- ExpStack <= push_TWord, T <= from_YLo;
--- L0995@01B5 C000007F280080000000.traceY:  ExpStack <= push_TWord, T <= from_YLo;
+-- L1008@01BD C000007F280080000000.traceY:  ExpStack <= push_TWord, T <= from_YLo;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00101, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 100, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-437 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+445 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00101" & "00" & O"0" & '0' & '0' & "00" & "00" & O"4" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- traceString 32;
--- L0996@01B6 C1BFDFA0020000000000.  trace(from_microcode), directByte = 32;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0100000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-438 => '1' & '1' & "00000" & O"677" & O"677" & "0100000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1009@01BE C1C7E3A0020000000000.  trace(from_microcode), directByte = 32;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0100000, T <= 00000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+446 => '1' & '1' & "00000" & O"707" & O"707" & "0100000" & "00000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= ExpStack, ExpStack <= pop2, back;
--- L0997@01B7 C002007F2000C0000000.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+-- L1010@01BF C002007F2000C0000000.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00100, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 110, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-439 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+447 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00100" & "00" & O"0" & '0' & '0' & "00" & "00" & O"6" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- trace(crlf);
--- L0999@01B8 C1BFDFFF060000000000.traceALU:  trace(crlf);
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-440 => '1' & '1' & "00000" & O"677" & O"677" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1012@01C0 C1C7E3FF060000000000.traceALU:  trace(crlf);
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 1111111, T <= 00000, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+448 => '1' & '1' & "00000" & O"707" & O"707" & "1111111" & "00000" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= save, traceT;
--- L1000@01B9 C1BFDFB48A0000000000.  T <= save, trace(from_microcode), directByte = 52;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110100, T <= 10001, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-441 => '1' & '1' & "00000" & O"677" & O"677" & "0110100" & "10001" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1013@01C1 C1C7E3B48A0000000000.  T <= save, trace(from_microcode), directByte = 52;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110100, T <= 10001, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+449 => '1' & '1' & "00000" & O"707" & O"707" & "0110100" & "10001" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_S, traceString 52;
--- L1001@01BA C1BFDFB47A0000000000.  T <= from_S, trace(from_microcode), directByte = 52;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110100, T <= 01111, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-442 => '1' & '1' & "00000" & O"677" & O"677" & "0110100" & "01111" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1014@01C2 C1C7E3B47A0000000000.  T <= from_S, trace(from_microcode), directByte = 52;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110100, T <= 01111, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+450 => '1' & '1' & "00000" & O"707" & O"707" & "0110100" & "01111" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_R, traceString 52;
--- L1002@01BB C1BFDFB4820000000000.  T <= from_R, trace(from_microcode), directByte = 52;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110100, T <= 10000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-443 => '1' & '1' & "00000" & O"677" & O"677" & "0110100" & "10000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1015@01C3 C1C7E3B4820000000000.  T <= from_R, trace(from_microcode), directByte = 52;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110100, T <= 10000, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+451 => '1' & '1' & "00000" & O"707" & O"707" & "0110100" & "10000" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_YHi, traceString 53;
--- L1003@01BC C1BFDFB5320000000000.  T <= from_YHi, trace(from_microcode), directByte = 53;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110101, T <= 00110, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-444 => '1' & '1' & "00000" & O"677" & O"677" & "0110101" & "00110" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1016@01C4 C1C7E3B5320000000000.  T <= from_YHi, trace(from_microcode), directByte = 53;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110101, T <= 00110, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+452 => '1' & '1' & "00000" & O"707" & O"707" & "0110101" & "00110" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= from_YLo, traceString 52;
--- L1004@01BD C1BFDFB42A0000000000.  T <= from_YLo, trace(from_microcode), directByte = 52;
---  nWR = 1, nRD = 1, if (00000) then 110111111 else 110111111, directByte = 0110100, T <= 00101, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-445 => '1' & '1' & "00000" & O"677" & O"677" & "0110100" & "00101" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+-- L1017@01C5 C1C7E3B42A0000000000.  T <= from_YLo, trace(from_microcode), directByte = 52;
+--  nWR = 1, nRD = 1, if (00000) then 111000111 else 111000111, directByte = 0110100, T <= 00101, DBGINDEX <= 01, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+453 => '1' & '1' & "00000" & O"707" & O"707" & "0110100" & "00101" & "01" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- T <= recall, DBGINDEX <= crlf;
--- L1005@01BE C000007F960000000000.  T <= recall, DBGINDEX <= crlf;
+-- L1018@01C6 C000007F960000000000.  T <= recall, DBGINDEX <= crlf;
 --  nWR = 1, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 10010, DBGINDEX <= 11, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-446 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10010" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+454 => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "10010" & "11" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if DBG_READY then next else repeat;
--- L1006@01BF C80000FF000000000000.trace:  if DBG_READY then next else repeat;
+-- L1019@01C7 C80000FF000000000000.trace:  if DBG_READY then next else repeat;
 --  nWR = 1, nRD = 1, if (00100) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-447 => '1' & '1' & "00100" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+455 => '1' & '1' & "00100" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- if DBG_READY then next else repeat;
--- L1007@01C0 C80000FF000000000000.  if DBG_READY then next else repeat;
+-- L1020@01C8 C80000FF000000000000.  if DBG_READY then next else repeat;
 --  nWR = 1, nRD = 1, if (00100) then 000000000 else 000000001, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-448 => '1' & '1' & "00100" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+456 => '1' & '1' & "00100" & O"000" & O"001" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- DBGINDEX <= zero, back;
--- L1008@01C1 C002007F040000000000.  DBGINDEX <= zero, if true then return else continue;
+-- L1021@01C9 C002007F040000000000.  DBGINDEX <= zero, if true then return else continue;
 --  nWR = 1, nRD = 1, if (00000) then 000000010 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 10, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-449 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "10" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
+457 => '1' & '1' & "00000" & O"002" & O"000" & "1111111" & "00000" & "10" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- 62 location(s) in following ranges will be filled with default value
--- 01C2 .. 01FF
+-- 54 location(s) in following ranges will be filled with default value
+-- 01CA .. 01FF
 
 others => '1' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0'
 );

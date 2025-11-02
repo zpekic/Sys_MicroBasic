@@ -45,8 +45,8 @@ seq_cond:		.if 5 values
 				OFF_IS_ZERO,
 				IS_RUNMODE,
 				EXTERNAL,		// external flag, e.g. button etc
-				RESERVED29,		// not used
-				RESERVED30,		// not used
+				CACHE_VALID,		
+				CACHE_HIT,		
 				false			// hard-code to 0
 				default true;
 seq_then:	.then 9 values next | continue, repeat, return, fork, @ default next;						// any label
@@ -78,7 +78,7 @@ T			.regfield 5 values
 				recall,
 				BasStack_Hi,
 				BasStack_Lo,
-				-,
+				Cache_Data,		// bits 31..16 contain the BP (Lino is at (15..0), handled in hardware) 
 				-,
 				-,
 				-,
@@ -253,7 +253,7 @@ alu				.regfield 5 values
 				Y_save,
 				Y_recall,
 				Y_fromTicks,
-				-,
+				cache_store,	// GOTO cache hooked up behind ALU to save microcode width bits
 				-,
 				-,
 				-
@@ -337,6 +337,7 @@ traceALU:	.sub;
 traceY:		.sub;
 traceBP:	.sub;
 outBeep:	.sub;
+findLino:	.sub;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -478,19 +479,33 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			T <= XQhere;
 			IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;		// IL_PC <= XQhere
 			alu <= R_fromStack, ExpStack <= pop2;
+			T <= from_R;
+			Lino <= T, if R_IS_ZERO then NOPROG_ERR;			// once Lino is set, CACHE_HIT and CACHE_VALID are meaningful
+			traceLino;
+			if CACHE_VALID then go_cvalid;
+			// INVALID: the cash entry is free, find target and store in cache (and stay there until end of run)
+			findLino();
 			traceALU();
-			if R_IS_ZERO then NOPROG_ERR;
-go_find:	T <= from_R;
-			Lino <= T, T <= Prog_start;							// new non-zero Lino picked up from evaluation stack
+			alu <= cache_store, goto fetch;	// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
+			
+go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
+			// VALID HIT: pick it up and use it
+			BP <= T, goto fetch;
+
+			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
+go_cmiss:	findLino();
+			traceALU();
+			goto fetch;
+			
+findLino:	T <= Prog_start;						
 go_search:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
 			alu <= S_fromLino, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
-			alu <= S_minus_R, if R_IS_ZERO then stop_run;		// TODO: "line xxx not found in yyy" message?
-			if Y_ZERO then go_found;
+			alu <= S_minus_R, if R_IS_ZERO then stop_run;	// TODO: "line xxx not found in yyy" message? (reached end of code without finding the target)
+			BP <= T, if Y_ZERO then return;					// target line number (S) is same as line number of inspected line (R), so bail (success)
 			findNextCR(same);
 			T <= inc, goto go_search;			
-go_found:	BP <= T, goto fetch;			
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)

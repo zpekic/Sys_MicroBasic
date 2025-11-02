@@ -164,6 +164,7 @@ signal hexdata, showdigit: std_logic_vector(3 downto 0);
 signal freqcnt_in: std_logic;
 signal debug_txd: std_logic;
 signal cpu_t: std_logic_vector(15 downto 0);
+signal cpu_cache_full, cpu_cache_empty: std_logic;
 
 signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
@@ -204,9 +205,9 @@ begin
 LDT1R <= not nWR;
 LDT1G <= not nRD;
 LDT1Y <= not nBUSREQ;
-LDT2R <= not debug_txd;
-LDT2G <= baudrate_x1;
-LDT2Y <= cpu_clk;
+LDT2R <= cpu_cache_full;
+LDT2G <= cpu_cache_empty;
+LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
 
 PMOD_RXD1 <= debug_txd;
 LED <= RXD_CHAR;
@@ -270,6 +271,9 @@ cpu: entity work.MicroBasic Port map (
 		clk => cpu_clk,
 		clk_tick => freq1kHz,
 		cond_external => button(1),
+		-- internal GOTO cache state
+		cache_empty => cpu_cache_empty,
+		cache_full => cpu_cache_full,
 		-- Intermediate language (IL) read-only memory
 		IL_A => il_a,
 		IL_D => il_d,

@@ -4,10 +4,10 @@
 103 REM	-------------------------------------
 104 REM https://archive.org/details/InterfaceAge198006/page/n131/mode/2up
 105 REM   SW432   CPU (MHz)	Result (s)
-106 REM   100     6.25		250.076
+106 REM   100     6.25		250.076 (cached = 200.691, 25% faster)
 107 REM   101     ?
 108 REM   110     ?
-109 REM   111     100.00	16.130
+109 REM   111     100.00	16.130 (cached = 13.044, 23% faster)
 110 REM   -------------------------------------
 130 PRINT "^GStarting.^M^J"
 140 LET N = 1
