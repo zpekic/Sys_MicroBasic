@@ -101,7 +101,7 @@ DBGINDEX		.regfield 2 values
 // 10-bit IL program counter
 IL_PC:			.regfield 3 values
 				same,
-				zero,
+				XQhere,
 				inc,
 				T,
 				pc_plus_off6,
@@ -303,7 +303,7 @@ LF:			.alias 0x0A;
 CR:			.alias 0x0D;
 //SPACE:		.alias 0x20;
 //DQUOTE:		.alias 0x22;
-clear:		.alias DBGINDEX <= zero, IL_PC <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
+clear:		.alias DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
 nop:		.alias if true then continue else repeat;
 goto:		.alias if false then continue else;
 back:	    .alias if true then return else continue;
@@ -344,21 +344,19 @@ findLino:	.sub;
 //	---------------------------------------------------------------------------
 _reset:		nop;			// TODO: use these 4 microcycles for cold start intialization  
 
-_reset1:	nop;
+_reset1:	T <= zero;
 
-_reset2:	nop;
+_reset2:	XQhere <= T;
 
 _reset3:	nop;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
 ColdStart:	traceString 4;	// output "MicroBas" on debug UART
-			write2Nulls(Prog_start);
+			write2Nulls(Prog_start);														// kills program area
 WarmStart:	clear;
 			BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero; 
-			Lino <= T;
-			XQhere <= T;
-			write2Nulls(BP);
+			Lino <= T, IL_PC <= T, write2Nulls(BP);											// kills input line
 			
 fetch:		trace(crlf);
 			traceString 51;								// trace Basic line number (in hex, for speed)
@@ -439,8 +437,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			.map 0x12;									// FV (Fetch Variable)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 36;								// trace mnemonic
-			if STACK_IS_EMPTY then ESTACK_ERR;
-			Vars <= indexFromExpStack;					// get index (variable name A-Z)
+			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR; // get index (variable name A-Z)
 			T <= from_vars, ExpStack <= pop1;			// T <= Vars(index)
 			ExpStack <= push_TWord, goto fetch;			// push onto stack
 
@@ -476,8 +473,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			.map 0x16;									// GO (GOTO)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 45;								// Trace mnemonic
-			T <= XQhere;
-			IL_PC <= T, if STACK_IS_EMPTY then ESTACK_ERR;		// IL_PC <= XQhere
+			IL_PC <= XQhere, if STACK_IS_EMPTY then ESTACK_ERR;	// IL_PC <= XQhere, check stack
 			alu <= R_fromStack, ExpStack <= pop2;
 			T <= from_R;
 			Lino <= T, if R_IS_ZERO then NOPROG_ERR;			// once Lino is set, CACHE_HIT and CACHE_VALID are meaningful
@@ -485,7 +481,6 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			if CACHE_VALID then go_cvalid;
 			// INVALID: the cash entry is free, find target and store in cache (and stay there until end of run)
 			findLino();
-			traceALU();
 			alu <= cache_store, goto fetch;	// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
 			
 go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
@@ -494,7 +489,6 @@ go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
 
 			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
 go_cmiss:	findLino();
-			traceALU();
 			goto fetch;
 			
 findLino:	T <= Prog_start;						
@@ -505,7 +499,7 @@ go_search:	alu <= reset1, readCore(T);
 			alu <= S_minus_R, if R_IS_ZERO then stop_run;	// TODO: "line xxx not found in yyy" message? (reached end of code without finding the target)
 			BP <= T, if Y_ZERO then return;					// target line number (S) is same as line number of inspected line (R), so bail (success)
 			findNextCR(same);
-			T <= inc, goto go_search;			
+			T <= inc, goto go_search;						
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)
@@ -565,16 +559,14 @@ div_done:	alu <= div_end, goto alu_done;
 			.map 0x1D;									// NX (Next Basic statement)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 39;								// Trace mnemonic
-			if IS_RUNMODE then nx_run;
-			IL_PC <= zero, goto fetch;					// command mode, restart at reading the input buffer
+			T <= zero, if IS_RUNMODE then nx_run;
+			IL_PC <= T, goto fetch;						// command mode, restart at reading the input buffer
 nx_run:		findNextCR(BP);
 			T <= inc;
 			BP <= T;									// BP at start of next statement, which is 2 bytes containing the line number
 			readCore16(BP);
-			if R_IS_ZERO then nx_err;
-			BP <= T, T <= from_R;						// BP at start of statement text, load T with new line number
-			Lino <= T, T <= XQhere;						// new current executing statement line number 
-			IL_PC <= T;									// IL_PC <= XQhere
+			BP <= T, T <= from_R, if R_IS_ZERO then nx_err; // BP at start of statement text, load T with new line number, check if at the end of program			 
+			Lino <= T, IL_PC <= XQhere;						// new current executing statement line number, and IL_PC at :XEC +2 
 			traceLino;
 			traceBP();
 			if KBD_BREAK then BREAK else fetch;
@@ -788,7 +780,7 @@ dbs_loop:	if Y_ZERO then return;			// bail if no bytes left to copy
 			.map 0x2C;									// XQ (Start Execute)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 42;								// Trace mnemonic
-			T <= IL_PC;
+			T <= IL_PC;									// store this location to XQhere
 			XQhere <= T, readCore16(Prog_start);		// XQhere <= IL_PC, find line number of first statement
 			if R_IS_ZERO then NOPROG_ERR;
 			BP <= T, T <= from_R;						// BP at text of first line, T contains its statement number

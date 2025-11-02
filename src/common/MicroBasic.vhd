@@ -178,6 +178,7 @@ signal cache: ram32x32;
 signal cache_valid: std_logic_vector(31 downto 0) := (others => '0');
 signal lino_clk: std_logic_vector(15 downto 0);
 signal cache_entry: std_logic_vector(31 downto 0);
+alias cache_ttl: std_logic_vector(4 downto 0)  is cache_entry(4 downto 0);
 alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5); 
 alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
 signal cache_hit: std_logic;
@@ -381,8 +382,8 @@ update_IL_PC: process(clk, mb_IL_PC)
 		case mb_IL_PC is
 --			when IL_PC_same =>
 --				IL_PC <= IL_PC;
-			when IL_PC_zero =>
-				IL_PC <= (others => '0');
+			when IL_PC_XQhere =>
+				IL_PC <= XQhere;
 			when IL_PC_inc =>
 				IL_PC <= std_logic_vector(unsigned(IL_PC) + 1);
 			when IL_PC_T =>
