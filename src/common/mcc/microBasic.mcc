@@ -5,7 +5,7 @@
 			.code 9, 80, mb:microBasic_code.vhd, 10;
 			.mapper 8, 16, mb:microBasic_map.vhd, 2;
 			.controller microBasic_control_unit.vhd, 4;
-			.symbol 9, 256, mb:microBasic_sym.vhd, 32;
+			.symbol 9, 256, mb:microBasic_sym.vhd, mb:microBas_sym.coe, 32;
 
 // System interface signals
 // nBUSREQ			.valfield 1 values 0, 1 default 1;
@@ -313,6 +313,7 @@ traceCall	.alias trace(from_microcode), directByte = 31;
 traceLino	.alias trace(from_microcode), directByte = 51;
 traceT		.alias trace(from_microcode), directByte = 52;
 traceSDepth:.alias trace(from_microcode), directByte = 56;	// trace stack depth by indenting 0 to 8 spaces
+waitForExt:	.alias if EXTERNAL then next else repeat;		// loop until external signal is high (e.g. button is pressed)
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 //dump_il:	.sub;
@@ -338,6 +339,7 @@ traceY:		.sub;
 traceBP:	.sub;
 outBeep:	.sub;
 findLino:	.sub;
+copyLine:	.sub;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -488,8 +490,8 @@ go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
 			BP <= T, goto fetch;
 
 			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
-go_cmiss:	findLino();
-			goto fetch;
+go_cmiss:	findLino();			
+			goto fetch;		  
 			
 findLino:	T <= Prog_start;						
 go_search:	alu <= reset1, readCore(T);
@@ -721,8 +723,12 @@ changeLine:	scanProgram();
 replaceLine:goto RSTACK_ERR;		// TODO REPLACE CASE
 
 insertLine:	goto ESTACK_ERR;		// TODO INSERT CASE
+
+appendLine:	copyLine();
+			write2Nulls(same);
+			goto WarmStart;
 			
-appendLine:	alu <= S_fromLino, T <= dec;				// go back one to overwrite the first NULL char too
+copyLine:	alu <= S_fromLino, T <= dec;				// go back one to overwrite the first NULL char too
 			writeCore(T, from_SHi);						// Line number in binary, MSB first
 			T <= inc;
 			writeCore(T, from_SLo);						// Line number in binary, LSB last
@@ -731,12 +737,9 @@ app_loop:	readCore(BP);								// copy from input buffer
 			writeCore(T, same);							// to Basic program area
 			BP <= inc, T <= inc;			
 			directByte = CR, if MDR_EQU_DB then next else app_loop;
-			write2Nulls(same);
-			goto WarmStart;
 					
 			// Scan through program text to find all pointers we need
-scanProgram:alu <= reset0;
-			T <= zero;
+scanProgram:T <= zero;
 			LS <= T, LE <= T, T <= Prog_start;
 			PrgEnd <= T;
 scan_loop:  readCore16(same);								// assume this will be LS (LE also needed to make it "found")

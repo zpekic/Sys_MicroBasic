@@ -63,6 +63,7 @@ entity MicroBasic is
 			  traceEnable: in STD_LOGIC;
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
+			  debug_uipc: out STD_LOGIC_VECTOR(8 downto 0);
 			  debug_t: out STD_LOGIC_VECTOR(15 downto 0);
 			  debug_sel: in STD_LOGIC_VECTOR(1 downto 0);
            debug_bus : out STD_LOGIC_VECTOR(31 downto 0));
@@ -178,10 +179,10 @@ signal cache: ram32x32;
 signal cache_valid: std_logic_vector(31 downto 0) := (others => '0');
 signal lino_clk: std_logic_vector(15 downto 0);
 signal cache_entry: std_logic_vector(31 downto 0);
-alias cache_ttl: std_logic_vector(4 downto 0)  is cache_entry(4 downto 0);
 alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5); 
 alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
 signal cache_hit: std_logic;
+
 
 -- other
 signal T, T_saved: std_logic_vector(15 downto 0);
@@ -194,7 +195,7 @@ begin
 -- GOTO cache
 cache_empty <= '1' when (cache_valid = X"00000000") else '0';	-- all 32 entries free
 cache_full <= '1' when (cache_valid = X"FFFFFFFF") else '0';	-- all 32 entries used
-cache_entry <= cache(to_integer(unsigned(Lino_index)));			-- cache entry pointed to by Lino 
+cache_entry <= cache(to_integer(unsigned(Lino_index)));			-- data/tag cache entry pointed to by Lino 
 cache_hit <= '1' when (cache_tag = Lino_tag) else '0';
 
 -- Tristate system bus (64k address, bidirectional 8-bit data to Basic RAM "core")
@@ -894,6 +895,7 @@ end process;
 			when alu_div_end =>
 				if (alu_sign = '1') then
 					-- correct quotient sign
+					-- TODO also correct remainder sign which by definition should be same as dividend (reg S)
 					Y(15 downto 0) <= neg_y;
 				end if;
 			when alu_Yx10_plus_MDR =>
@@ -1057,8 +1059,8 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 -------------------------------------------------------------------
 -- Built-in debug and tracer components
 -------------------------------------------------------------------
-debug_t <= T;
---debug_t <= ("0000011111" & tab_cnt(5 downto 0)) when (at_tab = '1') else ("0000011110" & tab_cnt(5 downto 0));
+debug_t <= T;					-- output T to show memory pointer
+debug_uipc <= ui_address;	-- output microinstruction program counter to show microinstruction symbols
 
 -- paralled debug port
 	with debug_sel select debug_bus(23 downto 0) <= 

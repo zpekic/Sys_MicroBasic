@@ -5,607 +5,607 @@
 Compiling microBasic.mcc, pass 1 out of 2.
 Warning: Clock edge implicitly (by default) set to rising_edge()
 Warning: .org value changed from -1 (0xFFFFFFFF) to 0 (0x0000)
-Line 345: resolved aliases:  nop in 'if true then continue else repeat', line 345
-L0345@0000._reset:  if true then continue else repeat;
+Line 347: resolved aliases:  nop in 'if true then continue else repeat', line 347
+L0347@0000._reset:  if true then continue else repeat;
 
-Line 351: resolved aliases:  nop in 'if true then continue else repeat', line 351
-L0351@0003._reset3:  if true then continue else repeat;
+Line 353: resolved aliases:  nop in 'if true then continue else repeat', line 353
+L0353@0003._reset3:  if true then continue else repeat;
 
-Line 355: resolved aliases:  traceString in 'trace(from_microcode), directByte = 4', line 355
-L0355@0004.ColdStart:  trace(from_microcode), directByte = 4;
+Line 357: resolved aliases:  traceString in 'trace(from_microcode), directByte = 4', line 357
+L0357@0004.ColdStart:  trace(from_microcode), directByte = 4;
 
-Line 357: resolved aliases:  clear in 'DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0', line 357
-L0357@0006.WarmStart:  DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
+Line 359: resolved aliases:  clear in 'DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0', line 359
+L0359@0006.WarmStart:  DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
 
-Line 362: resolved aliases:  traceString in 'trace(from_microcode), directByte = 51', line 362
-L0362@000A.  trace(from_microcode), directByte = 51;
+Line 364: resolved aliases:  traceString in 'trace(from_microcode), directByte = 51', line 364
+L0364@000A.  trace(from_microcode), directByte = 51;
 
-Line 363: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 363
-L0363@000B.  trace(from_microcode), directByte = 2;
+Line 365: resolved aliases:  traceString in 'trace(from_microcode), directByte = 2', line 365
+L0365@000B.  trace(from_microcode), directByte = 2;
 
-Line 365: resolved aliases:  traceSDepth in 'trace(from_microcode), directByte = 56', line 365
-L0365@000D.  trace(from_microcode), directByte = 56;
+Line 367: resolved aliases:  traceSDepth in 'trace(from_microcode), directByte = 56', line 367
+L0367@000D.  trace(from_microcode), directByte = 56;
 
 Warning: mask value 255 detected. Range will be 0 to 255
-Line 369: resolved aliases:  goto in 'if false then continue else INTERNAL_ERR', line 369
-L0369@000F.badop:  if false then continue else INTERNAL_ERR;
+Line 371: resolved aliases:  goto in 'if false then continue else INTERNAL_ERR', line 371
+L0371@000F.badop:  if false then continue else INTERNAL_ERR;
 
 Warning: mask value 7 detected. Range will be 0 to 7
-Line 374: resolved aliases:  traceString in 'trace(from_microcode), directByte = 15', line 374
-L0374@0010.  trace(from_microcode), directByte = 15;
+Line 376: resolved aliases:  traceString in 'trace(from_microcode), directByte = 15', line 376
+L0376@0010.  trace(from_microcode), directByte = 15;
 
-Line 377: resolved aliases:  goto in 'if false then continue else fetch', line 377
-L0377@0013.  if false then continue else fetch;
+Line 379: resolved aliases:  goto in 'if false then continue else fetch', line 379
+L0379@0013.  if false then continue else fetch;
 
-Line 380: resolved aliases:  traceString in 'trace(from_microcode), directByte = 15', line 380
-L0380@0014.  trace(from_microcode), directByte = 15;
+Line 382: resolved aliases:  traceString in 'trace(from_microcode), directByte = 15', line 382
+L0382@0014.  trace(from_microcode), directByte = 15;
 
-Line 381: resolved aliases:  goto in 'if false then continue else fetch', line 381
-L0381@0015.  if false then continue else fetch;
+Line 383: resolved aliases:  goto in 'if false then continue else fetch', line 383
+L0383@0015.  if false then continue else fetch;
 
-Line 386: resolved aliases:  traceString in 'trace(from_microcode), directByte = 12', line 386
-L0386@0016.  trace(from_microcode), directByte = 12;
+Line 388: resolved aliases:  traceString in 'trace(from_microcode), directByte = 12', line 388
+L0388@0016.  trace(from_microcode), directByte = 12;
 
-Line 387: resolved aliases:  goto in 'if false then continue else fetch', line 387
-L0387@0017.  if false then continue else fetch;
+Line 389: resolved aliases:  goto in 'if false then continue else fetch', line 389
+L0389@0017.  if false then continue else fetch;
 
-Line 392: resolved aliases:  traceString in 'trace(from_microcode), directByte = 28', line 392
-L0392@0018.  trace(from_microcode), directByte = 28;
+Line 394: resolved aliases:  traceString in 'trace(from_microcode), directByte = 28', line 394
+L0394@0018.  trace(from_microcode), directByte = 28;
 
-Line 393: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3, T <= codeByte', line 393
-L0393@0019.lb_push:  trace(from_microcode), directByte = 3, T <= codeByte;
+Line 395: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3, T <= codeByte', line 395
+L0395@0019.lb_push:  trace(from_microcode), directByte = 3, T <= codeByte;
 
-Line 400: resolved aliases:  traceString in 'trace(from_microcode), directByte = 29', line 400
-L0400@001C.  trace(from_microcode), directByte = 29;
+Line 402: resolved aliases:  traceString in 'trace(from_microcode), directByte = 29', line 402
+L0402@001C.  trace(from_microcode), directByte = 29;
 
-Line 401: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3, T <= codeByte', line 401
-L0401@001D.  trace(from_microcode), directByte = 3, T <= codeByte;
+Line 403: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3, T <= codeByte', line 403
+L0403@001D.  trace(from_microcode), directByte = 3, T <= codeByte;
 
-Line 408: resolved aliases:  traceString in 'trace(from_microcode), directByte = 38', line 408
-L0408@0020.  trace(from_microcode), directByte = 38;
-
-Warning: else clause missing in if statement, default value '' will be used
-Warning: else clause missing in if statement, default value '' will be used
-Line 411: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else fetch', line 411
-L0411@0023.  ExpStack <= push_TWord, if false then continue else fetch;
-
-Line 416: resolved aliases:  traceString in 'trace(from_microcode), directByte = 34', line 416
-L0416@0024.  trace(from_microcode), directByte = 34;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 418: resolved aliases:  goto in 'ExpStack <= pop2, if false then continue else fetch', line 418
-L0418@0026.  ExpStack <= pop2, if false then continue else fetch;
-
-Line 423: resolved aliases:  traceString in 'trace(from_microcode), directByte = 10', line 423
-L0423@0027.  trace(from_microcode), directByte = 10;
-
-Line 427: resolved aliases:  goto in 'if false then continue else fetch', line 427
-L0427@002B.  if false then continue else fetch;
-
-Line 432: resolved aliases:  traceString in 'trace(from_microcode), directByte = 11', line 432
-L0432@002C.  trace(from_microcode), directByte = 11;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 434: resolved aliases:  goto in 'SvPt <= BP, BP <= SvPt, if false then continue else bp_done', line 434
-L0434@002E.ptr_exc:  SvPt <= BP, BP <= SvPt, if false then continue else bp_done;
-
-Line 439: resolved aliases:  traceString in 'trace(from_microcode), directByte = 36', line 439
-L0439@002F.  trace(from_microcode), directByte = 36;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 442: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else fetch', line 442
-L0442@0032.  ExpStack <= push_TWord, if false then continue else fetch;
-
-Line 447: resolved aliases:  traceString in 'trace(from_microcode), directByte = 37', line 447
-L0447@0033.  trace(from_microcode), directByte = 37;
+Line 410: resolved aliases:  traceString in 'trace(from_microcode), directByte = 38', line 410
+L0410@0020.  trace(from_microcode), directByte = 38;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 452: resolved aliases:  goto in 'Vars <= T, if false then continue else fetch', line 452
-L0452@0038.  Vars <= T, if false then continue else fetch;
+Line 413: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else fetch', line 413
+L0413@0023.  ExpStack <= push_TWord, if false then continue else fetch;
 
-Line 457: resolved aliases:  traceString in 'trace(from_microcode), directByte = 47', line 457
-L0457@0039.  trace(from_microcode), directByte = 47;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 460: resolved aliases:  goto in 'BasStack <= push_Lino_and_BP, if false then continue else fetch', line 460
-L0460@003C.  BasStack <= push_Lino_and_BP, if false then continue else fetch;
-
-Line 465: resolved aliases:  traceString in 'trace(from_microcode), directByte = 48', line 465
-L0465@003D.  trace(from_microcode), directByte = 48;
+Line 418: resolved aliases:  traceString in 'trace(from_microcode), directByte = 34', line 418
+L0418@0024.  trace(from_microcode), directByte = 34;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 470: resolved aliases:  goto in 'BP <= T, BasStack <= pop, if false then continue else fetch', line 470
-L0470@0042.  BP <= T, BasStack <= pop, if false then continue else fetch;
+Line 420: resolved aliases:  goto in 'ExpStack <= pop2, if false then continue else fetch', line 420
+L0420@0026.  ExpStack <= pop2, if false then continue else fetch;
 
-Line 475: resolved aliases:  traceString in 'trace(from_microcode), directByte = 45', line 475
-L0475@0043.  trace(from_microcode), directByte = 45;
+Line 425: resolved aliases:  traceString in 'trace(from_microcode), directByte = 10', line 425
+L0425@0027.  trace(from_microcode), directByte = 10;
+
+Line 429: resolved aliases:  goto in 'if false then continue else fetch', line 429
+L0429@002B.  if false then continue else fetch;
+
+Line 434: resolved aliases:  traceString in 'trace(from_microcode), directByte = 11', line 434
+L0434@002C.  trace(from_microcode), directByte = 11;
 
 Warning: else clause missing in if statement, default value '' will be used
-Warning: else clause missing in if statement, default value '' will be used
-Line 480: resolved aliases:  traceLino in 'trace(from_microcode), directByte = 51', line 480
-L0480@0048.  trace(from_microcode), directByte = 51;
+Line 436: resolved aliases:  goto in 'SvPt <= BP, BP <= SvPt, if false then continue else bp_done', line 436
+L0436@002E.ptr_exc:  SvPt <= BP, BP <= SvPt, if false then continue else bp_done;
+
+Line 441: resolved aliases:  traceString in 'trace(from_microcode), directByte = 36', line 441
+L0441@002F.  trace(from_microcode), directByte = 36;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 484: resolved aliases:  goto in 'alu <= cache_store, if false then continue else fetch', line 484
-L0484@004B.  alu <= cache_store, if false then continue else fetch;
+Line 444: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else fetch', line 444
+L0444@0032.  ExpStack <= push_TWord, if false then continue else fetch;
 
-Line 488: resolved aliases:  goto in 'BP <= T, if false then continue else fetch', line 488
-L0488@004D.  BP <= T, if false then continue else fetch;
-
-Line 492: resolved aliases:  goto in 'if false then continue else fetch', line 492
-L0492@004F.  if false then continue else fetch;
+Line 449: resolved aliases:  traceString in 'trace(from_microcode), directByte = 37', line 449
+L0449@0033.  trace(from_microcode), directByte = 37;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 502: resolved aliases:  goto in 'T <= inc, if false then continue else go_search', line 502
-L0502@0058.  T <= inc, if false then continue else go_search;
+Line 454: resolved aliases:  goto in 'Vars <= T, if false then continue else fetch', line 454
+L0454@0038.  Vars <= T, if false then continue else fetch;
 
-Line 507: resolved aliases:  traceString in 'trace(from_microcode), directByte = 25', line 507
-L0507@0059.  trace(from_microcode), directByte = 25;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 515: resolved aliases:  traceString in 'trace(from_microcode), directByte = 22', line 515
-L0515@005D.  trace(from_microcode), directByte = 22;
+Line 459: resolved aliases:  traceString in 'trace(from_microcode), directByte = 47', line 459
+L0459@0039.  trace(from_microcode), directByte = 47;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 520: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else fetch', line 520
-L0520@0062.  ExpStack <= push_TWord, if false then continue else fetch;
+Line 462: resolved aliases:  goto in 'BasStack <= push_Lino_and_BP, if false then continue else fetch', line 462
+L0462@003C.  BasStack <= push_Lino_and_BP, if false then continue else fetch;
 
-Line 525: resolved aliases:  traceString in 'trace(from_microcode), directByte = 23', line 525
-L0525@0063.  trace(from_microcode), directByte = 23;
+Line 467: resolved aliases:  traceString in 'trace(from_microcode), directByte = 48', line 467
+L0467@003D.  trace(from_microcode), directByte = 48;
 
-Line 532: resolved aliases:  traceString in 'trace(from_microcode), directByte = 24', line 532
-L0532@0066.  trace(from_microcode), directByte = 24;
+Warning: else clause missing in if statement, default value '' will be used
+Line 472: resolved aliases:  goto in 'BP <= T, BasStack <= pop, if false then continue else fetch', line 472
+L0472@0042.  BP <= T, BasStack <= pop, if false then continue else fetch;
 
-Line 539: resolved aliases:  traceString in 'trace(from_microcode), directByte = 35', line 539
-L0539@0069.  trace(from_microcode), directByte = 35;
+Line 477: resolved aliases:  traceString in 'trace(from_microcode), directByte = 45', line 477
+L0477@0043.  trace(from_microcode), directByte = 45;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 544: resolved aliases:  goto in 'alu <= div_subset, if false then continue else div_loop', line 544
-L0544@006E.  alu <= div_subset, if false then continue else div_loop;
-
-Line 545: resolved aliases:  goto in 'alu <= div_end, if false then continue else alu_done', line 545
-L0545@006F.div_done:  alu <= div_end, if false then continue else alu_done;
-
-Line 550: resolved aliases:  traceString in 'trace(from_microcode), directByte = 46', line 550
-L0550@0070.  trace(from_microcode), directByte = 46;
-
-Line 556: resolved aliases:  goto in 'IL_PC <= inc, if false then continue else fetch', line 556
-L0556@0076.  IL_PC <= inc, if false then continue else fetch;
-
-Line 561: resolved aliases:  traceString in 'trace(from_microcode), directByte = 39', line 561
-L0561@0077.  trace(from_microcode), directByte = 39;
+Line 482: resolved aliases:  traceLino in 'trace(from_microcode), directByte = 51', line 482
+L0482@0048.  trace(from_microcode), directByte = 51;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 563: resolved aliases:  goto in 'IL_PC <= T, if false then continue else fetch', line 563
-L0563@0079.  IL_PC <= T, if false then continue else fetch;
+Line 486: resolved aliases:  goto in 'alu <= cache_store, if false then continue else fetch', line 486
+L0486@004B.  alu <= cache_store, if false then continue else fetch;
 
-Warning: else clause missing in if statement, default value '' will be used
-Line 570: resolved aliases:  traceLino in 'trace(from_microcode), directByte = 51', line 570
-L0570@0080.  trace(from_microcode), directByte = 51;
+Line 490: resolved aliases:  goto in 'BP <= T, if false then continue else fetch', line 490
+L0490@004D.  BP <= T, if false then continue else fetch;
 
-Line 573: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 573
-L0573@0083.nx_err:  directByte = 0x07, outChar(from_microcode);
-
-Line 574: resolved aliases:  goto in 'if false then continue else stop_run', line 574
-L0574@0084.  if false then continue else stop_run;
-
-Line 579: resolved aliases:  traceString in 'trace(from_microcode), directByte = 41', line 579
-L0579@0085.  trace(from_microcode), directByte = 41;
+Line 494: resolved aliases:  goto in 'if false then continue else fetch', line 494
+L0494@004F.  if false then continue else fetch;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 583: resolved aliases:  goto in 'alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload', line 583
-L0583@0089.  alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload;
+Line 504: resolved aliases:  goto in 'T <= inc, if false then continue else go_search', line 504
+L0504@0058.  T <= inc, if false then continue else go_search;
+
+Line 509: resolved aliases:  traceString in 'trace(from_microcode), directByte = 25', line 509
+L0509@0059.  trace(from_microcode), directByte = 25;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 517: resolved aliases:  traceString in 'trace(from_microcode), directByte = 22', line 517
+L0517@005D.  trace(from_microcode), directByte = 22;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 522: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else fetch', line 522
+L0522@0062.  ExpStack <= push_TWord, if false then continue else fetch;
+
+Line 527: resolved aliases:  traceString in 'trace(from_microcode), directByte = 23', line 527
+L0527@0063.  trace(from_microcode), directByte = 23;
+
+Line 534: resolved aliases:  traceString in 'trace(from_microcode), directByte = 24', line 534
+L0534@0066.  trace(from_microcode), directByte = 24;
+
+Line 541: resolved aliases:  traceString in 'trace(from_microcode), directByte = 35', line 541
+L0541@0069.  trace(from_microcode), directByte = 35;
+
+Warning: else clause missing in if statement, default value '' will be used
+Warning: else clause missing in if statement, default value '' will be used
+Line 546: resolved aliases:  goto in 'alu <= div_subset, if false then continue else div_loop', line 546
+L0546@006E.  alu <= div_subset, if false then continue else div_loop;
+
+Line 547: resolved aliases:  goto in 'alu <= div_end, if false then continue else alu_done', line 547
+L0547@006F.div_done:  alu <= div_end, if false then continue else alu_done;
+
+Line 552: resolved aliases:  traceString in 'trace(from_microcode), directByte = 46', line 552
+L0552@0070.  trace(from_microcode), directByte = 46;
+
+Line 558: resolved aliases:  goto in 'IL_PC <= inc, if false then continue else fetch', line 558
+L0558@0076.  IL_PC <= inc, if false then continue else fetch;
+
+Line 563: resolved aliases:  traceString in 'trace(from_microcode), directByte = 39', line 563
+L0563@0077.  trace(from_microcode), directByte = 39;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 565: resolved aliases:  goto in 'IL_PC <= T, if false then continue else fetch', line 565
+L0565@0079.  IL_PC <= T, if false then continue else fetch;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 572: resolved aliases:  traceLino in 'trace(from_microcode), directByte = 51', line 572
+L0572@0080.  trace(from_microcode), directByte = 51;
+
+Line 575: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 575
+L0575@0083.nx_err:  directByte = 0x07, outChar(from_microcode);
+
+Line 576: resolved aliases:  goto in 'if false then continue else stop_run', line 576
+L0576@0084.  if false then continue else stop_run;
+
+Line 581: resolved aliases:  traceString in 'trace(from_microcode), directByte = 41', line 581
+L0581@0085.  trace(from_microcode), directByte = 41;
+
+Warning: else clause missing in if statement, default value '' will be used
+Warning: else clause missing in if statement, default value '' will be used
+Line 585: resolved aliases:  goto in 'alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload', line 585
+L0585@0089.  alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 600: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then next else ls_next', line 600
-L0600@009A.ls_nextchar:  directByte = 0x0D, if MDR_EQU_DB then next else ls_next;
+Line 602: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then next else ls_next', line 602
+L0602@009A.ls_nextchar:  directByte = 0x0D, if MDR_EQU_DB then next else ls_next;
 
-Line 601: resolved aliases:  LF in 'directByte = 0x0A, outChar(from_microcode)', line 601
-L0601@009B.  directByte = 0x0A, outChar(from_microcode);
+Line 603: resolved aliases:  LF in 'directByte = 0x0A, outChar(from_microcode)', line 603
+L0603@009B.  directByte = 0x0A, outChar(from_microcode);
 
-Line 602: resolved aliases:  goto in 'T <= inc, if false then continue else ls_lineloop', line 602
-L0602@009C.  T <= inc, if false then continue else ls_lineloop;
+Line 604: resolved aliases:  goto in 'T <= inc, if false then continue else ls_lineloop', line 604
+L0604@009C.  T <= inc, if false then continue else ls_lineloop;
 
-Line 603: resolved aliases:  goto in 'T <= inc, if false then continue else ls_charloop', line 603
-L0603@009D.ls_next:  T <= inc, if false then continue else ls_charloop;
+Line 605: resolved aliases:  goto in 'T <= inc, if false then continue else ls_charloop', line 605
+L0605@009D.ls_next:  T <= inc, if false then continue else ls_charloop;
 
-Line 605: resolved aliases:  goto in 'T <= inc, if false then continue else ls_lineloop', line 605
-L0605@009F.  T <= inc, if false then continue else ls_lineloop;
+Line 607: resolved aliases:  goto in 'T <= inc, if false then continue else ls_lineloop', line 607
+L0607@009F.  T <= inc, if false then continue else ls_lineloop;
 
-Line 610: resolved aliases:  traceString in 'trace(from_microcode), directByte = 26', line 610
-L0610@00A0.  trace(from_microcode), directByte = 26;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 613: resolved aliases:  goto in 'if false then continue else fetch', line 613
-L0613@00A3.  if false then continue else fetch;
-
-Line 618: resolved aliases:  traceString in 'trace(from_microcode), directByte = 18', line 618
-L0618@00A4.  trace(from_microcode), directByte = 18;
+Line 612: resolved aliases:  traceString in 'trace(from_microcode), directByte = 26', line 612
+L0612@00A0.  trace(from_microcode), directByte = 26;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 622: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 622
-L0622@00A8.  trace(from_microcode), directByte = 3;
+Line 615: resolved aliases:  goto in 'if false then continue else fetch', line 615
+L0615@00A3.  if false then continue else fetch;
 
-Line 623: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop', line 623
-L0623@00A9.  directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
-
-Line 625: resolved aliases:  goto in 'if false then continue else fetch', line 625
-L0625@00AB.  if false then continue else fetch;
-
-Line 630: resolved aliases:  traceString in 'trace(from_microcode), directByte = 27', line 630
-L0630@00AC.  trace(from_microcode), directByte = 27;
+Line 620: resolved aliases:  traceString in 'trace(from_microcode), directByte = 18', line 620
+L0620@00A4.  trace(from_microcode), directByte = 18;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 633: resolved aliases:  goto in 'if false then continue else pt_loop', line 633
-L0633@00AF.  if false then continue else pt_loop;
+Line 624: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 624
+L0624@00A8.  trace(from_microcode), directByte = 3;
 
-Line 638: resolved aliases:  traceString in 'trace(from_microcode), directByte = 6', line 638
-L0638@00B0.  trace(from_microcode), directByte = 6;
+Line 625: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop', line 625
+L0625@00A9.  directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
 
-Line 640: resolved aliases:  goto in 'if false then continue else fetch', line 640
-L0640@00B2.  if false then continue else fetch;
+Line 627: resolved aliases:  goto in 'if false then continue else fetch', line 627
+L0627@00AB.  if false then continue else fetch;
 
-Line 645: resolved aliases:  traceString in 'trace(from_microcode), directByte = 5', line 645
-L0645@00B3.  trace(from_microcode), directByte = 5;
-
-Line 647: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 647
-L0647@00B5.  trace(from_microcode), directByte = 3;
-
-Line 653: resolved aliases:  traceString in 'trace(from_microcode), directByte = 8', line 653
-L0653@00B7.  trace(from_microcode), directByte = 8;
+Line 632: resolved aliases:  traceString in 'trace(from_microcode), directByte = 27', line 632
+L0632@00AC.  trace(from_microcode), directByte = 27;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 659: resolved aliases:  CR in 'directByte = 0x0D, if CHARIN_EQU_DB then gl_cr', line 659
-L0659@00BD.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
+Line 635: resolved aliases:  goto in 'if false then continue else pt_loop', line 635
+L0635@00AF.  if false then continue else pt_loop;
+
+Line 640: resolved aliases:  traceString in 'trace(from_microcode), directByte = 6', line 640
+L0640@00B0.  trace(from_microcode), directByte = 6;
+
+Line 642: resolved aliases:  goto in 'if false then continue else fetch', line 642
+L0642@00B2.  if false then continue else fetch;
+
+Line 647: resolved aliases:  traceString in 'trace(from_microcode), directByte = 5', line 647
+L0647@00B3.  trace(from_microcode), directByte = 5;
+
+Line 649: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 649
+L0649@00B5.  trace(from_microcode), directByte = 3;
+
+Line 655: resolved aliases:  traceString in 'trace(from_microcode), directByte = 8', line 655
+L0655@00B7.  trace(from_microcode), directByte = 8;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 660: resolved aliases:  BACKSPACE in 'directByte = 0x08, if CHARIN_EQU_DB then gl_bs', line 660
-L0660@00BE.  directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
+Line 661: resolved aliases:  CR in 'directByte = 0x0D, if CHARIN_EQU_DB then gl_cr', line 661
+L0661@00BD.  directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 661: resolved aliases:  ESC in 'directByte = 0x1b, if CHARIN_EQU_DB then gl_esc', line 661
-L0661@00BF.  directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
+Line 662: resolved aliases:  BACKSPACE in 'directByte = 0x08, if CHARIN_EQU_DB then gl_bs', line 662
+L0662@00BE.  directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 662: resolved aliases:  TAB in 'directByte = 0x09, if CHARIN_EQU_DB then gl_tab', line 662
-L0662@00C0.  directByte = 0x09, if CHARIN_EQU_DB then gl_tab;
+Line 663: resolved aliases:  ESC in 'directByte = 0x1b, if CHARIN_EQU_DB then gl_esc', line 663
+L0663@00BF.  directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 664: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 664
-L0664@00C1.gl_ignore:  directByte = 0x07, outChar(from_microcode);
-
-Line 665: resolved aliases:  goto in 'gotChar = 1, if false then continue else gl_loop', line 665
-L0665@00C2.  gotChar = 1, if false then continue else gl_loop;
+Line 664: resolved aliases:  TAB in 'directByte = 0x09, if CHARIN_EQU_DB then gl_tab', line 664
+L0664@00C0.  directByte = 0x09, if CHARIN_EQU_DB then gl_tab;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 671: resolved aliases:  goto in 'gotChar = 1, if false then continue else gl_loop', line 671
-L0671@00C7.  gotChar = 1, if false then continue else gl_loop;
+Line 666: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 666
+L0666@00C1.gl_ignore:  directByte = 0x07, outChar(from_microcode);
 
-Line 673: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 673
-L0673@00C8.gl_esc:  directByte = 0x07, outChar(from_microcode);
-
-Line 675: resolved aliases:  goto in 'gotChar = 1, if false then continue else gl', line 675
-L0675@00CA.  gotChar = 1, if false then continue else gl;
+Line 667: resolved aliases:  goto in 'gotChar = 1, if false then continue else gl_loop', line 667
+L0667@00C2.  gotChar = 1, if false then continue else gl_loop;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 678: resolved aliases:  BACKSPACE in 'directByte = 0x08, outChar(from_microcode)', line 678
-L0678@00CC.  directByte = 0x08, outChar(from_microcode);
+Line 673: resolved aliases:  goto in 'gotChar = 1, if false then continue else gl_loop', line 673
+L0673@00C7.  gotChar = 1, if false then continue else gl_loop;
 
-Line 679: resolved aliases:  goto in 'InlEnd <= dec, if false then continue else gl_write0', line 679
-L0679@00CD.  InlEnd <= dec, if false then continue else gl_write0;
+Line 675: resolved aliases:  BEEP in 'directByte = 0x07, outChar(from_microcode)', line 675
+L0675@00C8.gl_esc:  directByte = 0x07, outChar(from_microcode);
 
-Line 685: resolved aliases:  goto in 'gotChar = 1, BP <= Inline_start, if false then continue else fetch', line 685
-L0685@00D2.  gotChar = 1, BP <= Inline_start, if false then continue else fetch;
+Line 677: resolved aliases:  goto in 'gotChar = 1, if false then continue else gl', line 677
+L0677@00CA.  gotChar = 1, if false then continue else gl;
 
 Warning: else clause missing in if statement, default value '' will be used
-Warning: else clause missing in if statement, default value '' will be used
-Line 691: resolved aliases:  goto in 'if false then continue else gl_tabloop', line 691
-L0691@00D7.  if false then continue else gl_tabloop;
+Line 680: resolved aliases:  BACKSPACE in 'directByte = 0x08, outChar(from_microcode)', line 680
+L0680@00CC.  directByte = 0x08, outChar(from_microcode);
 
-Line 696: resolved aliases:  traceString in 'trace(from_microcode), directByte = 40', line 696
-L0696@00D8.  trace(from_microcode), directByte = 40;
+Line 681: resolved aliases:  goto in 'InlEnd <= dec, if false then continue else gl_write0', line 681
+L0681@00CD.  InlEnd <= dec, if false then continue else gl_write0;
+
+Line 687: resolved aliases:  goto in 'gotChar = 1, BP <= Inline_start, if false then continue else fetch', line 687
+L0687@00D2.  gotChar = 1, BP <= Inline_start, if false then continue else fetch;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 706: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then il_fork', line 706
-L0706@00E1.  directByte = 0x0D, if MDR_EQU_DB then il_fork;
+Line 693: resolved aliases:  goto in 'if false then continue else gl_tabloop', line 693
+L0693@00D7.  if false then continue else gl_tabloop;
+
+Line 698: resolved aliases:  traceString in 'trace(from_microcode), directByte = 40', line 698
+L0698@00D8.  trace(from_microcode), directByte = 40;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 707: resolved aliases:  goto in 'T <= inc, if false then continue else il_findBE', line 707
-L0707@00E2.  T <= inc, if false then continue else il_findBE;
-
-Line 715: resolved aliases:  goto in 'if false then continue else WarmStart', line 715
-L0715@00E8.  if false then continue else WarmStart;
-
-Line 721: resolved aliases:  goto in 'if false then continue else RSTACK_ERR', line 721
-L0721@00EC.replaceLine:  if false then continue else RSTACK_ERR;
-
-Line 723: resolved aliases:  goto in 'if false then continue else ESTACK_ERR', line 723
-L0723@00ED.insertLine:  if false then continue else ESTACK_ERR;
-
-Line 733: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then next else app_loop', line 733
-L0733@00F6.  directByte = 0x0D, if MDR_EQU_DB then next else app_loop;
-
-Line 735: resolved aliases:  goto in 'if false then continue else WarmStart', line 735
-L0735@00F8.  if false then continue else WarmStart;
-
-Line 746: resolved aliases:  goto in 'PrgEnd <= T, if false then continue else scan_exit', line 746
-L0746@0101.  PrgEnd <= T, if false then continue else scan_exit;
-
-Line 751: resolved aliases:  goto in 'T <= inc, if false then continue else scan_loop', line 751
-L0751@0106.scan_line:  T <= inc, if false then continue else scan_loop;
+Warning: else clause missing in if statement, default value '' will be used
+Line 708: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then il_fork', line 708
+L0708@00E1.  directByte = 0x0D, if MDR_EQU_DB then il_fork;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 758: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else scan_line', line 758
-L0758@010D.  ExpStack <= push_TWord, if false then continue else scan_line;
+Line 709: resolved aliases:  goto in 'T <= inc, if false then continue else il_findBE', line 709
+L0709@00E2.  T <= inc, if false then continue else il_findBE;
 
-Line 761: resolved aliases:  back in 'alu <= S_minus_R, if true then return else continue', line 761
-L0761@0110.scan_exit:  alu <= S_minus_R, if true then return else continue;
+Line 717: resolved aliases:  goto in 'if false then continue else WarmStart', line 717
+L0717@00E8.  if false then continue else WarmStart;
 
-Warning: else clause missing in if statement, default value '' will be used
-Line 771: resolved aliases:  goto in 'alu <= copy_inc, if false then continue else dbs_loop', line 771
-L0771@0118.  alu <= copy_inc, if false then continue else dbs_loop;
+Line 723: resolved aliases:  goto in 'if false then continue else RSTACK_ERR', line 723
+L0723@00EC.replaceLine:  if false then continue else RSTACK_ERR;
 
-Line 776: resolved aliases:  traceString in 'trace(from_microcode), directByte = 43', line 776
-L0776@0119.  trace(from_microcode), directByte = 43;
+Line 725: resolved aliases:  goto in 'if false then continue else ESTACK_ERR', line 725
+L0725@00ED.insertLine:  if false then continue else ESTACK_ERR;
 
-Line 777: resolved aliases:  goto in 'if false then continue else ColdStart', line 777
-L0777@011A.  if false then continue else ColdStart;
+Line 729: resolved aliases:  goto in 'if false then continue else WarmStart', line 729
+L0729@00F0.  if false then continue else WarmStart;
 
-Line 782: resolved aliases:  traceString in 'trace(from_microcode), directByte = 42', line 782
-L0782@011B.  trace(from_microcode), directByte = 42;
+Line 739: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then next else app_loop', line 739
+L0739@00F9.  directByte = 0x0D, if MDR_EQU_DB then next else app_loop;
 
-Warning: else clause missing in if statement, default value '' will be used
-Line 787: resolved aliases:  goto in 'Lino <= T, if false then continue else fetch', line 787
-L0787@0120.  Lino <= T, if false then continue else fetch;
+Line 749: resolved aliases:  goto in 'PrgEnd <= T, if false then continue else scan_exit', line 749
+L0749@0101.  PrgEnd <= T, if false then continue else scan_exit;
 
-Line 792: resolved aliases:  traceString in 'trace(from_microcode), directByte = 44', line 792
-L0792@0121.  trace(from_microcode), directByte = 44;
-
-Line 797: resolved aliases:  goto in 'if false then continue else print_lino', line 797
-L0797@0126.  if false then continue else print_lino;
-
-Line 802: resolved aliases:  traceString in 'trace(from_microcode), directByte = 19', line 802
-L0802@0127.  trace(from_microcode), directByte = 19;
+Line 754: resolved aliases:  goto in 'T <= inc, if false then continue else scan_loop', line 754
+L0754@0106.scan_line:  T <= inc, if false then continue else scan_loop;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 804: resolved aliases:  goto in 'IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch', line 804
-L0804@0129.  IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch;
+Line 761: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else scan_line', line 761
+L0761@010D.  ExpStack <= push_TWord, if false then continue else scan_line;
+
+Line 764: resolved aliases:  back in 'alu <= S_minus_R, if true then return else continue', line 764
+L0764@0110.scan_exit:  alu <= S_minus_R, if true then return else continue;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 774: resolved aliases:  goto in 'alu <= copy_inc, if false then continue else dbs_loop', line 774
+L0774@0118.  alu <= copy_inc, if false then continue else dbs_loop;
+
+Line 779: resolved aliases:  traceString in 'trace(from_microcode), directByte = 43', line 779
+L0779@0119.  trace(from_microcode), directByte = 43;
+
+Line 780: resolved aliases:  goto in 'if false then continue else ColdStart', line 780
+L0780@011A.  if false then continue else ColdStart;
+
+Line 785: resolved aliases:  traceString in 'trace(from_microcode), directByte = 42', line 785
+L0785@011B.  trace(from_microcode), directByte = 42;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 790: resolved aliases:  goto in 'Lino <= T, if false then continue else fetch', line 790
+L0790@0120.  Lino <= T, if false then continue else fetch;
+
+Line 795: resolved aliases:  traceString in 'trace(from_microcode), directByte = 44', line 795
+L0795@0121.  trace(from_microcode), directByte = 44;
+
+Line 800: resolved aliases:  goto in 'if false then continue else print_lino', line 800
+L0800@0126.  if false then continue else print_lino;
+
+Line 805: resolved aliases:  traceString in 'trace(from_microcode), directByte = 19', line 805
+L0805@0127.  trace(from_microcode), directByte = 19;
+
+Warning: else clause missing in if statement, default value '' will be used
+Line 807: resolved aliases:  goto in 'IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch', line 807
+L0807@0129.  IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch;
 
 Warning: mask value 7 detected. Range will be 48 to 55
-Line 809: resolved aliases:  traceString in 'trace(from_microcode), directByte = 20', line 809
-L0809@012A.  trace(from_microcode), directByte = 20;
+Line 812: resolved aliases:  traceString in 'trace(from_microcode), directByte = 20', line 812
+L0812@012A.  trace(from_microcode), directByte = 20;
 
-Line 810: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 810
-L0810@012B.  trace(from_microcode), directByte = 3;
+Line 813: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 813
+L0813@012B.  trace(from_microcode), directByte = 3;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 812: resolved aliases:  goto in 'RetStack <= push_IL_PC_PLUS_1, if false then continue else jump', line 812
-L0812@012D.  RetStack <= push_IL_PC_PLUS_1, if false then continue else jump;
+Line 815: resolved aliases:  goto in 'RetStack <= push_IL_PC_PLUS_1, if false then continue else jump', line 815
+L0815@012D.  RetStack <= push_IL_PC_PLUS_1, if false then continue else jump;
 
 Warning: mask value 7 detected. Range will be 56 to 63
-Line 817: resolved aliases:  traceString in 'trace(from_microcode), directByte = 21', line 817
-L0817@012E.  trace(from_microcode), directByte = 21;
+Line 820: resolved aliases:  traceString in 'trace(from_microcode), directByte = 21', line 820
+L0820@012E.  trace(from_microcode), directByte = 21;
 
-Line 818: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 818
-L0818@012F.  trace(from_microcode), directByte = 3;
+Line 821: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 821
+L0821@012F.  trace(from_microcode), directByte = 3;
 
-Line 819: resolved aliases:  goto in 'IL_PC <= direct11, if false then continue else fetch', line 819
-L0819@0130.jump:  IL_PC <= direct11, if false then continue else fetch;
+Line 822: resolved aliases:  goto in 'IL_PC <= direct11, if false then continue else fetch', line 822
+L0822@0130.jump:  IL_PC <= direct11, if false then continue else fetch;
 
 Warning: mask value 63 detected. Range will be 64 to 127
-Line 824: resolved aliases:  traceString in 'trace(from_microcode), directByte = 7', line 824
-L0824@0131.  trace(from_microcode), directByte = 7;
+Line 827: resolved aliases:  traceString in 'trace(from_microcode), directByte = 7', line 827
+L0827@0131.  trace(from_microcode), directByte = 7;
 
-Line 826: resolved aliases:  traceGoto in 'trace(from_microcode), directByte = 30', line 826
-L0826@0133.br_exit:  trace(from_microcode), directByte = 30;
+Line 829: resolved aliases:  traceGoto in 'trace(from_microcode), directByte = 30', line 829
+L0829@0133.br_exit:  trace(from_microcode), directByte = 30;
 
-Line 827: resolved aliases:  goto in 'if false then continue else fetch', line 827
-L0827@0134.  if false then continue else fetch;
+Line 830: resolved aliases:  goto in 'if false then continue else fetch', line 830
+L0830@0134.  if false then continue else fetch;
 
-Line 832: resolved aliases:  traceString in 'trace(from_microcode), directByte = 7', line 832
-L0832@0135.  trace(from_microcode), directByte = 7;
+Line 835: resolved aliases:  traceString in 'trace(from_microcode), directByte = 7', line 835
+L0835@0135.  trace(from_microcode), directByte = 7;
 
-Line 833: resolved aliases:  goto in 'if false then continue else badop', line 833
-L0833@0136.  if false then continue else badop;
+Line 836: resolved aliases:  goto in 'if false then continue else badop', line 836
+L0836@0136.  if false then continue else badop;
 
 Warning: mask value 31 detected. Range will be 128 to 159
-Line 838: resolved aliases:  traceString in 'trace(from_microcode), directByte = 17', line 838
-L0838@0137.  trace(from_microcode), directByte = 17;
+Line 841: resolved aliases:  traceString in 'trace(from_microcode), directByte = 17', line 841
+L0841@0137.  trace(from_microcode), directByte = 17;
 
-Line 840: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 840
-L0840@0139.bc_loop:  trace(from_microcode), directByte = 3;
+Line 843: resolved aliases:  traceString in 'trace(from_microcode), directByte = 3', line 843
+L0843@0139.bc_loop:  trace(from_microcode), directByte = 3;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 844: resolved aliases:  goto in 'BP <= inc, IL_PC <= inc, if false then continue else bc_loop', line 844
-L0844@013D.  BP <= inc, IL_PC <= inc, if false then continue else bc_loop;
+Line 847: resolved aliases:  goto in 'BP <= inc, IL_PC <= inc, if false then continue else bc_loop', line 847
+L0847@013D.  BP <= inc, IL_PC <= inc, if false then continue else bc_loop;
 
-Line 847: resolved aliases:  goto in 'if false then continue else fetch', line 847
-L0847@0140.  if false then continue else fetch;
+Line 850: resolved aliases:  goto in 'if false then continue else fetch', line 850
+L0850@0140.  if false then continue else fetch;
 
 Warning: mask value 31 detected. Range will be 160 to 191
-Line 855: resolved aliases:  traceString in 'trace(from_microcode), directByte = 16', line 855
-L0855@0144.  trace(from_microcode), directByte = 16;
+Line 858: resolved aliases:  traceString in 'trace(from_microcode), directByte = 16', line 858
+L0858@0144.  trace(from_microcode), directByte = 16;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 860: resolved aliases:  goto in 'ExpStack <= push_TByte, BP <= inc, if false then continue else fetch', line 860
-L0860@0149.  ExpStack <= push_TByte, BP <= inc, if false then continue else fetch;
+Line 863: resolved aliases:  goto in 'ExpStack <= push_TByte, BP <= inc, if false then continue else fetch', line 863
+L0863@0149.  ExpStack <= push_TByte, BP <= inc, if false then continue else fetch;
 
 Warning: mask value 31 detected. Range will be 192 to 223
-Line 865: resolved aliases:  traceString in 'trace(from_microcode), directByte = 14', line 865
-L0865@014A.  trace(from_microcode), directByte = 14;
+Line 868: resolved aliases:  traceString in 'trace(from_microcode), directByte = 14', line 868
+L0868@014A.  trace(from_microcode), directByte = 14;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 870: resolved aliases:  traceGoto in 'trace(from_microcode), directByte = 30', line 870
-L0870@014F.  trace(from_microcode), directByte = 30;
+Line 873: resolved aliases:  traceGoto in 'trace(from_microcode), directByte = 30', line 873
+L0873@014F.  trace(from_microcode), directByte = 30;
 
-Line 871: resolved aliases:  goto in 'if false then continue else fetch', line 871
-L0871@0150.  if false then continue else fetch;
+Line 874: resolved aliases:  goto in 'if false then continue else fetch', line 874
+L0874@0150.  if false then continue else fetch;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 877: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else bn_exit', line 877
-L0877@0156.  ExpStack <= push_TWord, if false then continue else bn_exit;
+Line 880: resolved aliases:  goto in 'ExpStack <= push_TWord, if false then continue else bn_exit', line 880
+L0880@0156.  ExpStack <= push_TWord, if false then continue else bn_exit;
 
 Warning: mask value 31 detected. Range will be 224 to 255
-Line 882: resolved aliases:  traceString in 'trace(from_microcode), directByte = 13', line 882
-L0882@0157.  trace(from_microcode), directByte = 13;
+Line 885: resolved aliases:  traceString in 'trace(from_microcode), directByte = 13', line 885
+L0885@0157.  trace(from_microcode), directByte = 13;
 
-Line 884: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then fetch', line 884
-L0884@0159.  directByte = 0x0D, if MDR_EQU_DB then fetch;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 889: resolved aliases:  traceString in 'gotChar = 1, trace(from_microcode), directByte = 55', line 889
-L0889@015B.BREAK:  gotChar = 1, trace(from_microcode), directByte = 55;
-
-Line 892: resolved aliases:  goto in 'if false then continue else traceDetails', line 892
-L0892@015E.  if false then continue else traceDetails;
-
-Line 894: resolved aliases:  traceString in 'trace(from_microcode), directByte = 50', line 894
-L0894@015F.NOPROG_ERR:  trace(from_microcode), directByte = 50;
-
-Line 895: resolved aliases:  goto in 'if false then continue else traceError', line 895
-L0895@0160.  if false then continue else traceError;
-
-Line 896: resolved aliases:  traceString in 'trace(from_microcode), directByte = 57', line 896
-L0896@0161.DIVBY0_ERR:  trace(from_microcode), directByte = 57;
-
-Line 897: resolved aliases:  goto in 'if false then continue else traceError', line 897
-L0897@0162.  if false then continue else traceError;
-
-Line 898: resolved aliases:  traceString in 'trace(from_microcode), directByte = 58', line 898
-L0898@0163.OVERFLOW_ERR:  trace(from_microcode), directByte = 58;
-
-Line 899: resolved aliases:  goto in 'if false then continue else traceError', line 899
-L0899@0164.  if false then continue else traceError;
-
-Line 900: resolved aliases:  traceString in 'trace(from_microcode), directByte = 61', line 900
-L0900@0165.SYNTAX_ERR:  trace(from_microcode), directByte = 61;
-
-Line 901: resolved aliases:  goto in 'if false then continue else traceError', line 901
-L0901@0166.  if false then continue else traceError;
-
-Line 902: resolved aliases:  traceString in 'trace(from_microcode), directByte = 62', line 902
-L0902@0167.INTERNAL_ERR:  trace(from_microcode), directByte = 62;
-
-Line 903: resolved aliases:  goto in 'if false then continue else traceError', line 903
-L0903@0168.  if false then continue else traceError;
-
-Line 904: resolved aliases:  traceString in 'trace(from_microcode), directByte = 60', line 904
-L0904@0169.ESTACK_ERR:  trace(from_microcode), directByte = 60;
-
-Line 905: resolved aliases:  goto in 'if false then continue else traceError', line 905
-L0905@016A.  if false then continue else traceError;
-
-Line 906: resolved aliases:  traceString in 'trace(from_microcode), directByte = 59', line 906
-L0906@016B.RSTACK_ERR:  trace(from_microcode), directByte = 59;
-
-Line 907: resolved aliases:  goto in 'if false then continue else traceError', line 907
-L0907@016C.  if false then continue else traceError;
-
-Line 908: resolved aliases:  traceString in 'trace(from_microcode), directByte = 54', line 908
-L0908@016D.BSTACK_ERR:  trace(from_microcode), directByte = 54;
-
-Line 925: resolved aliases:  goto in 'if false then continue else WarmStart', line 925
-L0925@017E.  if false then continue else WarmStart;
-
-Line 928: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then return', line 928
-L0928@0180.  directByte = 0x0D, if MDR_EQU_DB then return;
+Line 887: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then fetch', line 887
+L0887@0159.  directByte = 0x0D, if MDR_EQU_DB then fetch;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 929: resolved aliases:  NULL in 'directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR', line 929
-L0929@0181.  directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR;
+Line 892: resolved aliases:  traceString in 'gotChar = 1, trace(from_microcode), directByte = 55', line 892
+L0892@015B.BREAK:  gotChar = 1, trace(from_microcode), directByte = 55;
+
+Line 895: resolved aliases:  goto in 'if false then continue else traceDetails', line 895
+L0895@015E.  if false then continue else traceDetails;
+
+Line 897: resolved aliases:  traceString in 'trace(from_microcode), directByte = 50', line 897
+L0897@015F.NOPROG_ERR:  trace(from_microcode), directByte = 50;
+
+Line 898: resolved aliases:  goto in 'if false then continue else traceError', line 898
+L0898@0160.  if false then continue else traceError;
+
+Line 899: resolved aliases:  traceString in 'trace(from_microcode), directByte = 57', line 899
+L0899@0161.DIVBY0_ERR:  trace(from_microcode), directByte = 57;
+
+Line 900: resolved aliases:  goto in 'if false then continue else traceError', line 900
+L0900@0162.  if false then continue else traceError;
+
+Line 901: resolved aliases:  traceString in 'trace(from_microcode), directByte = 58', line 901
+L0901@0163.OVERFLOW_ERR:  trace(from_microcode), directByte = 58;
+
+Line 902: resolved aliases:  goto in 'if false then continue else traceError', line 902
+L0902@0164.  if false then continue else traceError;
+
+Line 903: resolved aliases:  traceString in 'trace(from_microcode), directByte = 61', line 903
+L0903@0165.SYNTAX_ERR:  trace(from_microcode), directByte = 61;
+
+Line 904: resolved aliases:  goto in 'if false then continue else traceError', line 904
+L0904@0166.  if false then continue else traceError;
+
+Line 905: resolved aliases:  traceString in 'trace(from_microcode), directByte = 62', line 905
+L0905@0167.INTERNAL_ERR:  trace(from_microcode), directByte = 62;
+
+Line 906: resolved aliases:  goto in 'if false then continue else traceError', line 906
+L0906@0168.  if false then continue else traceError;
+
+Line 907: resolved aliases:  traceString in 'trace(from_microcode), directByte = 60', line 907
+L0907@0169.ESTACK_ERR:  trace(from_microcode), directByte = 60;
+
+Line 908: resolved aliases:  goto in 'if false then continue else traceError', line 908
+L0908@016A.  if false then continue else traceError;
+
+Line 909: resolved aliases:  traceString in 'trace(from_microcode), directByte = 59', line 909
+L0909@016B.RSTACK_ERR:  trace(from_microcode), directByte = 59;
+
+Line 910: resolved aliases:  goto in 'if false then continue else traceError', line 910
+L0910@016C.  if false then continue else traceError;
+
+Line 911: resolved aliases:  traceString in 'trace(from_microcode), directByte = 54', line 911
+L0911@016D.BSTACK_ERR:  trace(from_microcode), directByte = 54;
+
+Line 928: resolved aliases:  goto in 'if false then continue else WarmStart', line 928
+L0928@017E.  if false then continue else WarmStart;
+
+Line 931: resolved aliases:  CR in 'directByte = 0x0D, if MDR_EQU_DB then return', line 931
+L0931@0180.  directByte = 0x0D, if MDR_EQU_DB then return;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 930: resolved aliases:  goto in 'T <= inc, if false then continue else findNextCR', line 930
-L0930@0182.  T <= inc, if false then continue else findNextCR;
+Line 932: resolved aliases:  NULL in 'directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR', line 932
+L0932@0181.  directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR;
 
-Line 935: resolved aliases:  back in 'alu <= Rx256_plus_MDR, T <= inc, if true then return else continue', line 935
-L0935@0186.  alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
+Warning: else clause missing in if statement, default value '' will be used
+Line 933: resolved aliases:  goto in 'T <= inc, if false then continue else findNextCR', line 933
+L0933@0182.  T <= inc, if false then continue else findNextCR;
 
-Line 939: resolved aliases:  back in 'if true then return else continue', line 939
-L0939@0189.  if true then return else continue;
+Line 938: resolved aliases:  back in 'alu <= Rx256_plus_MDR, T <= inc, if true then return else continue', line 938
+L0938@0186.  alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
+
+Line 942: resolved aliases:  back in 'if true then return else continue', line 942
+L0942@0189.  if true then return else continue;
 
 Warning: else clause missing in if statement, default value '' will be used
 Warning: else clause missing in if statement, default value '' will be used
-Line 945: resolved aliases:  back in 'alu <= S_fromStack, ExpStack <= pop2, if true then return else continue', line 945
-L0945@018D.  alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
+Line 948: resolved aliases:  back in 'alu <= S_fromStack, ExpStack <= pop2, if true then return else continue', line 948
+L0948@018D.  alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
 
-Line 962: resolved aliases:  goto in 'CHAROUT <= from_YtoAlpha, if false then continue else outChar', line 962
-L0962@019A.  CHAROUT <= from_YtoAlpha, if false then continue else outChar;
+Line 965: resolved aliases:  goto in 'CHAROUT <= from_YtoAlpha, if false then continue else outChar', line 965
+L0965@019A.  CHAROUT <= from_YtoAlpha, if false then continue else outChar;
 
-Line 965: resolved aliases:  back in 'alu <= Yx16, if true then return else continue', line 965
-L0965@019C.out_skip:  alu <= Yx16, if true then return else continue;
-
-Warning: else clause missing in if statement, default value '' will be used
-Line 969: resolved aliases:  TAB in 'directByte = 0x09, if MDR_EQU_DB then skipSp else return', line 969
-L0969@019F.  directByte = 0x09, if MDR_EQU_DB then skipSp else return;
-
-Line 970: resolved aliases:  goto in 'BP <= inc, if false then continue else skipSpaces', line 970
-L0970@01A0.skipSp:  BP <= inc, if false then continue else skipSpaces;
-
-Line 974: resolved aliases:  goto, BEEP in 'directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar', line 974
-L0974@01A3.  directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
-
-Line 976: resolved aliases:  CR in 'directByte = 0x0D, outChar(from_microcode)', line 976
-L0976@01A4.outCRLF:  directByte = 0x0D, outChar(from_microcode);
-
-Line 977: resolved aliases:  LF in 'directByte = 0x0A, CHAROUT <= from_microcode', line 977
-L0977@01A5.  directByte = 0x0A, CHAROUT <= from_microcode;
-
-Line 984: resolved aliases:  back in 'nRD = 0, MDR <= from_Bus, if true then return else continue', line 984
-L0984@01AA.  nRD = 0, MDR <= from_Bus, if true then return else continue;
-
-Line 991: resolved aliases:  NULL in 'directByte = 0x00, if MDR_EQU_DB then dump_inex', line 991
-L0991@01AE.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
+Line 968: resolved aliases:  back in 'alu <= Yx16, if true then return else continue', line 968
+L0968@019C.out_skip:  alu <= Yx16, if true then return else continue;
 
 Warning: else clause missing in if statement, default value '' will be used
-Line 992: resolved aliases:  goto in 'InlEnd <= inc, if false then continue else dump_inlp', line 992
-L0992@01AF.  InlEnd <= inc, if false then continue else dump_inlp;
+Line 972: resolved aliases:  TAB in 'directByte = 0x09, if MDR_EQU_DB then skipSp else return', line 972
+L0972@019F.  directByte = 0x09, if MDR_EQU_DB then skipSp else return;
 
-Line 994: resolved aliases:  back in 'if true then return else continue', line 994
-L0994@01B1.  if true then return else continue;
+Line 973: resolved aliases:  goto in 'BP <= inc, if false then continue else skipSpaces', line 973
+L0973@01A0.skipSp:  BP <= inc, if false then continue else skipSpaces;
 
-Line 997: resolved aliases:  traceString in 'trace(from_microcode), directByte = 33', line 997
-L0997@01B3.  trace(from_microcode), directByte = 33;
+Line 977: resolved aliases:  goto, BEEP in 'directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar', line 977
+L0977@01A3.  directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
 
-Line 998: resolved aliases:  back in 'T <= ExpStack, ExpStack <= pop2, if true then return else continue', line 998
-L0998@01B4.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+Line 979: resolved aliases:  CR in 'directByte = 0x0D, outChar(from_microcode)', line 979
+L0979@01A4.outCRLF:  directByte = 0x0D, outChar(from_microcode);
 
-Line 1001: resolved aliases:  traceString in 'trace(from_microcode), directByte = 32', line 1001
-L1001@01B6.  trace(from_microcode), directByte = 32;
+Line 980: resolved aliases:  LF in 'directByte = 0x0A, CHAROUT <= from_microcode', line 980
+L0980@01A5.  directByte = 0x0A, CHAROUT <= from_microcode;
 
-Line 1002: resolved aliases:  back in 'T <= ExpStack, ExpStack <= pop2, if true then return else continue', line 1002
-L1002@01B7.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+Line 987: resolved aliases:  back in 'nRD = 0, MDR <= from_Bus, if true then return else continue', line 987
+L0987@01AA.  nRD = 0, MDR <= from_Bus, if true then return else continue;
 
-Line 1005: resolved aliases:  traceT in 'T <= save, trace(from_microcode), directByte = 52', line 1005
-L1005@01B9.  T <= save, trace(from_microcode), directByte = 52;
+Line 994: resolved aliases:  NULL in 'directByte = 0x00, if MDR_EQU_DB then dump_inex', line 994
+L0994@01AE.  directByte = 0x00, if MDR_EQU_DB then dump_inex;
 
-Line 1006: resolved aliases:  traceString in 'T <= from_S, trace(from_microcode), directByte = 52', line 1006
-L1006@01BA.  T <= from_S, trace(from_microcode), directByte = 52;
+Warning: else clause missing in if statement, default value '' will be used
+Line 995: resolved aliases:  goto in 'InlEnd <= inc, if false then continue else dump_inlp', line 995
+L0995@01AF.  InlEnd <= inc, if false then continue else dump_inlp;
 
-Line 1007: resolved aliases:  traceString in 'T <= from_R, trace(from_microcode), directByte = 52', line 1007
-L1007@01BB.  T <= from_R, trace(from_microcode), directByte = 52;
+Line 997: resolved aliases:  back in 'if true then return else continue', line 997
+L0997@01B1.  if true then return else continue;
 
-Line 1008: resolved aliases:  traceString in 'T <= from_YHi, trace(from_microcode), directByte = 53', line 1008
-L1008@01BC.  T <= from_YHi, trace(from_microcode), directByte = 53;
+Line 1000: resolved aliases:  traceString in 'trace(from_microcode), directByte = 33', line 1000
+L1000@01B3.  trace(from_microcode), directByte = 33;
 
-Line 1009: resolved aliases:  traceString in 'T <= from_YLo, trace(from_microcode), directByte = 52', line 1009
-L1009@01BD.  T <= from_YLo, trace(from_microcode), directByte = 52;
+Line 1001: resolved aliases:  back in 'T <= ExpStack, ExpStack <= pop2, if true then return else continue', line 1001
+L1001@01B4.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
 
-Line 1013: resolved aliases:  back in 'DBGINDEX <= zero, if true then return else continue', line 1013
-L1013@01C1.  DBGINDEX <= zero, if true then return else continue;
+Line 1004: resolved aliases:  traceString in 'trace(from_microcode), directByte = 32', line 1004
+L1004@01B6.  trace(from_microcode), directByte = 32;
 
-Success: pass 0 on microBasic.mcc - 1023 line(s) read, 565 statement(s) parsed, code address range 0xFFFFFFFF - 0x01C2.
+Line 1005: resolved aliases:  back in 'T <= ExpStack, ExpStack <= pop2, if true then return else continue', line 1005
+L1005@01B7.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+
+Line 1008: resolved aliases:  traceT in 'T <= save, trace(from_microcode), directByte = 52', line 1008
+L1008@01B9.  T <= save, trace(from_microcode), directByte = 52;
+
+Line 1009: resolved aliases:  traceString in 'T <= from_S, trace(from_microcode), directByte = 52', line 1009
+L1009@01BA.  T <= from_S, trace(from_microcode), directByte = 52;
+
+Line 1010: resolved aliases:  traceString in 'T <= from_R, trace(from_microcode), directByte = 52', line 1010
+L1010@01BB.  T <= from_R, trace(from_microcode), directByte = 52;
+
+Line 1011: resolved aliases:  traceString in 'T <= from_YHi, trace(from_microcode), directByte = 53', line 1011
+L1011@01BC.  T <= from_YHi, trace(from_microcode), directByte = 53;
+
+Line 1012: resolved aliases:  traceString in 'T <= from_YLo, trace(from_microcode), directByte = 52', line 1012
+L1012@01BD.  T <= from_YLo, trace(from_microcode), directByte = 52;
+
+Line 1016: resolved aliases:  back in 'DBGINDEX <= zero, if true then return else continue', line 1016
+L1016@01C1.  DBGINDEX <= zero, if true then return else continue;
+
+Success: pass 0 on microBasic.mcc - 1026 line(s) read, 567 statement(s) parsed, code address range 0xFFFFFFFF - 0x01C2.
 Compiling microBasic.mcc, pass 2 out of 2.
 Info: line -1 - symbol[0000] <= '00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
 Info: line -1 - symbol[0001] <= '00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
@@ -1452,19 +1452,19 @@ Info: line -1 - symbol[00EA] <= '01101001_01100110_00100000_01000010_01000001_01
 Info: line -1 - symbol[00EB] <= '01101001_01100110_00100000_01011001_01011111_01011010_01000101_01010010_01001111_00100000_01110100_01101000_01100101_01101110_00100000_01101110_01100101_01111000_01110100_00100000_01100101_01101100_01110011_01100101_00100000_01101001_01101110_01110011_01100101_01110010_01110100_01001100_'
 Info: line -1 - symbol[00EC] <= '01110010_01100101_01110000_01101100_01100001_01100011_01100101_01001100_01101001_01101110_01100101_00111010_00100000_01101001_01100110_00100000_01100110_01100001_01101100_01110011_01100101_00100000_01110100_01101000_01100101_01101110_00100000_01100011_01101111_01101110_01110100_01101001_'
 Info: line -1 - symbol[00ED] <= '01101001_01101110_01110011_01100101_01110010_01110100_01001100_01101001_01101110_01100101_00111010_00100000_01101001_01100110_00100000_01100110_01100001_01101100_01110011_01100101_00100000_01110100_01101000_01100101_01101110_00100000_01100011_01101111_01101110_01110100_01101001_01101110_'
-Info: line -1 - symbol[00EE] <= '01100001_01110000_01110000_01100101_01101110_01100100_01001100_01101001_01101110_01100101_00111010_00100000_01100001_01101100_01110101_00100000_00111100_00111101_00100000_01010011_01011111_01100110_01110010_01101111_01101101_01001100_01101001_01101110_01101111_00101100_00100000_01010100_'
-Info: line -1 - symbol[00EF] <= '01110111_01110010_01101001_01110100_01100101_01000011_01101111_01110010_01100101_00101000_01010100_00101100_00100000_01100110_01110010_01101111_01101101_01011111_01010011_01001000_01101001_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F0] <= '01010100_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F1] <= '01110111_01110010_01101001_01110100_01100101_01000011_01101111_01110010_01100101_00101000_01010100_00101100_00100000_01100110_01110010_01101111_01101101_01011111_01010011_01001100_01101111_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F2] <= '01010100_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F3] <= '01100001_01110000_01110000_01011111_01101100_01101111_01101111_01110000_00111010_00100000_01110010_01100101_01100001_01100100_01000011_01101111_01110010_01100101_00101000_01000010_01010000_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F4] <= '01110111_01110010_01101001_01110100_01100101_01000011_01101111_01110010_01100101_00101000_01010100_00101100_00100000_01110011_01100001_01101101_01100101_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F5] <= '01000010_01010000_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00101100_00100000_01010100_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F6] <= '01100100_01101001_01110010_01100101_01100011_01110100_01000010_01111001_01110100_01100101_00100000_00111101_00100000_00110000_01111000_00110000_01000100_00101100_00100000_01101001_01100110_00100000_01001101_01000100_01010010_01011111_01000101_01010001_01010101_01011111_01000100_01000010_'
-Info: line -1 - symbol[00F7] <= '01110111_01110010_01101001_01110100_01100101_00110010_01001110_01110101_01101100_01101100_01110011_00101000_01110011_01100001_01101101_01100101_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00F8] <= '01101001_01100110_00100000_01100110_01100001_01101100_01110011_01100101_00100000_01110100_01101000_01100101_01101110_00100000_01100011_01101111_01101110_01110100_01101001_01101110_01110101_01100101_00100000_01100101_01101100_01110011_01100101_00100000_01010111_01100001_01110010_01101101_'
-Info: line -1 - symbol[00F9] <= '01110011_01100011_01100001_01101110_01010000_01110010_01101111_01100111_01110010_01100001_01101101_00111010_00100000_01100001_01101100_01110101_00100000_00111100_00111101_00100000_01110010_01100101_01110011_01100101_01110100_00110000_00111011_00100000_00100000_00100000_00100000_00100000_'
-Info: line -1 - symbol[00FA] <= '01010100_00100000_00111100_00111101_00100000_01111010_01100101_01110010_01101111_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00EE] <= '01100001_01110000_01110000_01100101_01101110_01100100_01001100_01101001_01101110_01100101_00111010_00100000_01100011_01101111_01110000_01111001_01001100_01101001_01101110_01100101_00101000_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00EF] <= '01110111_01110010_01101001_01110100_01100101_00110010_01001110_01110101_01101100_01101100_01110011_00101000_01110011_01100001_01101101_01100101_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F0] <= '01101001_01100110_00100000_01100110_01100001_01101100_01110011_01100101_00100000_01110100_01101000_01100101_01101110_00100000_01100011_01101111_01101110_01110100_01101001_01101110_01110101_01100101_00100000_01100101_01101100_01110011_01100101_00100000_01010111_01100001_01110010_01101101_'
+Info: line -1 - symbol[00F1] <= '01100011_01101111_01110000_01111001_01001100_01101001_01101110_01100101_00111010_00100000_01100001_01101100_01110101_00100000_00111100_00111101_00100000_01010011_01011111_01100110_01110010_01101111_01101101_01001100_01101001_01101110_01101111_00101100_00100000_01010100_00100000_00111100_'
+Info: line -1 - symbol[00F2] <= '01110111_01110010_01101001_01110100_01100101_01000011_01101111_01110010_01100101_00101000_01010100_00101100_00100000_01100110_01110010_01101111_01101101_01011111_01010011_01001000_01101001_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F3] <= '01010100_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F4] <= '01110111_01110010_01101001_01110100_01100101_01000011_01101111_01110010_01100101_00101000_01010100_00101100_00100000_01100110_01110010_01101111_01101101_01011111_01010011_01001100_01101111_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F5] <= '01010100_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F6] <= '01100001_01110000_01110000_01011111_01101100_01101111_01101111_01110000_00111010_00100000_01110010_01100101_01100001_01100100_01000011_01101111_01110010_01100101_00101000_01000010_01010000_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F7] <= '01110111_01110010_01101001_01110100_01100101_01000011_01101111_01110010_01100101_00101000_01010100_00101100_00100000_01110011_01100001_01101101_01100101_00101001_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F8] <= '01000010_01010000_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00101100_00100000_01010100_00100000_00111100_00111101_00100000_01101001_01101110_01100011_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
+Info: line -1 - symbol[00F9] <= '01100100_01101001_01110010_01100101_01100011_01110100_01000010_01111001_01110100_01100101_00100000_00111101_00100000_00110000_01111000_00110000_01000100_00101100_00100000_01101001_01100110_00100000_01001101_01000100_01010010_01011111_01000101_01010001_01010101_01011111_01000100_01000010_'
+Info: line -1 - symbol[00FA] <= '01110011_01100011_01100001_01101110_01010000_01110010_01101111_01100111_01110010_01100001_01101101_00111010_00100000_01010100_00100000_00111100_00111101_00100000_01111010_01100101_01110010_01101111_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
 Info: line -1 - symbol[00FB] <= '01001100_01010011_00100000_00111100_00111101_00100000_01010100_00101100_00100000_01001100_01000101_00100000_00111100_00111101_00100000_01010100_00101100_00100000_01010100_00100000_00111100_00111101_00100000_01010000_01110010_01101111_01100111_01011111_01110011_01110100_01100001_01110010_'
 Info: line -1 - symbol[00FC] <= '01010000_01110010_01100111_01000101_01101110_01100100_00100000_00111100_00111101_00100000_01010100_00111011_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_00100000_'
 Info: line -1 - symbol[00FD] <= '01110011_01100011_01100001_01101110_01011111_01101100_01101111_01101111_01110000_00111010_00100000_01110010_01100101_01100001_01100100_01000011_01101111_01110010_01100101_00110001_00110110_00101000_01110011_01100001_01101101_01100101_00101001_00111011_00100000_00100000_00100000_00100000_'
@@ -1888,4 +1888,16 @@ Info: line -1 - symbol[01BD] <= '01010100_00100000_00111100_00111101_00100000_01
 Info: line -1 - symbol[01BE] <= '01010100_00100000_00111100_00111101_00100000_01110010_01100101_01100011_01100001_01101100_01101100_00101100_00100000_01000100_01000010_01000111_01001001_01001110_01000100_01000101_01011000_00100000_00111100_00111101_00100000_01100011_01110010_01101100_01100110_00111011_00100000_00100000_'
 Info: line -1 - symbol[01BF] <= '01110100_01110010_01100001_01100011_01100101_00111010_00100000_01101001_01100110_00100000_01000100_01000010_01000111_01011111_01010010_01000101_01000001_01000100_01011001_00100000_01110100_01101000_01100101_01101110_00100000_01101110_01100101_01111000_01110100_00100000_01100101_01101100_'
 Info: line -1 - symbol[01C0] <= '01101001_01100110_00100000_01000100_01000010_01000111_01011111_01010010_01000101_01000001_01000100_01011001_00100000_01110100_01101000_01100101_01101110_00100000_01101110_01100101_01111000_01110100_00100000_01100101_01101100_01110011_01100101_00100000_01110010_01100101_01110000_01100101_'
-Info: line -1 - symbol[01C1] <= '01000100_01000010_01000111_01001001
+Info: line -1 - symbol[01C1] <= '01000100_01000010_01000111_01001001_01001110_01000100_01000101_01011000_00100000_00111100_00111101_00100000_01111010_01100101_01110010_01101111_00101100_00100000_01101001_01100110_00100000_01110100_01110010_01110101_01100101_00100000_01110100_01101000_01100101_01101110_00100000_01110010_'
+Generating code: 
+Warning in line 5: found 62 uninitialized locations:
+01C2 .. 01FF
+
+Generating code 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_code.vhd' ... Done.
+Generating mapping: 
+Generating mapper 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_map.vhd' ... Done.
+Generating symbol: 
+Generating code 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBasic_sym.vhd' ... Done.
+Writing 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBas_sym.coe' (LF only) ... Done (initialized locations: 512, empty locations: 0, total locations: 512).
+Generating controller
+Generating controller 'C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common

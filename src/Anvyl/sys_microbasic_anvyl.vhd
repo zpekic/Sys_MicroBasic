@@ -79,8 +79,8 @@ entity sys_microbasic_anvyl is
 				JE3: inout std_logic;
 				JE4: inout std_logic;
 				--DIP switches
-				--DIP_B4, DIP_B3, DIP_B2, DIP_B1: in std_logic;
-				--DIP_A4, DIP_A3, DIP_A2, DIP_A1: in std_logic;
+				DIP_B4, DIP_B3, DIP_B2, DIP_B1: in std_logic;
+				DIP_A4, DIP_A3, DIP_A2, DIP_A1: in std_logic;
 --				-- Hex keypad
 				--KYPD_COL: out std_logic_vector(3 downto 0);
 				--KYPD_ROW: in std_logic_vector(3 downto 0);
@@ -165,6 +165,7 @@ signal freqcnt_in: std_logic;
 signal debug_txd: std_logic;
 signal cpu_t: std_logic_vector(15 downto 0);
 signal cpu_cache_full, cpu_cache_empty: std_logic;
+signal cpu_uipc: std_logic_vector(8 downto 0);		-- microcode program counter value
 
 signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
@@ -190,15 +191,23 @@ signal switch: std_logic_vector(7 downto 0);
 alias sw_baudrate: std_logic_vector(2 downto 0) is switch(7 downto 5);
 alias sw_cpuclk: std_logic_vector(2 downto 0) is switch(4 downto 2);
 signal button: std_logic_vector(7 downto 0);
+signal dip: std_logic_vector(7 downto 0);
 
 ---- UART
 signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
 
 -- VGA
-signal x80, x64, y60, y32: std_logic_vector(7 downto 0);
-signal is_program, is_ram, cursor: std_logic;
-signal ram_address: std_logic_vector(10 downto 0);	
-signal ram_char, complement: std_logic_vector(7 downto 0);
+signal x80, y60: std_logic_vector(7 downto 0);
+signal vga_fgcolor, vga_bgcolor: std_logic_vector(3 downto 0);
+signal ram_addr, inp_addr, prg_addr, mcc_addr, sym_addr: std_logic_vector(15 downto 0);	
+signal ram_char, sym_char, vga_char: std_logic_vector(7 downto 0);
+signal complement: std_logic_vector(7 downto 0);
+signal inp_cursor, prg_cursor, mcc_cursor, vga_cursor: std_logic;
+signal inp_active, prg_active, mcc_active, vga_window: std_logic;
+-- 3 independent windows can overlap as they wish, but higher priority window will occluse the lower ones
+signal win_vector: std_logic_vector(2 downto 0);	-- 3 bits for 3 independent windows
+signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
+
 
 begin
 
@@ -210,7 +219,7 @@ LDT2G <= cpu_cache_empty;
 LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
 
 PMOD_RXD1 <= debug_txd;
-LED <= RXD_CHAR;
+LED <= RXD_CHAR when (button(2) = '0') else dip;
 
 -- divide internal clock   	
 on_mclk: process(CLK, cnt307200, cnt4096, cnt50MHz)
@@ -248,7 +257,7 @@ begin
 	end if;
 end process;
 
---	
+--	debounce noisy inputs
 	debounce_sw: entity work.debouncer8channel Port map ( 
 		clock => freq19200, 
 		reset => RESET,
@@ -262,6 +271,20 @@ end process;
 		signal_raw(7 downto 4) => "0000",
 		signal_raw(3 downto 0) => BTN,
 		signal_debounced => button
+	);
+
+	debounce_dip: entity work.debouncer8channel Port map ( 
+		clock => freq19200, 
+		reset => RESET,
+		signal_raw(7) => DIP_B4,
+		signal_raw(6) => DIP_B3,
+		signal_raw(5) => DIP_B2,
+		signal_raw(4) => DIP_B1,
+		signal_raw(3) => DIP_A4,
+		signal_raw(2) => DIP_A3,
+		signal_raw(1) => DIP_A2,
+		signal_raw(0) => DIP_A1,
+		signal_debounced => dip
 	);
 	
 -- 
@@ -295,8 +318,9 @@ cpu: entity work.MicroBasic Port map (
 		-- debug / trace
 		traceEnable => not sw_cpuclk(2),
 		baudrate => baudrate_x1,
-		debug_t => cpu_t,					-- use to highlight T position
 		debug_txd => debug_txd, 
+		debug_uipc => cpu_uipc,
+		debug_t => cpu_t,					-- use to highlight T position
 		debug_sel => sw(1 downto 0),	-- select 1 of 4 internal registers to visualize on LED and VGA
 		debug_bus => cpu_debug			
 	);
@@ -394,40 +418,129 @@ freqcnt: entity work.freqcounter Port map (
 		value => freqcnt_value
 	);		
 
--- VGA to visualize Basic memory
+-- VGA to visualize Basic memory and microcode execution
 -- 32 rows by 64 chars are displayed, so whole 2k RAM fits into display
 vga: entity work.mwvga Port map ( 
 		reset => reset,
 		clk => vga_clk,
-		border_char => X"20", -- space
-		win_char => ram_char,
-		win => is_ram,
-		win_color => is_program,
+		char => vga_char,
+		fgcolor => vga_fgcolor,
+		bgcolor => vga_bgcolor,
 		hactive => open, -- TODO: use for BUSACK?
 		vactive => open, -- TODO: use for BUSACK?
 		x => x80,
 		y => y60,
-		cursor_enable => cursor,
+		cursor_enable => (freq2 and vga_cursor),
 		cursor_type => '1',
 		-- VGA connections
-		color(11 downto 8) => RED_O,
-		color(7 downto 4) => GREEN_O,
-		color(3 downto 0) => BLUE_O,
+		color12(11 downto 8) => RED_O,
+		color12(7 downto 4) => GREEN_O,
+		color12(3 downto 0) => BLUE_O,
 		hsync => HSYNC_O,
 		vsync => VSYNC_O
 	);
 	
--- convert VGA 80*60 to 64*32 by creating a center positioned window
-x64 <= std_logic_vector(unsigned(x80) - 8);
-y32 <= std_logic_vector(unsigned(y60) - 14);
-is_program <= '1' when (unsigned(y32) > 3) else '0';	-- color program area differently than input buffer
-is_ram <= not(y32(7) or y32(6) or y32(5) or x64(7) or x64(6));
-ram_address <= y32(4 downto 0) & x64(5 downto 0);	
-ram_char <= complement xor ram(to_integer(unsigned(ram_address)));
---cursor <= freq2 when (cpu_bp(10 downto 0) = ram_address) else '0';
-cursor <= freq2 when (cpu_debug(10 downto 0) = ram_address) else '0';
-complement <= X"80" when (ram_address = cpu_t(10 downto 0)) else X"00";
+inpwin: entity work.hwindow
+		Generic map (
+			top => 	X"08",
+			left => 	X"08",
+			width => X"40",
+			height => X"04"			
+		)
+		Port map ( 
+			enable => '1',
+			x => x80,
+			y => y60,
+			m_base => X"0000",
+			m_cursor => cpu_debug(15 downto 0),
+			-- outputs
+			char_addr => inp_addr,
+			cursor_hit => inp_cursor,
+			active => inp_active
+		);
+
+prgwin: entity work.hwindow
+		Generic map (
+			top => 	X"0C",
+			left => 	X"08",
+			width => X"40",
+			height => X"1C"			
+		)
+		Port map ( 
+			enable => '1',
+			x => x80,
+			y => y60,
+			m_base => X"0100",
+			m_cursor => cpu_debug(15 downto 0),
+			-- outputs
+			char_addr => prg_addr,
+			cursor_hit => prg_cursor,
+			active => prg_active
+		);
+
+mccwin: entity work.hwindow
+		Generic map (
+			top => 	X"27", -- to test vertical overlap
+			left => 	X"3C", -- to test horizontal overlap
+			width => X"10",
+			height => X"10"			
+		)
+		Port map ( 
+			enable => (not sw_cpuclk(2)),
+			x => x80,
+			y => y60,
+			m_base => "000" & std_logic_vector(unsigned(cpu_uipc) - 15) & "0000",
+			m_cursor => "000" & std_logic_vector(unsigned(cpu_uipc) - 0) & "0000",
+			-- outputs
+			char_addr => mcc_addr,
+			cursor_hit => mcc_cursor,
+			active => mcc_active
+		);
+
+-- very simple priority encoder
+win_vector <= mcc_active & prg_active & inp_active;
+-- mcc > prg > inp > background
+with win_vector select win_sel <= 
+	"00" when "000",
+	"01" when "001",
+	"10" when "010",
+	"10" when "011",
+	"11" when others;
+			
+with win_sel select vga_cursor <= 
+			inp_cursor when "01",
+			prg_cursor when "10",
+			mcc_cursor when "11",
+			'0' when others;
+
+with win_sel select vga_fgcolor <= 
+			"0110" when "01",		-- yellow	
+			"0111" when "10", 	-- white
+			"0000" when "11", 	-- black
+			dip(7 downto 4) when others;	-- control the border
+
+with win_sel select vga_bgcolor <= 
+			"0011" when "01",		-- cyan
+			"0001" when "10",		-- blue
+			"0010" when "11", 	-- green
+			dip(3 downto 0) when others;	-- control the border
+
+with win_sel select vga_char <= 
+			ram_char when "01",
+			ram_char when "10",
+			sym_char when "11",
+			X"5C" when others;	-- \
+			
+ram_addr <= prg_addr when (prg_active = '1') else inp_addr; -- both mapped to same RAM
+complement <= X"80" when (ram_addr = cpu_t) else X"00";		-- also indicate location of T in RAM
+ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
+
+-- Microcode symbols, truncated to 16 chars per microinstructions to save memory
+sym_rom: entity work.microBas_sym port map (
+		clka => CLK,
+		addra => mcc_addr(12 downto 0),
+		douta => sym_char
+	);
 
 end;
-
 

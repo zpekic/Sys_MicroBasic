@@ -185,18 +185,18 @@ signal mask, pattern: std_logic_vector(7 downto 0);
 
 begin
 
-pattern <= tinyfont(to_integer(unsigned(a(9 downto 0))));
 mask <= (others => a(10)); -- codes 128..255 are reverse pattern
+pattern <= mask xor tinyfont(to_integer(unsigned(a(9 downto 0))));
 
-with h select
-	pixel <= (a(10) xor pattern(7)) when "000",
-				(a(10) xor pattern(6)) when "001",
-				(a(10) xor pattern(5)) when "010",
-				(a(10) xor pattern(4)) when "011",
-				(a(10) xor pattern(3)) when "100",
-				(a(10) xor pattern(2)) when "101",
-				(a(10) xor pattern(1)) when "110",
-				(a(10) xor pattern(0)) when others;
+with h select pixel <= 
+		pattern(7) when "000",
+		pattern(6) when "001",
+		pattern(5) when "010",
+		pattern(4) when "011",
+		pattern(3) when "100",
+		pattern(2) when "101",
+		pattern(1) when "110",
+		pattern(0) when others;
 
 end Behavioral;
 
