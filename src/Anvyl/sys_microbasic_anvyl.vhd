@@ -489,8 +489,10 @@ mccwin: entity work.hwindow
 			enable => (not sw_cpuclk(2)),
 			x => x80,
 			y => y60,
-			m_base => "000" & std_logic_vector(unsigned(cpu_uipc) - 15) & "0000",
-			m_cursor => "000" & std_logic_vector(unsigned(cpu_uipc) - 0) & "0000",
+--			m_base => "000" & std_logic_vector(unsigned(cpu_uipc) - 15) & "0000",
+--			m_cursor => "000" & std_logic_vector(unsigned(cpu_uipc) - 0) & "0000",
+			m_base => X"0000",
+			m_cursor => X"00F0",
 			-- outputs
 			char_addr => mcc_addr,
 			cursor_hit => mcc_cursor,
@@ -514,33 +516,43 @@ with win_sel select vga_cursor <=
 			'0' when others;
 
 with win_sel select vga_fgcolor <= 
-			"0110" when "01",		-- yellow	
-			"0111" when "10", 	-- white
-			"0000" when "11", 	-- black
-			dip(7 downto 4) when others;	-- control the border
+			"0110" when "01",		-- yellow for input buffer
+			"0111" when "10", 	-- white	for Basic program text
+			"0000" when "11", 	-- black for microcode symbols
+			dip(7 downto 4) when others;	-- border color check
 
 with win_sel select vga_bgcolor <= 
-			"0011" when "01",		-- cyan
-			"0001" when "10",		-- blue
-			"0010" when "11", 	-- green
-			dip(3 downto 0) when others;	-- control the border
+			"0001" when "01",		-- blue for Core RAM 
+			"0001" when "10",		-- blue for Core RAM
+			"0010" when "11", 	-- green for Microcode symbols RAM
+			dip(3 downto 0) when others;	-- border color check
 
 with win_sel select vga_char <= 
 			ram_char when "01",
 			ram_char when "10",
 			sym_char when "11",
-			X"5C" when others;	-- \
+			X"7F" when others;	-- tiny chessboard pattern
 			
 ram_addr <= prg_addr when (prg_active = '1') else inp_addr; -- both mapped to same RAM
 complement <= X"80" when (ram_addr = cpu_t) else X"00";		-- also indicate location of T in RAM
 ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
 
 -- Microcode symbols, truncated to 16 chars per microinstructions to save memory
-sym_rom: entity work.microBas_sym port map (
-		clka => CLK,
-		addra => mcc_addr(12 downto 0),
-		douta => sym_char
-	);
+--sym_rom: entity work.microBas_sym port map (
+--		clka => CLK,
+--		addra => mcc_addr(12 downto 0),
+--		douta => sym_char
+--	);
 
+sym_ram: entity work.symTracer port map (
+		reset => RESET,
+		rom_clk => CLK,					-- 100MHz
+		refresh_clk => cnt50MHz(7),	-- 390.625kHz
+		--- 
+		uipc => cpu_uipc,
+		--
+		char_addr => mcc_addr(7 downto 0),
+		char_out => sym_char		
+	);
 end;
 
