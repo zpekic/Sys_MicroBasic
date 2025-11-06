@@ -219,7 +219,7 @@ LDT2G <= cpu_cache_empty;
 LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
 
 PMOD_RXD1 <= debug_txd;
-LED <= RXD_CHAR when (button(2) = '0') else dip;
+LED <= RXD_CHAR when (button(2) = '0') else switch;
 
 -- divide internal clock   	
 on_mclk: process(CLK, cnt307200, cnt4096, cnt50MHz)
@@ -536,13 +536,6 @@ with win_sel select vga_char <=
 ram_addr <= prg_addr when (prg_active = '1') else inp_addr; -- both mapped to same RAM
 complement <= X"80" when (ram_addr = cpu_t) else X"00";		-- also indicate location of T in RAM
 ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
-
--- Microcode symbols, truncated to 16 chars per microinstructions to save memory
---sym_rom: entity work.microBas_sym port map (
---		clka => CLK,
---		addra => mcc_addr(12 downto 0),
---		douta => sym_char
---	);
 
 sym_ram: entity work.symTracer port map (
 		reset => RESET,

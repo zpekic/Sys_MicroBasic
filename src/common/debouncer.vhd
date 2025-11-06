@@ -54,19 +54,23 @@ all1 <= '1' when shifter = "11111111" else '0';
 --				 (all1 and all1 and debounced);
 signal_out <= debounced; 
 
-debounce: process(clock, debounced)
+debounce: process(clock, reset, debounced)
 begin
-    if (rising_edge(clock)) then
-        if (all1 = '1') then
-            debounced <= '1'; 
-        else
-            if (all0 = '1') then
-                debounced <= '0';
-            else
-                debounced <= debounced;
-            end if;
-        end if;
-    end if;
+	if (reset = '1') then
+		debounced <= signal_in;
+	else	
+		if (rising_edge(clock)) then
+		  if (all1 = '1') then
+				debounced <= '1'; 
+		  else
+				if (all0 = '1') then
+					 debounced <= '0';
+				else
+					 debounced <= debounced;
+				end if;
+		  end if;
+		end if;
+	end if;
 end process;
 
 sample: process(clock, reset, signal_in)

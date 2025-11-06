@@ -408,6 +408,8 @@ update_IL_PC: process(clk, mb_IL_PC)
  end if;
 end process;
 
+-- holds the start address of Basic input loop (which is 0), or if any program has run, the address of the
+-- XQ (execute) instruction. Knowing this entry point is needed to restart program runs
  update_XQhere: process(clk, mb_XQhere)
  begin
 	if (rising_edge(clk)) then
@@ -417,6 +419,7 @@ end process;
  end if;
  end process;
 
+-- instruction register
  update_IL_OP: process(clk, mb_IL_OP)
  begin
 	if (rising_edge(clk)) then
@@ -513,6 +516,8 @@ begin
 				T <= BasStack(to_integer(unsigned(BasSP) - 1))(15 downto 0);
 			when T_Cache_Data =>
 				T <= cache_data;
+			when T_LS =>
+				T <= LS;
 			when others =>
 				null;
 		end case;
@@ -915,13 +920,21 @@ end process;
 				R <= T;
 			when alu_S_fromLino =>
 				S <= Lino;
-			when alu_copy_del =>
+			when alu_copy_init_del =>
 				S <= std_logic_vector(unsigned(LE) + 1);
 				R <= LS;
 				Y <= X"0000" & std_logic_vector(unsigned(PrgEnd) - unsigned(LE));
 			when alu_copy_inc =>
 				S <= std_logic_vector(unsigned(S) + 1);
 				R <= std_logic_vector(unsigned(R) + 1);
+				Y <= std_logic_vector(unsigned(Y) - 1);
+			when alu_copy_init_ins =>
+				S <= PrgEnd;
+				R <= std_logic_vector(unsigned(PrgEnd) + unsigned(BE) - unsigned(BP) + 3);
+				Y <= X"0000" & std_logic_vector(unsigned(PrgEnd) - unsigned(LS) + 1);
+			when alu_copy_dec =>
+				S <= std_logic_vector(unsigned(S) - 1);
+				R <= std_logic_vector(unsigned(R) - 1);
 				Y <= std_logic_vector(unsigned(Y) - 1);
 			when alu_ls_load =>
 				-- initialize for LS (list) opcode
