@@ -540,7 +540,7 @@ ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
 sym_ram: entity work.symTracer port map (
 		reset => RESET,
 		rom_clk => CLK,					-- 100MHz
-		refresh_clk => cnt50MHz(7),	-- 390.625kHz
+		refresh_clk => cnt50MHz(to_integer(unsigned(dip(2 downto 0)))),	-- TODO: find best frequency?
 		--- 
 		uipc => cpu_uipc,
 		--

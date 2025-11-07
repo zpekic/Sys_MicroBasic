@@ -36,7 +36,7 @@ entity serialtracer2 is
 			  enable: in STD_LOGIC;
            start : in  STD_LOGIC;
            index : in  STD_LOGIC_VECTOR (5 downto 0);
-			  slevel: in STD_LOGIC_VECTOR(2 downto 0);		-- pass in stack level
+			  slevel: in STD_LOGIC_VECTOR(3 downto 0);		-- pass in stack level
            data : in  STD_LOGIC_VECTOR (63 downto 0);
 			  txd: out  STD_LOGIC;
            ready : out  STD_LOGIC);
@@ -96,7 +96,7 @@ constant debug_rom: rom512x8 := (
 		c('C'), c('P'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		c('G'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		c('R'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
-		X"00", X"00", X"00", X"00", X"00", X"00", X"00", X"00",
+		c('U'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		BEL, c('*'), c('N'), c('o'), c(' '), c('P'), c('r'), c('g'),
 		X"88", X"89", X"8A", X"8B", c('.'), X"00", X"00", X"00",			-- output lino (basic line number as hex)
 		X"8C", X"8D", X"8E", X"8F", c(' '), X"00", X"00", X"00",			-- output registers (as hex)

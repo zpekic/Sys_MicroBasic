@@ -44,7 +44,7 @@ seq_cond:		.if 5 values
 				AT_TAB,
 				OFF_IS_ZERO,
 				IS_RUNMODE,
-				EXTERNAL,		// external flag, e.g. button etc
+				S_EQU_DB_MOD16,	
 				CACHE_VALID,		
 				CACHE_HIT,		
 				false			// hard-code to 0
@@ -66,6 +66,7 @@ T			.regfield 5 values
 				from_YHi,
 				zero,
 				codeByte,
+				MDR,
 				MDRx2,
 				inc,
 				dec,
@@ -80,7 +81,6 @@ T			.regfield 5 values
 				BasStack_Lo,
 				Cache_Data,		// bits 31..16 contain the BP (Lino is at (15..0), handled in hardware) 
 				LS,
-				-,
 				-,
 				-,
 				-,
@@ -247,15 +247,15 @@ alu				.regfield 5 values
 				R_fromT,
 				S_fromLino,
 				copy_init_del,
-				copy_inc,
+				copy_next,
 				copy_init_ins,
-				copy_dec,
 				ls_load,
 				ls_check,
 				Y_save,
 				Y_recall,
 				Y_fromTicks,
 				cache_store,	// GOTO cache hooked up behind ALU to save microcode width bits
+				-,
 				-
 				default nop;
 
@@ -329,7 +329,7 @@ pullRS:		.sub;
 printDec:	.sub;
 printDecR:	.sub alu;
 printY:		.sub;
-delBasLine: .sub;
+copyCore:	.sub alu;
 scanProgram:.sub;
 findNextCR:	.sub T;
 write2Nulls:.sub T;
@@ -713,25 +713,17 @@ il_fork:	scanProgram();								// find LS, LE, number of same or first higher li
 deleteLine:	if R_IS_ZERO then WarmStart;				// bail if no line found at all
 			if Y_ZERO then next else WarmStart;			// bail if no exact line number found
 			findPrgEnd();
-			delBasLine();								// delete the line with number in S
+			copyCore(copy_init_del);					// R (dest) = LS, S (source) = LE + 1, Y (count) = PrgEnd - LE
 			goto WarmStart;
 			
 changeLine:	if R_IS_ZERO then appendLine;				// didn't find line >= Lino in whole program, means this is append
 			if Y_ZERO then next else insertLine;
 
 replaceLine:findPrgEnd();								// implement replace as first delete the line and then insert before next higher
-			delBasLine();
+			copyCore(copy_init_del);					// R (dest) = LS, S (source) = LE + 1, Y (count) = PrgEnd - LE
 			scanProgram();
 insertLine:	findPrgEnd();
-			//WaitForExt;		// DEBUG!
-			alu <= copy_init_ins;			// R (dest) = PrgEnd + BE - BS + 3, S (source) = PrgEnd, Y (count) = PrgEnd - LS + 1
-ins_loop:	if Y_ZERO then ins_finish;		// exit if no bytes left to copy
-			T <= from_S;
-			readCore(T);
-			T <= from_R;
-			writeCore(T, same);
-			traceALU();
-			alu <= copy_dec, goto ins_loop;	// R--, S--, Y--
+			copyCore(copy_init_ins);					// R (dest) = PrgEnd + BE - BS + 3, S (source) = PrgEnd, Y (count) = PrgEnd - LS + 1
 ins_finish: copyLine(LS);
 			goto WarmStart;
 
@@ -740,7 +732,7 @@ appendLine:	T <= dec;
 			write2Nulls(same);
 			goto WarmStart;
 			
-copyLine:	alu <= S_fromLino;				// go back two to overwrite the first NULL char too
+copyLine:	alu <= S_fromLino;							// go back two to overwrite the first NULL char too
 			writeCore(T, from_SHi);						// Line number in binary, MSB first
 			T <= inc;
 			writeCore(T, from_SLo);						// Line number in binary, LSB last
@@ -777,15 +769,13 @@ scan_found:	findNextCR(same);
 			//if EXTERNAL then continue else repeat;	// DEBUG!
 			back;										// LE to last char of found statement
 		
-			//--- deleting a found line ---
-delBasLine: alu <= copy_init_del;			// R (dest) = LS, S (source) = LE + 1, Y (count) = PrgEnd - LE
-dbs_loop:	if Y_ZERO then return;			// bail if no bytes left to copy
-			T <= from_S;
+			//--- copy Y bytes in Core memory from S to R ---
+copyCore:	T <= from_S, if Y_ZERO then return;			// bail if no bytes left to copy
 			readCore(T);
 			T <= from_R;
 			writeCore(T, same);
 			traceALU();
-			alu <= copy_inc, goto dbs_loop;	// R++, S++, Y--
+			alu <= copy_next, goto copyCore;	// Y--, R and S incremented / decremented based on direction
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2B;									// MT (Mark the BASIC program space Empty)
@@ -812,6 +802,42 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 'O', outChar(from_microcode);
 			directByte = 'P', outChar(from_microcode);
 			goto print_lino;									
+
+			////////////////////////////////////////////////////////////////////////////////
+			.map 0x2E;									// US (USR function call)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 49;								// Trace mnemonic
+			alu <= R_fromStack, ExpStack <= pop2;		// R == param2
+			T <= ExpStack, ExpStack <= pop2;			// T == param1 (Core address for PEEK and POKE)
+			alu <= S_fromStack, ExpStack <= pop2;		// S == function index
+			traceALU();
+			// TODO: better / faster "switch" implementation?
+			directByte = 20, if S_EQU_DB_MOD16 then u_peek8;
+			directByte = 24, if S_EQU_DB_MOD16 then u_poke8;
+			directByte = 21, if S_EQU_DB_MOD16 then u_peek16;
+			directByte = 25, if S_EQU_DB_MOD16 then u_poke16;
+			// TODO implement other fun functions!
+			goto INTERNAL_ERR;							// not implemented, break
+			
+u_peek8: 	readCore(T);								// MDR <= Core(T)
+			T <= MDR;
+u_done:		ExpStack <= push_TWord, goto fetch;
+			
+u_peek16:	readCore16(same);
+			T <= from_R, goto u_done;
+
+u_poke8:	T <= save;
+			T <= from_R;						
+			alu <= S_fromT, T <= recall;
+			writeCore(T, from_SLo);
+			goto u_peek8;								// slow, but allows X = USR(poke8, A, X) trick to check if byte has been written correctly
+			
+u_poke16:	T <= save; 
+			T <= from_R;
+			alu <= S_fromT, T <= recall;
+			writeCore(T, from_SHi), T <= inc;
+			writeCore(T, from_SLo);
+			T <= dec, goto u_peek16;					// same comment as above, but for 16-bits
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2F;									// RT (IL subroutine return)

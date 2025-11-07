@@ -130,8 +130,8 @@ signal SwapR, SwapS: std_logic_vector(7 downto 0);
 signal ExpSTHi, ExpSTLo: std_logic_vector(7 downto 0);
 
 -- IL return stack (JS / RT)
-signal RetStack: ram8x16;
-signal RetSP: std_logic_vector(2 downto 0);			-- stack pointer points to free word
+signal RetStack: ram16x16;
+signal RetSP: std_logic_vector(3 downto 0);			-- stack pointer points to free word
 signal rstack_is_empty, rstack_is_full: std_logic;
 
 -- Basic stack (GOSUB/RETURN)
@@ -189,6 +189,9 @@ signal T, T_saved: std_logic_vector(15 downto 0);
 signal tab_cnt: std_logic_vector(7 downto 0);
 signal at_tab: std_logic;
 signal ready_alt_break: std_logic;
+signal last3Chars: std_logic_vector(23 downto 0);
+signal is_notRnd: std_logic;
+signal s_equ_db_mod16: std_logic;
 
 begin
 
@@ -223,6 +226,8 @@ begin
 	end if;
 end process;
 
+is_notRnd <= '0' when (last3Chars = X"524E44") else '1';	-- magic number is ASCII for RND
+ 
 DBUS <= MDR when ((mb_nWR or nBUSACK) = '0') else "ZZZZZZZZ";
 update_MDR: process(clk, mb_MDR)
 begin
@@ -232,6 +237,13 @@ begin
 	--				MDR <= MDR;
 			when MDR_from_Bus =>
 				MDR <= DBUS;
+				-- HACKHACK: track last 3 read chars to compare if they were "RND" - if so, disable overflow check
+				if ((unsigned(DBUS) > 96) and (unsigned(DBUS) < 123)) then
+					last3Chars <= last3Chars(15 downto 0) & std_logic_vector(unsigned(DBUS) - 32);	-- definitely lowercase
+				else
+					last3Chars <= last3Chars(15 downto 0) & DBUS;												-- presumed uppercase
+				end if;
+				-- End hack
 			when MDR_zero =>
 				MDR <= (others => '0');
 			when MDR_CHARIN =>
@@ -301,12 +313,12 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_Y_ZERO) => y_zero_alt_cp_skip,
 			cond(seq_cond_Y_SIGN) => Y(15),
 			cond(seq_cond_ALU_READY) => alu_ready,
-			cond(seq_cond_ALU_OVERFLOW) => alu_overflow,
+			cond(seq_cond_ALU_OVERFLOW) => (is_notRnd and alu_overflow),
 			cond(seq_cond_ALU_SIGN) => alu_sign,
 			cond(seq_cond_AT_TAB) => at_tab,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
-			cond(seq_cond_EXTERNAL) => cond_external,	-- boolean signal from outside of the CPU
+			cond(seq_cond_S_EQU_DB_MOD16) => s_equ_db_mod16,	
 			cond(seq_cond_CACHE_VALID) => cache_valid(to_integer(unsigned(Lino_index))),
 			cond(seq_cond_CACHE_HIT) => cache_hit,
 			cond(seq_cond_false) => '0',
@@ -347,13 +359,14 @@ r_is_zero <= 			'1' when (R = X"0000") else '0';
 off_is_zero	<=			'1' when (IL_OFF5 = "00000") else '0';
 y_zero <=				'1' when (Y(15 downto 0) = X"0000") else '0';
 is_runmode <=			'0' when (Lino = X"0000") else '1';
+s_equ_db_mod16 <=		'1' when (S(3 downto 0) = mb_directByte(3 downto 0)) else '0';
 
 -- stack error conditions. Stack pointers point to first empty position. So if SP is 0 can't be pulled from, 
 -- and if full (7 or 15) then can't be pushed onto. 
 estack_is_full <= 	'1' when (ExpSP = X"F") else '0';
 estack_is_empty <=	'1' when (ExpSP = X"0") else '0';
-rstack_is_full	<=		'1' when (RetSP = O"7") else '0';
-rstack_is_empty <=	'1' when (RetSP = O"0") else '0';
+rstack_is_full	<=		'1' when (RetSP = X"F") else '0';
+rstack_is_empty <=	'1' when (RetSP = X"0") else '0';
 bstack_is_full	<=		'1' when (BasSP = O"7") else '0';
 bstack_is_empty <=	'1' when (BasSP = O"0") else '0';
 
@@ -489,6 +502,8 @@ begin
 				T <= (others => '0');
 			when T_codeByte =>
 				T <= X"00" & il_codeByte;	
+			when T_MDR =>	
+				T <= X"00" & MDR;
 			when T_MDRx2 =>	
 				-- assume it is already uppercased, otherwise a and A would be different variables!
 				T <= X"00" & MDR(6 downto 0) & '0';
@@ -924,18 +939,19 @@ end process;
 				S <= std_logic_vector(unsigned(LE) + 1);
 				R <= LS;
 				Y <= X"0000" & std_logic_vector(unsigned(PrgEnd) - unsigned(LE));
-			when alu_copy_inc =>
-				S <= std_logic_vector(unsigned(S) + 1);
-				R <= std_logic_vector(unsigned(R) + 1);
+			when alu_copy_next =>
+				if (unsigned(S) > unsigned(R)) then 
+					S <= std_logic_vector(unsigned(S) + 1);
+					R <= std_logic_vector(unsigned(R) + 1);
+				else 
+					S <= std_logic_vector(unsigned(S) - 1);
+					R <= std_logic_vector(unsigned(R) - 1);
+				end if;
 				Y <= std_logic_vector(unsigned(Y) - 1);
 			when alu_copy_init_ins =>
 				S <= PrgEnd;
 				R <= std_logic_vector(unsigned(PrgEnd) + unsigned(BE) - unsigned(BP) + 3);
 				Y <= X"0000" & std_logic_vector(unsigned(PrgEnd) - unsigned(LS) + 1);
-			when alu_copy_dec =>
-				S <= std_logic_vector(unsigned(S) - 1);
-				R <= std_logic_vector(unsigned(R) - 1);
-				Y <= std_logic_vector(unsigned(Y) - 1);
 			when alu_ls_load =>
 				-- initialize for LS (list) opcode
 				-- S = start line, R = end line, store both to Y and check values
