@@ -42,20 +42,9 @@ end freqcounter;
 
 architecture Behavioral of freqcounter is
 
-component adder16 is
-    Port ( cin : in  STD_LOGIC;
-           a : in  STD_LOGIC_VECTOR (15 downto 0);
-           b : in  STD_LOGIC_VECTOR (15 downto 0);
-           na : in  STD_LOGIC;
-           nb : in  STD_LOGIC;
-           bcd : in  STD_LOGIC;
-           y : out  STD_LOGIC_VECTOR (15 downto 0);
-           cout : out  STD_LOGIC);
-end component;
-
 signal cnt_0, cnt_1, cnt_sel, sum: std_logic_vector(31 downto 0);
 signal clk_prev: std_logic;
-signal c: std_logic_vector(2 downto 0);
+signal carry: std_logic_vector(8 downto 0);
 
 begin
 
@@ -84,19 +73,20 @@ begin
 	end if;
 end process;
 
-c(0) <= cin;
-cout <= c(2);
+carry(0) <= cin;
+cout <= carry(8);
 
-generate_adder32: for i in 0 to 1 generate
-	adder: adder16 Port map ( 
-				cin => c(i), 
-				a => cnt_sel((((i + 1) * 16) - 1) downto (i * 16)),
-				b => add((((i + 1) * 16) - 1) downto (i * 16)),
+na_generate: for i in 0 to 7 generate
+begin
+	na: entity work.nibbleadder Port map ( 
+				cin => carry(i),
+				a => cnt_sel((3 + 4 * i) downto (4 * i)),
+				b => add((3 + 4 * i) downto (4 * i)),
 				na => '0',
 				nb => '0',
 				bcd => bcd,
-				y => sum((((i + 1) * 16) - 1) downto (i * 16)),
-				cout => c(i + 1) 
+				y => sum((3 + 4 * i) downto (4 * i)),
+				cout => carry(i + 1)
 			);
 end generate;
 

@@ -98,7 +98,7 @@ constant debug_rom: rom512x8 := (
 		c('R'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		c('U'), c('S'), c(' '), X"00", X"00", X"00", X"00", X"00", 
 		BEL, c('*'), c('N'), c('o'), c(' '), c('P'), c('r'), c('g'),
-		X"88", X"89", X"8A", X"8B", c('.'), X"00", X"00", X"00",			-- output lino (basic line number as hex)
+		CR, LF, X"88", X"89", X"8A", X"8B", c('.'), X"00",					-- output lino (basic line number as hex)
 		X"8C", X"8D", X"8E", X"8F", c(' '), X"00", X"00", X"00",			-- output registers (as hex)
 		X"8C", X"8D", X"8E", X"8F", X"00", X"8D", X"8E", X"8F",
 		BEL, c('*'), c('B'), c('a'), c('s'), c('S'), c('t'), c('k'),	-- Basic stack

@@ -31,8 +31,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity chargen_rom is
     Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);
-           h : in  STD_LOGIC_VECTOR (2 downto 0);
-			  pixel: out STD_LOGIC
+			  pattern: out STD_LOGIC_VECTOR(7 downto 0)
 			);
 end chargen_rom;
 
@@ -181,22 +180,12 @@ X"55", X"AA", X"55", X"AA", X"55", X"AA", X"55", X"AA"  -- DEL
 --attribute rom_style : string;
 --attribute rom_style of tinyfont : signal is "block";
 
-signal mask, pattern: std_logic_vector(7 downto 0);
+signal mask: std_logic_vector(7 downto 0);
 
 begin
 
 mask <= (others => a(10)); -- codes 128..255 are reverse pattern
 pattern <= mask xor tinyfont(to_integer(unsigned(a(9 downto 0))));
-
-with h select pixel <= 
-		pattern(7) when "000",
-		pattern(6) when "001",
-		pattern(5) when "010",
-		pattern(4) when "011",
-		pattern(3) when "100",
-		pattern(2) when "101",
-		pattern(1) when "110",
-		pattern(0) when others;
 
 end Behavioral;
 

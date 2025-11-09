@@ -50,13 +50,6 @@ end mwvga;
 
 architecture Behavioral of mwvga is
 
-component chargen_rom is
-    Port ( a : in  STD_LOGIC_VECTOR (10 downto 0);
-           h : in  STD_LOGIC_VECTOR (2 downto 0);
-			  pixel: out STD_LOGIC
-			);
-end component;
-
 -- basic colors (RRRRGGGGBBBB)
 --constant color8_black : std_logic_vector(11 downto 0) := X"000"; 
 --constant color8_red	 : std_logic_vector(11 downto 0) := X"F00"; 
@@ -67,17 +60,6 @@ end component;
 --constant color8_yellow: std_logic_vector(11 downto 0) := X"FF0"; 
 --constant color8_white : std_logic_vector(11 downto 0) := X"FFF"; 
 --
---type table8x12 is array(0 to 7) of std_logic_vector(11 downto 0);
---constant palette: table8x12 :=(
---	color8_blue,
---	color8_cyan,
---	color8_blue,
---	color8_yellow,
---	color8_black,
---	color8_cyan,
---	color8_black,
---	color8_yellow
---	);
 
 signal hpulse, h, hfp: std_logic_vector(11 downto 0);
 signal vpulse, v, vfp: std_logic_vector(11 downto 0);
@@ -85,7 +67,7 @@ signal h_clk, v_clk: std_logic;
 signal pixel: std_logic;
 signal reverse: std_logic;
 signal color4: STD_LOGIC_VECTOR(3 downto 0);
-signal a: std_logic_vector(7 downto 0);
+signal a, pattern: std_logic_vector(7 downto 0);
 
 begin
 
@@ -149,13 +131,22 @@ end process;
 reverse <= char(7) xor (cursor_enable and ((cursor_type and v(2) and v(1)) or (not cursor_type)));
 a <= reverse & char(6 downto 0);
 
-chargen: chargen_rom port map (
+chargen: entity work.chargen_rom port map (
 		a(10 downto 3) => a,					-- 256 chars (128 duplicated, upper 128 reversed)
 		a(2 downto 0) => v(2 downto 0),	-- 8 rows per char
-		h => h(2 downto 0),
-		pixel => pixel
+		pattern => pattern
 	);
 	
+with h(2 downto 0) select pixel <= 
+		pattern(7) when "000",
+		pattern(6) when "001",
+		pattern(5) when "010",
+		pattern(4) when "011",
+		pattern(3) when "100",
+		pattern(2) when "101",
+		pattern(1) when "110",
+		pattern(0) when others;
+		
 color12 <= 	color4(3) & color4(2) & color4(2) & color4(2) & -- Red
 				color4(3) & color4(1) & color4(1) & color4(1) &	-- Green 
 				color4(3) & color4(0) & color4(0) & color4(0);	-- Blue

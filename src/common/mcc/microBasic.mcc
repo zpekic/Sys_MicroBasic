@@ -5,7 +5,7 @@
 			.code 9, 80, mb:microBasic_code.vhd, 10;
 			.mapper 8, 16, mb:microBasic_map.vhd, 2;
 			.controller microBasic_control_unit.vhd, 4;
-			.symbol 9, 256, mb:microBasic_sym.vhd, mb:microBas_sym.coe, 32;
+			.symbol 9, 128, mb:microBasic_sym.vhd, mb:microBas_sym.coe, 16;
 
 // System interface signals
 // nBUSREQ			.valfield 1 values 0, 1 default 1;
@@ -44,7 +44,7 @@ seq_cond:		.if 5 values
 				AT_TAB,
 				OFF_IS_ZERO,
 				IS_RUNMODE,
-				S_EQU_DB_MOD16,	
+				S_EQU_DB_MOD32,	
 				CACHE_VALID,		
 				CACHE_HIT,		
 				false			// hard-code to 0
@@ -81,7 +81,7 @@ T			.regfield 5 values
 				BasStack_Lo,
 				Cache_Data,		// bits 31..16 contain the BP (Lino is at (15..0), handled in hardware) 
 				LS,
-				-,
+				binop,			// operation is defined by bits 2,1,0 of S register
 				-,
 				-,
 				-,
@@ -310,10 +310,10 @@ back:	    .alias if true then return else continue;
 traceString .alias trace(from_microcode), directByte =;
 traceGoto	.alias trace(from_microcode), directByte = 30;
 traceCall	.alias trace(from_microcode), directByte = 31;
-traceLino	.alias trace(from_microcode), directByte = 51;
+//traceLino	.alias trace(from_microcode), directByte = 51;
 traceT		.alias trace(from_microcode), directByte = 52;
 traceSDepth:.alias trace(from_microcode), directByte = 56;	// trace stack depth by indenting 0 to 8 spaces
-waitForExt:	.alias if EXTERNAL then next else repeat;		// loop until external signal is high (e.g. button is pressed)
+//waitForExt:	.alias if EXTERNAL then next else repeat;		// loop until external signal is high (e.g. button is pressed)
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 //dump_il:	.sub;
@@ -341,6 +341,7 @@ outBeep:	.sub;
 findLino:	.sub;
 copyLine:	.sub T;
 findPrgEnd:	.sub;
+prepWrite:	.sub;
 
 			.org 0;
 //	First 4 microcode locations can't be used branch destinations
@@ -361,11 +362,9 @@ WarmStart:	clear;
 			BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero; 
 			Lino <= T, IL_PC <= T, write2Nulls(BP);											// kills input line
 			
-fetch:		trace(crlf);
-			traceString 51;								// trace Basic line number (in hex, for speed)
-			traceString 2; 								// trace IL_PC and future opcode
-			IL_OP <= from_interpreter, IL_PC <= inc;	// load opcode, advance IL_PC
-			traceSDepth;
+fetch:		traceString 51;											// CR, LF, then trace Basic line number (in hex, for speed)
+			traceString 2; 											// trace IL_PC and future opcode
+			IL_OP <= from_interpreter, IL_PC <= inc, traceSDepth;	// load opcode, advance IL_PC, indent by stack depth IL code if tracing is on
 			T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode (or break if we went into the weeds)
 			
 			.map 0b????????;							// opcode sink of last resort
@@ -375,9 +374,8 @@ badop:		goto INTERNAL_ERR;
 			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 15;								// trace mnemonic
-			ExpStack <= startSwap;	// R <= ExpStack(0), S <= ExpStack(0 + param) 
-			ExpStack <= endSwap;	// ExpStack(0) <= S, ExpStack(0 + param) <= R
-			goto fetch;
+			ExpStack <= startSwap;						// R <= ExpStack(0), S <= ExpStack(0 + param) 
+			ExpStack <= endSwap, goto fetch;			// ExpStack(0) <= S, ExpStack(0 + param) <= R
 
 			.map 0x00;									// SX 0 does nothing, so map to just skip
 			traceString 15;								// trace mnemonic
@@ -479,7 +477,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			alu <= R_fromStack, ExpStack <= pop2;
 			T <= from_R;
 			Lino <= T, if R_IS_ZERO then NOPROG_ERR;			// once Lino is set, CACHE_HIT and CACHE_VALID are meaningful
-			traceLino;
+			// traceLino;
 			if CACHE_VALID then go_cvalid;
 			// INVALID: the cache entry is free, find target and store in cache (and stay there until end of run)
 			findLino();
@@ -812,32 +810,32 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			alu <= S_fromStack, ExpStack <= pop2;		// S == function index
 			traceALU();
 			// TODO: better / faster "switch" implementation?
-			directByte = 20, if S_EQU_DB_MOD16 then u_peek8;
-			directByte = 24, if S_EQU_DB_MOD16 then u_poke8;
-			directByte = 21, if S_EQU_DB_MOD16 then u_peek16;
-			directByte = 25, if S_EQU_DB_MOD16 then u_poke16;
+			directByte = 20, if S_EQU_DB_MOD32 then u_peek8;
+			directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
+			directByte = 21, if S_EQU_DB_MOD32 then u_peek16;
+			directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
 			// TODO implement other fun functions!
-			goto INTERNAL_ERR;							// not implemented, break
-			
+			T <= binop, goto u_done;					// by default, execute binary operations T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
+						
 u_peek8: 	readCore(T);								// MDR <= Core(T)
-			T <= MDR;
+u_in:		T <= MDR;
 u_done:		ExpStack <= push_TWord, goto fetch;
 			
 u_peek16:	readCore16(same);
 			T <= from_R, goto u_done;
 
-u_poke8:	T <= save;
-			T <= from_R;						
-			alu <= S_fromT, T <= recall;
+u_poke8:	prepWrite();
 			writeCore(T, from_SLo);
 			goto u_peek8;								// slow, but allows X = USR(poke8, A, X) trick to check if byte has been written correctly
 			
-u_poke16:	T <= save; 
-			T <= from_R;
-			alu <= S_fromT, T <= recall;
+u_poke16:	prepWrite(); 
 			writeCore(T, from_SHi), T <= inc;
 			writeCore(T, from_SLo);
 			T <= dec, goto u_peek16;					// same comment as above, but for 16-bits
+			
+prepWrite:	T <= save;									// will need the IO or memory address
+			T <= from_R;								// get data to be written
+			alu <= S_fromT, T <= recall, back;			// copy to S and get target address back to T
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2F;									// RT (IL subroutine return)
@@ -962,8 +960,10 @@ print_lino:		directByte = ' ', outChar(from_microcode);
 				directByte = 'T', outChar(from_microcode), alu <= S_fromLino;
 				directByte = ' ', outChar(from_microcode), T <= from_S;
 				printDecR(R_fromT);
-				directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;
+				directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;	// load count of ticks (ms) while Basic program was running
 				printY();
+//				directByte = ' ', outChar(from_microcode), alu <= Y_recall;		// Y shadow was loaded with count of CPU clocks per tick (CPU speed in kHz)
+//				printY();
 err_done:		outCRLF();
 				trace(crlf);
 				goto WarmStart;
@@ -1025,7 +1025,7 @@ writeCore:	nWR = 0, if nBUSACK then repeat else return;
 
 readCore:	nRD = 0, if nBUSACK then repeat else next;
 			nRD = 0, MDR <= from_Bus, back;
-			
+
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		
 dump_input: InlEnd <= InLine_start, trace(crlf);

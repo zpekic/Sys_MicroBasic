@@ -142,6 +142,8 @@ signal ram: memory;
 signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
+signal pattern, memData: std_logic_vector(7 downto 0); 
+signal sel_hi4k: std_logic;
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -186,10 +188,12 @@ signal cpu_outchar: std_logic_vector(7 downto 0);
 signal RXD_READY, RXD_VALID: std_logic;
 signal RXD_CHAR: std_logic_vector(7 downto 0);
 
----
+-- debounced inputs
 signal switch: std_logic_vector(7 downto 0);
 alias sw_baudrate: std_logic_vector(2 downto 0) is switch(7 downto 5);
 alias sw_cpuclk: std_logic_vector(2 downto 0) is switch(4 downto 2);
+alias sw_traceRegSel: std_logic_vector(1 downto 0) is switch(1 downto 0);
+alias sw_traceDisable: std_logic is switch(4);
 signal button: std_logic_vector(7 downto 0);
 signal dip: std_logic_vector(7 downto 0);
 
@@ -316,12 +320,12 @@ cpu: entity work.MicroBasic Port map (
 		inchar => RXD_CHAR,
 		inchar_ready => RXD_READY,
 		-- debug / trace
-		traceEnable => not sw_cpuclk(2),
+		traceEnable => not sw_traceDisable,
 		baudrate => baudrate_x1,
 		debug_txd => debug_txd, 
 		debug_uipc => cpu_uipc,
 		debug_t => cpu_t,					-- use to highlight T position
-		debug_sel => sw(1 downto 0),	-- select 1 of 4 internal registers to visualize on LED and VGA
+		debug_sel => sw_traceRegSel,	-- select 1 of 4 internal registers to visualize on LED and VGA
 		debug_bus => cpu_debug			
 	);
 
@@ -333,16 +337,25 @@ cu_il: entity work.il_rom Port map (
 		);
 
 -- infer simple 2k RAM
-D <= ram(to_integer(unsigned(A(10 downto 0)))) when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nBUSACK or nWR) = '0') then 
+		if ((nBUSACK or nWR or sel_hi4k) = '0') then 
 			ram(to_integer(unsigned(A(10 downto 0)))) <= D;
 		end if;
 	end if;
 end process;
 
+sel_hi4k <= '1' when (A(15 downto 12) = X"F") else '0';
+memData <= pattern when (sel_hi4k = '1') else ram(to_integer(unsigned(A(10 downto 0))));
+D <= memData when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
+
+-- Character generator ROM handy for the marquee demo
+chargen: entity work.chargen_rom port map (
+		a => A(10 downto 0),			-- 256 chars (128 duplicated, upper 128 reversed) * 8 bytes per char
+		pattern => pattern
+	);
+	
 -- CPU clock should ideally be sync'd when switching from one frequency to another
 with sw_cpuclk select cpu_clk <= 
 		button(0) when O"0",
@@ -407,16 +420,16 @@ baudrate_x2 <= cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
 baudrate_x4 <= cnt307200(to_integer(8 - unsigned('0' & sw_baudrate)));
 							
 -- count signal frequencies
-freqcnt: entity work.freqcounter Port map ( 
-		reset => RESET,
-		clk => freq2,
-		freq => baudrate_x1,
-		bcd => '1',
-		add => X"00000004",
-		cin => '0',
-		cout => open,
-		value => freqcnt_value
-	);		
+--freqcnt: entity work.freqcounter Port map ( 
+--		reset => RESET,
+--		clk => freq2,
+--		freq => baudrate_x1,
+--		bcd => '1',
+--		add => X"00000004",
+--		cin => '0',
+--		cout => open,
+--		value => freqcnt_value
+--	);		
 
 -- VGA to visualize Basic memory and microcode execution
 -- 32 rows by 64 chars are displayed, so whole 2k RAM fits into display
@@ -431,7 +444,7 @@ vga: entity work.mwvga Port map (
 		x => x80,
 		y => y60,
 		cursor_enable => (freq2 and vga_cursor),
-		cursor_type => '1',
+		cursor_type => sw_traceDisable,	-- only visual change, not functional
 		-- VGA connections
 		color12(11 downto 8) => RED_O,
 		color12(7 downto 4) => GREEN_O,
@@ -445,7 +458,7 @@ inpwin: entity work.hwindow
 			top => 	X"08",
 			left => 	X"08",
 			width => X"40",
-			height => X"04"			
+			height => X"02"			
 		)
 		Port map ( 
 			enable => '1',
@@ -464,13 +477,13 @@ prgwin: entity work.hwindow
 			top => 	X"0C",
 			left => 	X"08",
 			width => X"40",
-			height => X"1C"			
+			height => X"1E"			
 		)
 		Port map ( 
 			enable => '1',
 			x => x80,
 			y => y60,
-			m_base => X"0100",
+			m_base => X"0080",
 			m_cursor => cpu_debug(15 downto 0),
 			-- outputs
 			char_addr => prg_addr,
@@ -539,8 +552,9 @@ ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
 
 sym_ram: entity work.symTracer port map (
 		reset => RESET,
-		rom_clk => CLK,					-- 100MHz
-		refresh_clk => cnt50MHz(to_integer(unsigned(dip(2 downto 0)))),	-- TODO: find best frequency?
+		rom_clk => cnt50MHz(0),			-- 50MHz
+		refresh_clk => cnt50MHz(7),	-- must be at least 256* higher than cpu clock for full window refresh
+		cpu_clk => cpu_clk,
 		--- 
 		uipc => cpu_uipc,
 		--

@@ -1,4 +1,5 @@
 # Output products list for <microBas_sym>
+_xmsgs\pn_parser.xmsgs
 microBas_sym.asy
 microBas_sym.gise
 microBas_sym.mif

@@ -110,8 +110,8 @@ signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase,
 
 -- key pointers (memory map constants, TODO: make them variable to configure RAM layout and size) 
 constant Inline_Start: std_logic_vector(15 downto 0) := X"0000";	-- input buffer at start of RAM
-constant Inline_End: std_logic_vector(15 downto 0) := X"00FF";		-- input buffer up to 256 characters  	
-constant Prog_Start: std_logic_vector(15 downto 0) := X"0100"; 	-- Basic program right after that
+constant Inline_End: std_logic_vector(15 downto 0) := X"007F";		-- input buffer up to 128 characters  	
+constant Prog_Start: std_logic_vector(15 downto 0) := X"0080"; 	-- Basic program right after that
 constant Core_End: std_logic_vector(15 downto 0) := X"07FF";		-- up to 2k (but can go up to 64k)
 -- key pointers (for parsing)
 signal BP, BP_saved: std_logic_vector(15 downto 0);
@@ -183,15 +183,16 @@ alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5);
 alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
 signal cache_hit: std_logic;
 
-
 -- other
 signal T, T_saved: std_logic_vector(15 downto 0);
-signal tab_cnt: std_logic_vector(7 downto 0);
+signal S0, S1, S2: std_logic_vector(15 downto 0);
+signal tab_cnt: std_logic_vector(7 downto 0) := X"00";
 signal at_tab: std_logic;
 signal ready_alt_break: std_logic;
 signal last3Chars: std_logic_vector(23 downto 0);
 signal is_notRnd: std_logic;
-signal s_equ_db_mod16: std_logic;
+signal s_equ_db_mod32: std_logic;
+signal cpu_freq: std_logic_vector(31 downto 0);
 
 begin
 
@@ -318,7 +319,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_AT_TAB) => at_tab,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
-			cond(seq_cond_S_EQU_DB_MOD16) => s_equ_db_mod16,	
+			cond(seq_cond_S_EQU_DB_MOD32) => s_equ_db_mod32,	
 			cond(seq_cond_CACHE_VALID) => cache_valid(to_integer(unsigned(Lino_index))),
 			cond(seq_cond_CACHE_HIT) => cache_hit,
 			cond(seq_cond_false) => '0',
@@ -359,7 +360,7 @@ r_is_zero <= 			'1' when (R = X"0000") else '0';
 off_is_zero	<=			'1' when (IL_OFF5 = "00000") else '0';
 y_zero <=				'1' when (Y(15 downto 0) = X"0000") else '0';
 is_runmode <=			'0' when (Lino = X"0000") else '1';
-s_equ_db_mod16 <=		'1' when (S(3 downto 0) = mb_directByte(3 downto 0)) else '0';
+s_equ_db_mod32 <=		'1' when (S(4 downto 0) = mb_directByte(4 downto 0)) else '0';
 
 -- stack error conditions. Stack pointers point to first empty position. So if SP is 0 can't be pulled from, 
 -- and if full (7 or 15) then can't be pushed onto. 
@@ -533,11 +534,27 @@ begin
 				T <= cache_data;
 			when T_LS =>
 				T <= LS;
+			when T_binop =>
+				-- S	operation
+				-- 0	T NOR R
+				-- 1	T NOR /R
+				-- 2 	/T NOR R
+				-- 3	T AND R
+				-- 4	T OR S
+				-- 5	T OR /S
+				-- 6	/T OR S
+				-- 7	T NAND R				
+				T <= S2 xor ((S1 xor T) nor (S0 xor R));
 			when others =>
 				null;
 		end case;
  end if;
 end process;
+	
+-- masks for T_binop
+S0 <= (others => S(0));
+S1 <= (others => S(1));
+S2 <= (others => S(2));
 	
  update_BP: process(clk, mb_BP)
  begin
@@ -993,6 +1010,7 @@ end process;
 				Y <= Y_saved;
 			when alu_Y_fromTicks =>
 				Y <= cnt_tick;
+				Y_saved <= cpu_freq;
 			when alu_cache_store =>
 				cache(to_integer(unsigned(Lino_index))) <= BP & Lino;
 				cache_valid(to_integer(unsigned(Lino_index))) <= '1';
@@ -1088,8 +1106,8 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 -------------------------------------------------------------------
 -- Built-in debug and tracer components
 -------------------------------------------------------------------
-debug_t <= T;					-- output T to show memory pointer
-debug_uipc <= ui_address;	-- output microinstruction program counter to show microinstruction symbols
+debug_t <= T;						-- output T to show memory pointer
+debug_uipc <= ui_address;		-- output microinstruction program counter to show microinstruction symbols
 
 -- paralled debug port
 	with debug_sel select debug_bus(23 downto 0) <= 
@@ -1177,6 +1195,18 @@ eightdigadder: entity work.bcdadder
 			b => X"00000001",
 			sum => cnt_tick_inc
 		);
+		
+-- 8 BCD digits frequency counter
+--eightdigcnt: entity work.freqcounter port map ( 
+--			reset => reset,
+--			clk => clk_tick,
+--			freq => clk,
+--			bcd => '1',
+--			add => X"00000002",
+--			cin => '0',
+--			cout => open,
+--			value => cpu_freq
+--		);
 		
 end Behavioral;
 

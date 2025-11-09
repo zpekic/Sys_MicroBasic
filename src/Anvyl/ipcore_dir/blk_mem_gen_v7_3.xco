@@ -1,7 +1,7 @@
 ##############################################################
 #
 # Xilinx Core Generator version 14.7
-# Date: Sun Nov 09 19:39:22 2025
+# Date: Sun Nov 09 06:35:20 2025
 #
 ##############################################################
 #
@@ -48,7 +48,7 @@ CSET axi_type=AXI4_Full
 CSET byte_size=9
 CSET coe_file=C:\Users\zoltanp\Documents\HexCalc\Sys_MicroBasic\src\common\mcc\microBas_sym.coe
 CSET collision_warnings=ALL
-CSET component_name=microBas_sym
+CSET component_name=blk_mem_gen_v7_3
 CSET disable_collision_warnings=false
 CSET disable_out_of_range_warnings=false
 CSET ecc=false
@@ -105,4 +105,4 @@ CSET write_width_b=8
 MISC pkg_timestamp=2012-11-19T16:22:25Z
 # END Extra information
 GENERATE
-# CRC: 567b373f
+# CRC: ae32b0a8
