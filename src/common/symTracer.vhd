@@ -71,7 +71,7 @@ end process;
 -- refresh_clk >= 256 cpu_clk
 enable <= '0' when (uipc = uipc_old) else '1';
 
-on_refresh_clk: process(reset, refresh_clk)
+on_refresh_clk: process(reset, refresh_clk, enable)
 begin
 	if ((reset = '1') or (enable = '1')) then
 		opcnt <= (others => '1');
@@ -107,7 +107,7 @@ mb_sym_d <= mb_symbol_byte(to_integer(unsigned(mb_sym_a)));
 bit8char <= c('1') when (uipc(8) = '1') else c('0');
 
 with col select sym_char <=
-	X"20" when X"C",
+	X"FF" when X"C",		-- transparent char, show whatever is below the window
 	bit8char when X"D",
 	hex2ascii(to_integer(unsigned(uipc(7 downto 4)))) when X"E",
 	hex2ascii(to_integer(unsigned(uipc(3 downto 0)))) when X"F",
@@ -118,7 +118,7 @@ gen_r: for r in 0 to SYMBOL_ADDRESS_LAST generate
 begin
    gen_c: for c in 0 to SYMBOL_BYTE_LAST generate
    begin
-		assert false report "r = " & integer'image(r) & " c = " & integer'image(c) severity note;
+		--assert false report "r = " & integer'image(r) & " c = " & integer'image(c) severity note;
 		mb_symbol_byte(r * (SYMBOL_BYTE_LAST + 1) + c) <= mb_symbol_entry(r)(SYMBOL_DATA_WIDTH - 8 * c - 1 downto SYMBOL_DATA_WIDTH - 8 * (c + 1));
    end generate;
 end generate;

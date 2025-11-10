@@ -207,7 +207,7 @@ signal ram_addr, inp_addr, prg_addr, mcc_addr, sym_addr: std_logic_vector(15 dow
 signal ram_char, sym_char, vga_char: std_logic_vector(7 downto 0);
 signal complement: std_logic_vector(7 downto 0);
 signal inp_cursor, prg_cursor, mcc_cursor, vga_cursor: std_logic;
-signal inp_active, prg_active, mcc_active, vga_window: std_logic;
+signal inp_active, prg_active, mcc_active, mcc_active_out, vga_window: std_logic;
 -- 3 independent windows can overlap as they wish, but higher priority window will occluse the lower ones
 signal win_vector: std_logic_vector(2 downto 0);	-- 3 bits for 3 independent windows
 signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
@@ -509,8 +509,11 @@ mccwin: entity work.hwindow
 			-- outputs
 			char_addr => mcc_addr,
 			cursor_hit => mcc_cursor,
-			active => mcc_active
+			active => mcc_active_out
 		);
+
+-- implement transparency on mccwin (TODO: move the logic inside the hardware window?)
+mcc_active <= '0' when (sym_char = X"FF") else mcc_active_out;
 
 -- very simple priority encoder
 win_vector <= mcc_active & prg_active & inp_active;
@@ -553,7 +556,7 @@ ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
 sym_ram: entity work.symTracer port map (
 		reset => RESET,
 		rom_clk => cnt50MHz(0),			-- 50MHz
-		refresh_clk => cnt50MHz(7),	-- must be at least 256* higher than cpu clock for full window refresh
+		refresh_clk => cnt50MHz(5),	-- must be at least 256* higher than cpu clock for full window refresh
 		cpu_clk => cpu_clk,
 		--- 
 		uipc => cpu_uipc,

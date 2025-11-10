@@ -560,9 +560,8 @@ div_done:	alu <= div_end, goto alu_done;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 39;									// Trace mnemonic
 			IL_PC <= T, if IS_RUNMODE then next else fetch; // if in command mode, restart at reading the input buffer (T is zero at start of every instruction)
-nx_run:		findNextCR(BP);
-			T <= inc;
-			BP <= T;										// BP at start of next statement, which is 2 bytes containing the line number
+			findNextCR(BP);
+			BP <= inc;										// BP at start of next statement, which is 2 bytes containing the line number
 			readCore16(BP);
 			BP <= T, T <= from_R, if R_IS_ZERO then nx_err; // BP at start of statement text, load T with new line number, check if at the end of program			 
 			Lino <= T, IL_PC <= XQhere;						// new current executing statement line number, and IL_PC at :XEC +2 
@@ -815,7 +814,7 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 21, if S_EQU_DB_MOD32 then u_peek16;
 			directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
 			// TODO implement other fun functions!
-			T <= binop, goto u_done;					// by default, execute binary operations T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
+			T <= binop, goto u_done;					// by default, execute binary operation T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
 						
 u_peek8: 	readCore(T);								// MDR <= Core(T)
 u_in:		T <= MDR;
@@ -962,8 +961,8 @@ print_lino:		directByte = ' ', outChar(from_microcode);
 				printDecR(R_fromT);
 				directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;	// load count of ticks (ms) while Basic program was running
 				printY();
-//				directByte = ' ', outChar(from_microcode), alu <= Y_recall;		// Y shadow was loaded with count of CPU clocks per tick (CPU speed in kHz)
-//				printY();
+				directByte = ' ', outChar(from_microcode), alu <= Y_recall;		// Y shadow was loaded with count of CPU clocks per tick (CPU speed in kHz)
+				printY();
 err_done:		outCRLF();
 				trace(crlf);
 				goto WarmStart;

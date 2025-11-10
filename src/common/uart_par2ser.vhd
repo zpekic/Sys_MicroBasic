@@ -55,7 +55,7 @@ with mode select p_bit <=
 	'0' when "100",	-- parity 0
 	'1' when "101",	-- parity 1
 	parity when "110", -- parity even (because mode(0) is '0')
-	parity when "111", -- parity odd (because mode(1) is '1')
+	parity when "111", -- parity odd (because mode(0) is '1')
 	'1' when others;
 
 -- drive simple UART data output with mux
@@ -98,7 +98,7 @@ begin
 		bitSel <= (others => '0');
 	else
 		if (rising_edge(bitClk)) then
-			if (bitSel = X"D") then
+			if (bitSel = X"E") then
 				bitSel <= (others => '0');
 			else
 				bitSel <= std_logic_vector(unsigned(bitSel) + 1);

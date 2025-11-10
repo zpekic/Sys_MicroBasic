@@ -152,7 +152,7 @@ signal Y, Y_saved: std_logic_vector(31 downto 0);	-- double size needed for MUL,
 alias ListFrom: std_logic_vector(15 downto 0) is Y(31 downto 16);
 alias ListTo: std_logic_vector(15 downto 0) is Y(15 downto 0);
 signal R, S: std_logic_vector(15 downto 0);			-- ALU input arguments are 16 bit
-signal s_plus_r, s_minus_r, r_minus_s, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
+signal s_plus_r, s_minus_r, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
 signal s_mul_r: std_logic_vector(31 downto 0);		-- output of combinatorial multiplier
 signal subc: std_logic_vector(16 downto 0);			-- 17 bits, MSB is carry out which is needed in division step 
 signal y_zero, r_is_zero: std_logic;					-- combinatorial state of Y and R
@@ -1036,7 +1036,7 @@ s_plus_r <= std_logic_vector(signed(S) + signed(R));
 plus_overflow <= ((not R(15)) and (not S(15))) when (s_plus_r(15) = '1') else (R(15) and S(15));
 
 s_minus_r <= std_logic_vector(signed(S) - signed(R));
-r_minus_s <= std_logic_vector(signed(R) - signed(S));
+--r_minus_s <= std_logic_vector(signed(R) - signed(S));
 minus_overflow <= '0';
 s_equ_r <= '1' when (s_minus_r = X"0000") else '0';
 s_gt_r <= not(s_minus_r(15)) and not(s_equ_r);
@@ -1197,16 +1197,16 @@ eightdigadder: entity work.bcdadder
 		);
 		
 -- 8 BCD digits frequency counter
---eightdigcnt: entity work.freqcounter port map ( 
---			reset => reset,
---			clk => clk_tick,
---			freq => clk,
---			bcd => '1',
---			add => X"00000002",
---			cin => '0',
---			cout => open,
---			value => cpu_freq
---		);
+eightdigcnt: entity work.freqcounter port map ( 
+			reset => reset,
+			clk => clk_tick,
+			freq => clk,
+			bcd => '1',
+			add => X"00000002",
+			cin => '0',
+			cout => open,
+			value => cpu_freq
+		);
 		
 end Behavioral;
 

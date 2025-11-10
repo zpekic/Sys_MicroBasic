@@ -54,7 +54,7 @@ all1 <= '1' when shifter = "11111111" else '0';
 --				 (all1 and all1 and debounced);
 signal_out <= debounced; 
 
-debounce: process(clock, reset, debounced)
+debounce: process(clock, reset, debounced, signal_in)
 begin
 	if (reset = '1') then
 		debounced <= signal_in;
