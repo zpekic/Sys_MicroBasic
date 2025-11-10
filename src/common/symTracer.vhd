@@ -30,6 +30,7 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 use work.microbasic_package.all;
+use work.microbasic_sym.all;
 
 entity symTracer is
     Port ( reset : in  STD_LOGIC;
@@ -44,7 +45,7 @@ end symTracer;
 architecture Behavioral of symTracer is
 
 signal sym_ram: ram256x8;
-signal sym_char, tmp_char, rom_char, bit8char: std_logic_vector(7 downto 0);
+signal sym_char, tmp_char, bit8char: std_logic_vector(7 downto 0);
 signal uipc_old, uipc_new: std_logic_vector(8 downto 0);
 signal opcnt, a: std_logic_vector(7 downto 0);
 alias row: std_logic_vector(3 downto 0) is opcnt(3 downto 0);
@@ -94,12 +95,15 @@ end process;
 
 -- ROM containing the microcode symbols. This is 8k, but organized as 512 entries of 16 chars (bytes) each
 -- this truncation to 16 chars per microinstructions is to save memory, while still be able to trace it
-sym_rom: entity work.microBas_sym port map (
-		clka => rom_clk,
-		addra => (uipc & col),
-		douta => rom_char
-	);
-
+--sym_rom: entity work.microBas_sym port map (
+--		clka => rom_clk,
+--		addra => (uipc & col),
+--		douta => rom_char
+--	);
+	
+mb_sym_a <= uipc & col;
+mb_sym_d <= mb_symbol_byte(to_integer(unsigned(mb_sym_a)));
+ 
 bit8char <= c('1') when (uipc(8) = '1') else c('0');
 
 with col select sym_char <=
@@ -107,7 +111,17 @@ with col select sym_char <=
 	bit8char when X"D",
 	hex2ascii(to_integer(unsigned(uipc(7 downto 4)))) when X"E",
 	hex2ascii(to_integer(unsigned(uipc(3 downto 0)))) when X"F",
-	rom_char when others;
+	mb_sym_d when others;
+	
+--convert symbol entries to byte-oriented ROM
+gen_r: for r in 0 to SYMBOL_ADDRESS_LAST generate
+begin
+   gen_c: for c in 0 to SYMBOL_BYTE_LAST generate
+   begin
+		assert false report "r = " & integer'image(r) & " c = " & integer'image(c) severity note;
+		mb_symbol_byte(r * (SYMBOL_BYTE_LAST + 1) + c) <= mb_symbol_entry(r)(SYMBOL_DATA_WIDTH - 8 * c - 1 downto SYMBOL_DATA_WIDTH - 8 * (c + 1));
+   end generate;
+end generate;
 	
 end Behavioral;
 
