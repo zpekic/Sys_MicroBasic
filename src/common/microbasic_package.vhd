@@ -28,7 +28,7 @@ type rom256x8 is array(0 to 255) of std_logic_vector(7 downto 0);
 type rom64x8 is array (0 to 63) of std_logic_vector(7 downto 0);
 type rom16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
 
-type ram256x8 is array(0 to 255) of std_logic_vector(7 downto 0);
+type ram512x8 is array(0 to 511) of std_logic_vector(7 downto 0);
 type ram32x32 is array (0 to 31) of std_logic_vector(31 downto 0);
 type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
 type ram32x4 is array (0 to 31) of std_logic_vector(3 downto 0);

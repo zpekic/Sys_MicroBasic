@@ -494,18 +494,16 @@ prgwin: entity work.hwindow
 mccwin: entity work.hwindow
 		Generic map (
 			top => 	X"27", -- to test vertical overlap
-			left => 	X"3C", -- to test horizontal overlap
-			width => X"10",
+			left => 	X"2C", -- to test horizontal overlap
+			width => X"20",
 			height => X"10"			
 		)
 		Port map ( 
 			enable => (not sw_cpuclk(2)),
 			x => x80,
 			y => y60,
---			m_base => "000" & std_logic_vector(unsigned(cpu_uipc) - 15) & "0000",
---			m_cursor => "000" & std_logic_vector(unsigned(cpu_uipc) - 0) & "0000",
 			m_base => X"0000",
-			m_cursor => X"00F0",
+			m_cursor => X"01E0",
 			-- outputs
 			char_addr => mcc_addr,
 			cursor_hit => mcc_cursor,
@@ -556,12 +554,12 @@ ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
 sym_ram: entity work.symTracer port map (
 		reset => RESET,
 		rom_clk => cnt50MHz(0),			-- 50MHz
-		refresh_clk => cnt50MHz(5),	-- must be at least 256* higher than cpu clock for full window refresh
+		refresh_clk => cnt50MHz(4),	-- must be at least 256* higher than cpu clock for full window refresh
 		cpu_clk => cpu_clk,
 		--- 
 		uipc => cpu_uipc,
 		--
-		char_addr => mcc_addr(7 downto 0),
+		char_addr => mcc_addr(8 downto 0),
 		char_out => sym_char		
 	);
 end;

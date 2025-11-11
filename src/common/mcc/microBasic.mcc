@@ -82,6 +82,7 @@ T			.regfield 5 values
 				Cache_Data,		// bits 31..16 contain the BP (Lino is at (15..0), handled in hardware) 
 				LS,
 				binop,			// operation is defined by bits 2,1,0 of S register
+				fromTicks,		// 2 counters running while Basic code is executing
 				-,
 				-,
 				-,
@@ -253,8 +254,8 @@ alu				.regfield 5 values
 				ls_check,
 				Y_save,
 				Y_recall,
-				Y_fromTicks,
 				cache_store,	// GOTO cache hooked up behind ALU to save microcode width bits
+				-,
 				-,
 				-
 				default nop;
@@ -560,8 +561,10 @@ div_done:	alu <= div_end, goto alu_done;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 39;									// Trace mnemonic
 			IL_PC <= T, if IS_RUNMODE then next else fetch; // if in command mode, restart at reading the input buffer (T is zero at start of every instruction)
+			
 			findNextCR(BP);
-			BP <= inc;										// BP at start of next statement, which is 2 bytes containing the line number
+			T <= inc;
+			BP <= T;										// BP at start of next statement, which is 2 bytes containing the line number
 			readCore16(BP);
 			BP <= T, T <= from_R, if R_IS_ZERO then nx_err; // BP at start of statement text, load T with new line number, check if at the end of program			 
 			Lino <= T, IL_PC <= XQhere;						// new current executing statement line number, and IL_PC at :XEC +2 
@@ -959,18 +962,17 @@ print_lino:		directByte = ' ', outChar(from_microcode);
 				directByte = 'T', outChar(from_microcode), alu <= S_fromLino;
 				directByte = ' ', outChar(from_microcode), T <= from_S;
 				printDecR(R_fromT);
-				directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;	// load count of ticks (ms) while Basic program was running
-				printY();
-				directByte = ' ', outChar(from_microcode), alu <= Y_recall;		// Y shadow was loaded with count of CPU clocks per tick (CPU speed in kHz)
-				printY();
+				directByte = ' ', outChar(from_microcode), T <= fromTicks;	// load count of ticks (s) while Basic program was running
+				printDecR(R_fromT);
+				directByte = '.', outChar(from_microcode), T <= recall;		// T shadow was loaded with ms count of ticks
+				printDecR(R_fromT);
 err_done:		outCRLF();
 				trace(crlf);
 				goto WarmStart;
 
 findNextCR: readCore(T);
-			directByte = CR, if MDR_EQU_DB then return;			// return with T pointing to CR
-			directByte = NULL, if MDR_EQU_DB then INTERNAL_ERR;	// finding NULL before CR is unexpected, TODO "code corruption error"?
-			T <= inc, goto findNextCR;		
+			directByte = CR, if MDR_EQU_DB then return;										// return with T pointing to CR
+			T <= inc, directByte = NULL, if MDR_EQU_DB then INTERNAL_ERR else findNextCR;	// finding NULL before CR is unexpected, TODO "code corruption error"?
 
 readCore16:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;

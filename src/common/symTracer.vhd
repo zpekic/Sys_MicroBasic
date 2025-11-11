@@ -38,18 +38,18 @@ entity symTracer is
            refresh_clk : in  STD_LOGIC;
 			  cpu_clk: in STD_LOGIC;
            uipc : in  STD_LOGIC_VECTOR (8 downto 0);
-           char_addr : in  STD_LOGIC_VECTOR (7 downto 0);
+           char_addr : in  STD_LOGIC_VECTOR (8 downto 0);
            char_out : out  STD_LOGIC_VECTOR (7 downto 0));
 end symTracer;
 
 architecture Behavioral of symTracer is
 
-signal sym_ram: ram256x8;
-signal sym_char, tmp_char, bit8char: std_logic_vector(7 downto 0);
+signal sym_ram: ram512x8;
+signal sym_char, tmp_char, bit8char, uipc_char: std_logic_vector(7 downto 0);
 signal uipc_old, uipc_new: std_logic_vector(8 downto 0);
-signal opcnt, a: std_logic_vector(7 downto 0);
+signal opcnt, a: std_logic_vector(8 downto 0);
 alias row: std_logic_vector(3 downto 0) is opcnt(3 downto 0);
-alias col: std_logic_vector(3 downto 0) is opcnt(7 downto 4);
+alias col: std_logic_vector(4 downto 0) is opcnt(8 downto 4);
 signal enable: std_logic;
 
 begin
@@ -77,7 +77,7 @@ begin
 		opcnt <= (others => '1');
 	else
 		if (rising_edge(refresh_clk)) then
-			if (opcnt = X"00") then
+			if (opcnt = "000000000") then
 				sym_ram(to_integer(unsigned(a))) <= tmp_char;
 			else
 				opcnt <= std_logic_vector(unsigned(opcnt) - 1);
@@ -92,27 +92,26 @@ begin
 		end if;
 	end if;
 end process;
-
--- ROM containing the microcode symbols. This is 8k, but organized as 512 entries of 16 chars (bytes) each
--- this truncation to 16 chars per microinstructions is to save memory, while still be able to trace it
---sym_rom: entity work.microBas_sym port map (
---		clka => rom_clk,
---		addra => (uipc & col),
---		douta => rom_char
---	);
 	
-mb_sym_a <= uipc & col;
+mb_sym_a <= uipc & col(3 downto 0);
 mb_sym_d <= mb_symbol_byte(to_integer(unsigned(mb_sym_a)));
  
+with col(4 downto 2) select sym_char <=
+	X"FF" when O"0",			-- transparent char, show whatever is below the window
+	X"FF" when O"1",			-- transparent char, show whatever is below the window
+	X"FF" when O"2",			-- transparent char, show whatever is below the window
+	uipc_char when O"3",		-- value of microcode PC in hex
+	mb_sym_d when others;	-- microcode symbols from ROM
+
 bit8char <= c('1') when (uipc(8) = '1') else c('0');
 
-with col select sym_char <=
-	X"FF" when X"C",		-- transparent char, show whatever is below the window
-	bit8char when X"D",
-	hex2ascii(to_integer(unsigned(uipc(7 downto 4)))) when X"E",
-	hex2ascii(to_integer(unsigned(uipc(3 downto 0)))) when X"F",
-	mb_sym_d when others;
+with col(1 downto 0) select uipc_char <=
+	bit8char when "00",
+	hex2ascii(to_integer(unsigned(uipc(7 downto 4)))) when "01",
+	hex2ascii(to_integer(unsigned(uipc(3 downto 0)))) when "10",
+	X"FF" when others;
 	
+-- ROM containing the microcode symbols. This is 8k, organized as 512 entries of 16 chars (bytes) each
 --convert symbol entries to byte-oriented ROM
 gen_r: for r in 0 to SYMBOL_ADDRESS_LAST generate
 begin

@@ -171,7 +171,7 @@ alias Lino_index: std_logic_vector(4 downto 0) is Lino(4 downto 0);
 alias Lino_tag: std_logic_vector(10 downto 0) is Lino(15 downto 5);
 
 -- built in counter, counts in "ticks" while Basic program is running
-signal cnt_tick, cnt_tick_inc: std_logic_vector(31 downto 0);
+signal cnt_tick, cnt_tick1000: std_logic_vector(15 downto 0);
 signal lino_tick: std_logic_vector(15 downto 0);
 
 -- GOTO cache
@@ -545,6 +545,9 @@ begin
 				-- 6	/T OR S
 				-- 7	T NAND R				
 				T <= S2 xor ((S1 xor T) nor (S0 xor R));
+			when T_fromTicks =>
+				T <= cnt_tick1000;
+				T_saved <= cnt_tick;
 			when others =>
 				null;
 		end case;
@@ -882,6 +885,8 @@ end process;
 					S <= std_logic_vector(unsigned(S) + 1);
 					R <= '0' & R(15 downto 1);	-- shift down
 				end if;
+			-- Using restore division without the restoration addition cycle (with sign correction before/after)
+			-- See "Digital Computer Arithmetic" by Joseph J.F. Cavanagh, page 254, ISBN 0-07-010282-1
 			when alu_div_start =>	-- S / R 
 				if (S(15) = '0') then
 					-- S > 0
@@ -1008,9 +1013,6 @@ end process;
 				Y_saved <= Y;
 			when alu_Y_recall => 
 				Y <= Y_saved;
-			when alu_Y_fromTicks =>
-				Y <= cnt_tick;
-				Y_saved <= cpu_freq;
 			when alu_cache_store =>
 				cache(to_integer(unsigned(Lino_index))) <= BP & Lino;
 				cache_valid(to_integer(unsigned(Lino_index))) <= '1';
@@ -1167,17 +1169,24 @@ on_clk_tick: process(clk_tick, reset)
 begin
 	if (reset = '1') then
 		cnt_tick <= (others => '0');
+		cnt_tick1000 <= (others => '0');
 		lino_tick <= (others => '0');
 	else
 		if (rising_edge(clk_tick)) then
 			lino_tick <= Lino;
 			if (is_runmode = '1') then
 				if (lino_tick = X"0000") then
-					-- going from stopped to running
+					-- going from stopped to running, reset counters
 					cnt_tick <= (others => '0');
+					cnt_tick1000 <= (others => '0');
 				else
-					-- when running, load increment from BCD adder, so we can skip bin2BCD conversion
-					cnt_tick <= cnt_tick_inc;
+					-- when running, load increment counters
+					if (cnt_tick = X"03E7") then		-- wrap around at 1000
+						cnt_tick <= (others => '0');
+						cnt_tick1000 <= std_logic_vector(unsigned(cnt_tick1000) + 1);
+					else
+						cnt_tick <= std_logic_vector(unsigned(cnt_tick) + 1);
+					end if;
 				end if;
 			end if;
 		end if;
@@ -1185,28 +1194,28 @@ begin
 end process;
 
 -- 8 BCD digits adder
-eightdigadder: entity work.bcdadder 
-     Generic map (
-			DIGITS => 8
-     )
-     Port map ( 
-			carry_in => '0',
-			a => cnt_tick,
-			b => X"00000001",
-			sum => cnt_tick_inc
-		);
+--eightdigadder: entity work.bcdadder 
+--     Generic map (
+--			DIGITS => 8
+--     )
+--     Port map ( 
+--			carry_in => '0',
+--			a => cnt_tick,
+--			b => X"00000001",
+--			sum => cnt_tick_inc
+--		);
 		
 -- 8 BCD digits frequency counter
-eightdigcnt: entity work.freqcounter port map ( 
-			reset => reset,
-			clk => clk_tick,
-			freq => clk,
-			bcd => '1',
-			add => X"00000002",
-			cin => '0',
-			cout => open,
-			value => cpu_freq
-		);
+--eightdigcnt: entity work.freqcounter port map ( 
+--			reset => reset,
+--			clk => clk_tick,
+--			freq => clk,
+--			bcd => '1',
+--			add => X"00000002",
+--			cin => '0',
+--			cout => open,
+--			value => cpu_freq
+--		);
 		
 end Behavioral;
 

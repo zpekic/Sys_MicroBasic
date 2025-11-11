@@ -1990,9 +1990,8 @@ MEMORY_INITIALIZATION_VECTOR=
 29,
 3B,
 20,
-;0075 BP <= inc;
-42,
-50,
+;0075 T <= inc;
+54,
 20,
 3C,
 3D,
@@ -2007,7 +2006,25 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0076 readCore16(BP);
+20,
+;0076 BP <= T;
+42,
+50,
+20,
+3C,
+3D,
+20,
+54,
+3B,
+20,
+20,
+20,
+20,
+20,
+20,
+20,
+20,
+;0077 readCore16(BP);
 72,
 65,
 61,
@@ -2024,7 +2041,7 @@ MEMORY_INITIALIZATION_VECTOR=
 29,
 3B,
 20,
-;0077 BP <= T, T <= from_R, if R_IS_ZERO then nx_err;
+;0078 BP <= T, T <= from_R, if R_IS_ZERO then nx_err;
 42,
 50,
 20,
@@ -2041,7 +2058,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 66,
 72,
-;0078 Lino <= T, IL_PC <= XQhere;
+;0079 Lino <= T, IL_PC <= XQhere;
 4C,
 69,
 6E,
@@ -2058,7 +2075,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 50,
 43,
-;0079 traceBP();
+;007A traceBP();
 74,
 72,
 61,
@@ -2075,7 +2092,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;007A if KBD_BREAK then BREAK else fetch;
+;007B if KBD_BREAK then BREAK else fetch;
 69,
 66,
 20,
@@ -2092,7 +2109,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 68,
 65,
-;007B nx_err: directByte = 0x07, outChar(from_microcode);
+;007C nx_err: directByte = 0x07, outChar(from_microcode);
 6E,
 78,
 5F,
@@ -2109,7 +2126,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 42,
 79,
-;007C if false then continue else stop_run;
+;007D if false then continue else stop_run;
 69,
 66,
 20,
@@ -2126,7 +2143,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;007D trace(from_microcode), directByte = 41;
+;007E trace(from_microcode), directByte = 41;
 74,
 72,
 61,
@@ -2143,7 +2160,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;007E alu <= reset1, if IS_RUNMODE then badop;
+;007F alu <= reset1, if IS_RUNMODE then badop;
 61,
 6C,
 75,
@@ -2160,7 +2177,7 @@ MEMORY_INITIALIZATION_VECTOR=
 2C,
 20,
 69,
-;007F ls_parload: T <= from_R, if STACK_IS_EMPTY then ls_parchk;
+;0080 ls_parload: T <= from_R, if STACK_IS_EMPTY then ls_parchk;
 6C,
 73,
 5F,
@@ -2177,7 +2194,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 3C,
 3D,
-;0080 alu <= S_fromT;
+;0081 alu <= S_fromT;
 61,
 6C,
 75,
@@ -2194,7 +2211,7 @@ MEMORY_INITIALIZATION_VECTOR=
 54,
 3B,
 20,
-;0081 alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload;
+;0082 alu <= R_fromStack, ExpStack <= pop2, if false then continue else ls_parload;
 61,
 6C,
 75,
@@ -2211,7 +2228,7 @@ MEMORY_INITIALIZATION_VECTOR=
 53,
 74,
 61,
-;0082 ls_parchk: alu <= ls_load;
+;0083 ls_parchk: alu <= ls_load;
 6C,
 73,
 5F,
@@ -2228,7 +2245,7 @@ MEMORY_INITIALIZATION_VECTOR=
 75,
 20,
 3C,
-;0083 if LS_PARAMS_OK then next else SYNTAX_ERR;
+;0084 if LS_PARAMS_OK then next else SYNTAX_ERR;
 69,
 66,
 20,
@@ -2245,7 +2262,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4F,
 4B,
 20,
-;0084 ls_start: T <= Prog_start;
+;0085 ls_start: T <= Prog_start;
 6C,
 73,
 5F,
@@ -2262,7 +2279,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 50,
-;0085 ls_lineloop: if CHARIN_READY then next else ls_continue;
+;0086 ls_lineloop: if CHARIN_READY then next else ls_continue;
 6C,
 73,
 5F,
@@ -2279,7 +2296,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;0086 if KBD_BREAK then BREAK;
+;0087 if KBD_BREAK then BREAK;
 69,
 66,
 20,
@@ -2296,7 +2313,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 68,
 65,
-;0087 gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;
+;0088 gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;
 67,
 6F,
 74,
@@ -2313,7 +2330,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 69,
 72,
-;0088 ls_pause: if CHARIN_READY then next else repeat;
+;0089 ls_pause: if CHARIN_READY then next else repeat;
 6C,
 73,
 5F,
@@ -2330,7 +2347,7 @@ MEMORY_INITIALIZATION_VECTOR=
 43,
 48,
 41,
-;0089 gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause;
+;008A gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause;
 67,
 6F,
 74,
@@ -2347,7 +2364,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 69,
 72,
-;008A ls_continue: gotChar = 1, readCore16(same);
+;008B ls_continue: gotChar = 1, readCore16(same);
 6C,
 73,
 5F,
@@ -2364,7 +2381,7 @@ MEMORY_INITIALIZATION_VECTOR=
 67,
 6F,
 74,
-;008B alu <= ls_check, if R_IS_ZERO then fetch;
+;008C alu <= ls_check, if R_IS_ZERO then fetch;
 61,
 6C,
 75,
@@ -2381,7 +2398,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 6B,
 2C,
-;008C if LS_PASSED_END then fetch;
+;008D if LS_PASSED_END then fetch;
 69,
 66,
 20,
@@ -2398,7 +2415,7 @@ MEMORY_INITIALIZATION_VECTOR=
 45,
 4E,
 44,
-;008D if LS_IN_RANGE then next else ls_nextLine;
+;008E if LS_IN_RANGE then next else ls_nextLine;
 69,
 66,
 20,
@@ -2415,7 +2432,7 @@ MEMORY_INITIALIZATION_VECTOR=
 45,
 20,
 74,
-;008E printDecR(Y_save);
+;008F printDecR(Y_save);
 70,
 72,
 69,
@@ -2432,7 +2449,7 @@ MEMORY_INITIALIZATION_VECTOR=
 61,
 76,
 65,
-;008F alu <= Y_recall, directByte = ' ', outChar(from_microcode);
+;0090 alu <= Y_recall, directByte = ' ', outChar(from_microcode);
 61,
 6C,
 75,
@@ -2449,7 +2466,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 6C,
 2C,
-;0090 ls_charloop: readCore(T);
+;0091 ls_charloop: readCore(T);
 6C,
 73,
 5F,
@@ -2466,7 +2483,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 65,
 61,
-;0091 outChar(from_MDR);
+;0092 outChar(from_MDR);
 6F,
 75,
 74,
@@ -2483,7 +2500,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4D,
 44,
 52,
-;0092 ls_nextchar: directByte = 0x0D, if MDR_EQU_DB then next else ls_next;
+;0093 ls_nextchar: directByte = 0x0D, if MDR_EQU_DB then next else ls_next;
 6C,
 73,
 5F,
@@ -2500,7 +2517,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 69,
 72,
-;0093 directByte = 0x0A, outChar(from_microcode);
+;0094 directByte = 0x0A, outChar(from_microcode);
 64,
 69,
 72,
@@ -2517,7 +2534,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;0094 T <= inc, if false then continue else ls_lineloop;
+;0095 T <= inc, if false then continue else ls_lineloop;
 54,
 20,
 3C,
@@ -2534,7 +2551,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 61,
 6C,
-;0095 ls_next: T <= inc, if false then continue else ls_charloop;
+;0096 ls_next: T <= inc, if false then continue else ls_charloop;
 6C,
 73,
 5F,
@@ -2551,7 +2568,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 69,
 6E,
-;0096 ls_nextLine: findNextCR(same);
+;0097 ls_nextLine: findNextCR(same);
 6C,
 73,
 5F,
@@ -2568,7 +2585,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 69,
 6E,
-;0097 T <= inc, if false then continue else ls_lineloop;
+;0098 T <= inc, if false then continue else ls_lineloop;
 54,
 20,
 3C,
@@ -2585,7 +2602,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 61,
 6C,
-;0098 trace(from_microcode), directByte = 26;
+;0099 trace(from_microcode), directByte = 26;
 74,
 72,
 61,
@@ -2602,7 +2619,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0099 if STACK_IS_EMPTY then ESTACK_ERR;
+;009A if STACK_IS_EMPTY then ESTACK_ERR;
 69,
 66,
 20,
@@ -2619,7 +2636,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4D,
 50,
 54,
-;009A printDec();
+;009B printDec();
 70,
 72,
 69,
@@ -2636,7 +2653,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;009B if false then continue else fetch;
+;009C if false then continue else fetch;
 69,
 66,
 20,
@@ -2653,7 +2670,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;009C trace(from_microcode), directByte = 18;
+;009D trace(from_microcode), directByte = 18;
 74,
 72,
 61,
@@ -2670,7 +2687,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;009D pq_loop: BP <= inc, readCore(BP);
+;009E pq_loop: BP <= inc, readCore(BP);
 70,
 71,
 5F,
@@ -2687,7 +2704,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 69,
-;009E directByte = '"', if MDR_EQU_DB then pq_done;
+;009F directByte = '"', if MDR_EQU_DB then pq_done;
 64,
 69,
 72,
@@ -2704,7 +2721,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 22,
 27,
-;009F outChar(from_MDR);
+;00A0 outChar(from_MDR);
 6F,
 75,
 74,
@@ -2721,7 +2738,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4D,
 44,
 52,
-;00A0 trace(from_microcode), directByte = 3;
+;00A1 trace(from_microcode), directByte = 3;
 74,
 72,
 61,
@@ -2738,7 +2755,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00A1 directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
+;00A2 directByte = 0x0D, if MDR_EQU_DB then INTERNAL_ERR else pq_loop;
 64,
 69,
 72,
@@ -2755,7 +2772,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00A2 pq_done: traceBP();
+;00A3 pq_done: traceBP();
 70,
 71,
 5F,
@@ -2772,7 +2789,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 42,
 50,
-;00A3 if false then continue else fetch;
+;00A4 if false then continue else fetch;
 69,
 66,
 20,
@@ -2789,7 +2806,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00A4 trace(from_microcode), directByte = 27;
+;00A5 trace(from_microcode), directByte = 27;
 74,
 72,
 61,
@@ -2806,7 +2823,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00A5 pt_loop: if AT_TAB then fetch;
+;00A6 pt_loop: if AT_TAB then fetch;
 70,
 74,
 5F,
@@ -2823,7 +2840,7 @@ MEMORY_INITIALIZATION_VECTOR=
 54,
 5F,
 54,
-;00A6 directByte = ' ', outChar(from_microcode);
+;00A7 directByte = ' ', outChar(from_microcode);
 64,
 69,
 72,
@@ -2840,7 +2857,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 20,
 27,
-;00A7 if false then continue else pt_loop;
+;00A8 if false then continue else pt_loop;
 69,
 66,
 20,
@@ -2857,7 +2874,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00A8 trace(from_microcode), directByte = 6;
+;00A9 trace(from_microcode), directByte = 6;
 74,
 72,
 61,
@@ -2874,7 +2891,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00A9 crlf_fetch: outCRLF();
+;00AA crlf_fetch: outCRLF();
 63,
 72,
 6C,
@@ -2891,7 +2908,7 @@ MEMORY_INITIALIZATION_VECTOR=
 75,
 74,
 43,
-;00AA if false then continue else fetch;
+;00AB if false then continue else fetch;
 69,
 66,
 20,
@@ -2908,7 +2925,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00AB trace(from_microcode), directByte = 5;
+;00AC trace(from_microcode), directByte = 5;
 74,
 72,
 61,
@@ -2925,7 +2942,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00AC pc_loop: outChar(from_interpreter);
+;00AD pc_loop: outChar(from_interpreter);
 70,
 63,
 5F,
@@ -2942,7 +2959,7 @@ MEMORY_INITIALIZATION_VECTOR=
 68,
 61,
 72,
-;00AD trace(from_microcode), directByte = 3;
+;00AE trace(from_microcode), directByte = 3;
 74,
 72,
 61,
@@ -2959,7 +2976,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00AE IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;
+;00AF IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;
 49,
 4C,
 5F,
@@ -2976,7 +2993,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 69,
 66,
-;00AF trace(from_microcode), directByte = 8;
+;00B0 trace(from_microcode), directByte = 8;
 74,
 72,
 61,
@@ -2993,7 +3010,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00B0 gl: InlEnd <= InLine_start;
+;00B1 gl: InlEnd <= InLine_start;
 67,
 6C,
 3A,
@@ -3010,7 +3027,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 49,
 6E,
-;00B1 gl_loop: if CHARIN_READY then next else repeat;
+;00B2 gl_loop: if CHARIN_READY then next else repeat;
 67,
 6C,
 5F,
@@ -3027,7 +3044,7 @@ MEMORY_INITIALIZATION_VECTOR=
 48,
 41,
 52,
-;00B2 if KBD_BREAK then next else gl_char;
+;00B3 if KBD_BREAK then next else gl_char;
 69,
 66,
 20,
@@ -3044,7 +3061,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 68,
 65,
-;00B3 gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
+;00B4 gotChar = 1, if IS_RUNMODE then stop_run else gl_esc;
 67,
 6F,
 74,
@@ -3061,7 +3078,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;00B4 gl_char: if CHARIN_PRINTABLE then gl_print;
+;00B5 gl_char: if CHARIN_PRINTABLE then gl_print;
 67,
 6C,
 5F,
@@ -3078,7 +3095,7 @@ MEMORY_INITIALIZATION_VECTOR=
 48,
 41,
 52,
-;00B5 directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
+;00B6 directByte = 0x0D, if CHARIN_EQU_DB then gl_cr;
 64,
 69,
 72,
@@ -3095,7 +3112,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00B6 directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
+;00B7 directByte = 0x08, if CHARIN_EQU_DB then gl_bs;
 64,
 69,
 72,
@@ -3112,7 +3129,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00B7 directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
+;00B8 directByte = 0x1b, if CHARIN_EQU_DB then gl_esc;
 64,
 69,
 72,
@@ -3129,7 +3146,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 31,
-;00B8 directByte = 0x09, if CHARIN_EQU_DB then gl_tab;
+;00B9 directByte = 0x09, if CHARIN_EQU_DB then gl_tab;
 64,
 69,
 72,
@@ -3146,7 +3163,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00B9 gl_ignore: directByte = 0x07, outChar(from_microcode);
+;00BA gl_ignore: directByte = 0x07, outChar(from_microcode);
 67,
 6C,
 5F,
@@ -3163,7 +3180,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 65,
 63,
-;00BA gotChar = 1, if false then continue else gl_loop;
+;00BB gotChar = 1, if false then continue else gl_loop;
 67,
 6F,
 74,
@@ -3180,7 +3197,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;00BB gl_print: if INLEND_MAX then gl_ignore;
+;00BC gl_print: if INLEND_MAX then gl_ignore;
 67,
 6C,
 5F,
@@ -3197,7 +3214,7 @@ MEMORY_INITIALIZATION_VECTOR=
 49,
 4E,
 4C,
-;00BC outChar(from_charin);
+;00BD outChar(from_charin);
 6F,
 75,
 74,
@@ -3214,7 +3231,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 68,
 61,
-;00BD writeCore(InlEnd, CHARIN), InlEnd <= inc;
+;00BE writeCore(InlEnd, CHARIN), InlEnd <= inc;
 77,
 72,
 69,
@@ -3231,7 +3248,7 @@ MEMORY_INITIALIZATION_VECTOR=
 45,
 6E,
 64,
-;00BE gl_write0: writeCore(InlEnd, zero);
+;00BF gl_write0: writeCore(InlEnd, zero);
 67,
 6C,
 5F,
@@ -3248,7 +3265,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 74,
 65,
-;00BF gotChar = 1, if false then continue else gl_loop;
+;00C0 gotChar = 1, if false then continue else gl_loop;
 67,
 6F,
 74,
@@ -3265,7 +3282,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;00C0 gl_esc: directByte = 0x07, outChar(from_microcode);
+;00C1 gl_esc: directByte = 0x07, outChar(from_microcode);
 67,
 6C,
 5F,
@@ -3282,7 +3299,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 42,
 79,
-;00C1 outCRLF();
+;00C2 outCRLF();
 6F,
 75,
 74,
@@ -3299,7 +3316,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00C2 gotChar = 1, if false then continue else gl;
+;00C3 gotChar = 1, if false then continue else gl;
 67,
 6F,
 74,
@@ -3316,7 +3333,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;00C3 gl_bs: if INLEND_MIN then gl_ignore;
+;00C4 gl_bs: if INLEND_MIN then gl_ignore;
 67,
 6C,
 5F,
@@ -3333,7 +3350,7 @@ MEMORY_INITIALIZATION_VECTOR=
 45,
 4E,
 44,
-;00C4 directByte = 0x08, outChar(from_microcode);
+;00C5 directByte = 0x08, outChar(from_microcode);
 64,
 69,
 72,
@@ -3350,7 +3367,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00C5 InlEnd <= dec, if false then continue else gl_write0;
+;00C6 InlEnd <= dec, if false then continue else gl_write0;
 49,
 6E,
 6C,
@@ -3367,7 +3384,7 @@ MEMORY_INITIALIZATION_VECTOR=
 2C,
 20,
 69,
-;00C6 gl_cr: writeCore(InlEnd, CHARIN), InlEnd <= inc;
+;00C7 gl_cr: writeCore(InlEnd, CHARIN), InlEnd <= inc;
 67,
 6C,
 5F,
@@ -3384,7 +3401,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6F,
 72,
 65,
-;00C7 writeCore(InlEnd, zero);
+;00C8 writeCore(InlEnd, zero);
 77,
 72,
 69,
@@ -3401,7 +3418,7 @@ MEMORY_INITIALIZATION_VECTOR=
 45,
 6E,
 64,
-;00C8 dump_input();
+;00C9 dump_input();
 64,
 75,
 6D,
@@ -3418,7 +3435,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00C9 outCRLF();
+;00CA outCRLF();
 6F,
 75,
 74,
@@ -3435,7 +3452,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00CA gotChar = 1, BP <= Inline_start, if false then continue else fetch;
+;00CB gotChar = 1, BP <= Inline_start, if false then continue else fetch;
 67,
 6F,
 74,
@@ -3452,7 +3469,7 @@ MEMORY_INITIALIZATION_VECTOR=
 42,
 50,
 20,
-;00CB gl_tab: if INLEND_MAX then gl_ignore;
+;00CC gl_tab: if INLEND_MAX then gl_ignore;
 67,
 6C,
 5F,
@@ -3469,7 +3486,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4C,
 45,
 4E,
-;00CC gl_tabloop: if AT_TAB then gl_write0;
+;00CD gl_tabloop: if AT_TAB then gl_write0;
 67,
 6C,
 5F,
@@ -3486,7 +3503,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 20,
 41,
-;00CD directByte = ' ', outChar(from_microcode);
+;00CE directByte = ' ', outChar(from_microcode);
 64,
 69,
 72,
@@ -3503,7 +3520,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 20,
 27,
-;00CE directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
+;00CF directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
 64,
 69,
 72,
@@ -3520,7 +3537,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 20,
 27,
-;00CF if false then continue else gl_tabloop;
+;00D0 if false then continue else gl_tabloop;
 69,
 66,
 20,
@@ -3537,7 +3554,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00D0 trace(from_microcode), directByte = 40;
+;00D1 trace(from_microcode), directByte = 40;
 74,
 72,
 61,
@@ -3554,7 +3571,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;00D1 alu <= S_fromStack, ExpStack <= pop2;
+;00D2 alu <= S_fromStack, ExpStack <= pop2;
 61,
 6C,
 75,
@@ -3571,7 +3588,7 @@ MEMORY_INITIALIZATION_VECTOR=
 53,
 74,
 61,
-;00D2 alu <= S_plus_R;
+;00D3 alu <= S_plus_R;
 61,
 6C,
 75,
@@ -3588,7 +3605,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 52,
 3B,
-;00D3 T <= from_YLo, if Y_SIGN then SYNTAX_ERR;
+;00D4 T <= from_YLo, if Y_SIGN then SYNTAX_ERR;
 54,
 20,
 3C,
@@ -3605,7 +3622,7 @@ MEMORY_INITIALIZATION_VECTOR=
 2C,
 20,
 69,
-;00D4 Lino <= T, if Y_ZERO then SYNTAX_ERR;
+;00D5 Lino <= T, if Y_ZERO then SYNTAX_ERR;
 4C,
 69,
 6E,
@@ -3622,7 +3639,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 59,
 5F,
-;00D5 traceALU();
+;00D6 traceALU();
 74,
 72,
 61,
@@ -3639,7 +3656,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00D6 skipSpaces();
+;00D7 skipSpaces();
 73,
 6B,
 69,
@@ -3656,7 +3673,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00D7 T <= BP;
+;00D8 T <= BP;
 54,
 20,
 3C,
@@ -3673,7 +3690,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00D8 il_findBE: BE <= T, readCore(T);
+;00D9 il_findBE: BE <= T, readCore(T);
 69,
 6C,
 5F,
@@ -3690,7 +3707,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 3C,
 3D,
-;00D9 directByte = 0x0D, if MDR_EQU_DB then il_fork;
+;00DA directByte = 0x0D, if MDR_EQU_DB then il_fork;
 64,
 69,
 72,
@@ -3707,7 +3724,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00DA T <= inc, if false then continue else il_findBE;
+;00DB T <= inc, if false then continue else il_findBE;
 54,
 20,
 3C,
@@ -3724,7 +3741,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 61,
 6C,
-;00DB il_fork: scanProgram();
+;00DC il_fork: scanProgram();
 69,
 6C,
 5F,
@@ -3741,7 +3758,7 @@ MEMORY_INITIALIZATION_VECTOR=
 50,
 72,
 6F,
-;00DC if IMPLINE_EMPTY then next else changeLine;
+;00DD if IMPLINE_EMPTY then next else changeLine;
 69,
 66,
 20,
@@ -3758,7 +3775,7 @@ MEMORY_INITIALIZATION_VECTOR=
 50,
 54,
 59,
-;00DD deleteLine: if R_IS_ZERO then WarmStart;
+;00DE deleteLine: if R_IS_ZERO then WarmStart;
 64,
 65,
 6C,
@@ -3775,7 +3792,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 20,
 52,
-;00DE if Y_ZERO then next else WarmStart;
+;00DF if Y_ZERO then next else WarmStart;
 69,
 66,
 20,
@@ -3792,7 +3809,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6E,
 20,
 6E,
-;00DF findPrgEnd();
+;00E0 findPrgEnd();
 66,
 69,
 6E,
@@ -3809,7 +3826,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00E0 copyCore(copy_init_del);
+;00E1 copyCore(copy_init_del);
 63,
 6F,
 70,
@@ -3826,7 +3843,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 69,
 6E,
-;00E1 if false then continue else WarmStart;
+;00E2 if false then continue else WarmStart;
 69,
 66,
 20,
@@ -3843,7 +3860,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00E2 changeLine: if R_IS_ZERO then appendLine;
+;00E3 changeLine: if R_IS_ZERO then appendLine;
 63,
 68,
 61,
@@ -3860,7 +3877,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 20,
 52,
-;00E3 if Y_ZERO then next else insertLine;
+;00E4 if Y_ZERO then next else insertLine;
 69,
 66,
 20,
@@ -3877,7 +3894,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6E,
 20,
 6E,
-;00E4 replaceLine: findPrgEnd();
+;00E5 replaceLine: findPrgEnd();
 72,
 65,
 70,
@@ -3894,7 +3911,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 69,
 6E,
-;00E5 copyCore(copy_init_del);
+;00E6 copyCore(copy_init_del);
 63,
 6F,
 70,
@@ -3911,7 +3928,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 69,
 6E,
-;00E6 scanProgram();
+;00E7 scanProgram();
 73,
 63,
 61,
@@ -3928,7 +3945,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3B,
 20,
 20,
-;00E7 insertLine: findPrgEnd();
+;00E8 insertLine: findPrgEnd();
 69,
 6E,
 73,
@@ -3945,7 +3962,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 6E,
 64,
-;00E8 copyCore(copy_init_ins);
+;00E9 copyCore(copy_init_ins);
 63,
 6F,
 70,
@@ -3962,7 +3979,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 69,
 6E,
-;00E9 ins_finish: copyLine(LS);
+;00EA ins_finish: copyLine(LS);
 69,
 6E,
 73,
@@ -3979,7 +3996,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6F,
 70,
 79,
-;00EA if false then continue else WarmStart;
+;00EB if false then continue else WarmStart;
 69,
 66,
 20,
@@ -3996,7 +4013,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00EB appendLine: T <= dec;
+;00EC appendLine: T <= dec;
 61,
 70,
 70,
@@ -4013,7 +4030,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 3C,
 3D,
-;00EC copyLine(dec);
+;00ED copyLine(dec);
 63,
 6F,
 70,
@@ -4030,7 +4047,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3B,
 20,
 20,
-;00ED write2Nulls(same);
+;00EE write2Nulls(same);
 77,
 72,
 69,
@@ -4047,7 +4064,7 @@ MEMORY_INITIALIZATION_VECTOR=
 61,
 6D,
 65,
-;00EE if false then continue else WarmStart;
+;00EF if false then continue else WarmStart;
 69,
 66,
 20,
@@ -4064,7 +4081,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;00EF copyLine: alu <= S_fromLino;
+;00F0 copyLine: alu <= S_fromLino;
 63,
 6F,
 70,
@@ -4081,7 +4098,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 3C,
 3D,
-;00F0 writeCore(T, from_SHi);
+;00F1 writeCore(T, from_SHi);
 77,
 72,
 69,
@@ -4098,7 +4115,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 72,
 6F,
-;00F1 T <= inc;
+;00F2 T <= inc;
 54,
 20,
 3C,
@@ -4115,7 +4132,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00F2 writeCore(T, from_SLo);
+;00F3 writeCore(T, from_SLo);
 77,
 72,
 69,
@@ -4132,7 +4149,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 72,
 6F,
-;00F3 T <= inc;
+;00F4 T <= inc;
 54,
 20,
 3C,
@@ -4149,7 +4166,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00F4 app_loop: readCore(BP);
+;00F5 app_loop: readCore(BP);
 61,
 70,
 70,
@@ -4166,7 +4183,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 43,
 6F,
-;00F5 writeCore(T, same);
+;00F6 writeCore(T, same);
 77,
 72,
 69,
@@ -4183,7 +4200,7 @@ MEMORY_INITIALIZATION_VECTOR=
 73,
 61,
 6D,
-;00F6 BP <= inc, T <= inc;
+;00F7 BP <= inc, T <= inc;
 42,
 50,
 20,
@@ -4200,7 +4217,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3C,
 3D,
 20,
-;00F7 directByte = 0x0D, if MDR_EQU_DB then return else app_loop;
+;00F8 directByte = 0x0D, if MDR_EQU_DB then return else app_loop;
 64,
 69,
 72,
@@ -4217,7 +4234,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;00F8 findPrgEnd: T <= Prog_start;
+;00F9 findPrgEnd: T <= Prog_start;
 66,
 69,
 6E,
@@ -4234,7 +4251,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 3C,
 3D,
-;00F9 fpe_loop: readCore16(same);
+;00FA fpe_loop: readCore16(same);
 66,
 70,
 65,
@@ -4251,7 +4268,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 43,
 6F,
-;00FA if R_IS_ZERO then next else fpe_next;
+;00FB if R_IS_ZERO then next else fpe_next;
 69,
 66,
 20,
@@ -4268,7 +4285,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 68,
 65,
-;00FB T <= dec;
+;00FC T <= dec;
 54,
 20,
 3C,
@@ -4285,7 +4302,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;00FC PrgEnd <= T, if true then return else continue;
+;00FD PrgEnd <= T, if true then return else continue;
 50,
 72,
 67,
@@ -4302,7 +4319,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;00FD fpe_next: findNextCR(same);
+;00FE fpe_next: findNextCR(same);
 66,
 70,
 65,
@@ -4319,7 +4336,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 4E,
 65,
-;00FE T <= inc, if false then continue else fpe_loop;
+;00FF T <= inc, if false then continue else fpe_loop;
 54,
 20,
 3C,
@@ -4336,7 +4353,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 61,
 6C,
-;00FF scanProgram: T <= zero;
+;0100 scanProgram: T <= zero;
 73,
 63,
 61,
@@ -4353,7 +4370,7 @@ MEMORY_INITIALIZATION_VECTOR=
 54,
 20,
 3C,
-;0100 LS <= T, LE <= T, T <= Prog_start;
+;0101 LS <= T, LE <= T, T <= Prog_start;
 4C,
 53,
 20,
@@ -4370,7 +4387,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 54,
-;0101 scan_loop: LS <= T, readCore16(same);
+;0102 scan_loop: LS <= T, readCore16(same);
 73,
 63,
 61,
@@ -4387,7 +4404,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 3C,
 3D,
-;0102 alu <= S_fromLino, if R_IS_ZERO then return;
+;0103 alu <= S_fromLino, if R_IS_ZERO then return;
 61,
 6C,
 75,
@@ -4404,7 +4421,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4C,
 69,
 6E,
-;0103 scan_check: alu <= S_minus_R;
+;0104 scan_check: alu <= S_minus_R;
 73,
 63,
 61,
@@ -4421,7 +4438,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 75,
 20,
-;0104 traceALU();
+;0105 traceALU();
 74,
 72,
 61,
@@ -4438,7 +4455,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0105 if Y_ZERO then scan_found else next;
+;0106 if Y_ZERO then scan_found else next;
 69,
 66,
 20,
@@ -4455,7 +4472,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6E,
 20,
 73,
-;0106 if Y_SIGN then scan_found else next;
+;0107 if Y_SIGN then scan_found else next;
 69,
 66,
 20,
@@ -4472,7 +4489,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6E,
 20,
 73,
-;0107 scan_next: findNextCR(same);
+;0108 scan_next: findNextCR(same);
 73,
 63,
 61,
@@ -4489,7 +4506,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6E,
 64,
 4E,
-;0108 scan_line: T <= inc, if false then continue else scan_loop;
+;0109 scan_line: T <= inc, if false then continue else scan_loop;
 73,
 63,
 61,
@@ -4506,7 +4523,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3C,
 3D,
 20,
-;0109 scan_found: findNextCR(same);
+;010A scan_found: findNextCR(same);
 73,
 63,
 61,
@@ -4523,7 +4540,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 6E,
 64,
-;010A LE <= T;
+;010B LE <= T;
 4C,
 45,
 20,
@@ -4540,7 +4557,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;010B if true then return else continue;
+;010C if true then return else continue;
 69,
 66,
 20,
@@ -4557,7 +4574,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 65,
 74,
-;010C copyCore: T <= from_S, if Y_ZERO then return;
+;010D copyCore: T <= from_S, if Y_ZERO then return;
 63,
 6F,
 70,
@@ -4574,7 +4591,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 66,
-;010D readCore(T);
+;010E readCore(T);
 72,
 65,
 61,
@@ -4591,7 +4608,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;010E T <= from_R;
+;010F T <= from_R;
 54,
 20,
 3C,
@@ -4608,7 +4625,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;010F writeCore(T, same);
+;0110 writeCore(T, same);
 77,
 72,
 69,
@@ -4625,7 +4642,7 @@ MEMORY_INITIALIZATION_VECTOR=
 73,
 61,
 6D,
-;0110 traceALU();
+;0111 traceALU();
 74,
 72,
 61,
@@ -4642,7 +4659,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0111 alu <= copy_next, if false then continue else copyCore;
+;0112 alu <= copy_next, if false then continue else copyCore;
 61,
 6C,
 75,
@@ -4659,7 +4676,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 78,
 74,
-;0112 trace(from_microcode), directByte = 43;
+;0113 trace(from_microcode), directByte = 43;
 74,
 72,
 61,
@@ -4676,7 +4693,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0113 if false then continue else ColdStart;
+;0114 if false then continue else ColdStart;
 69,
 66,
 20,
@@ -4693,7 +4710,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0114 trace(from_microcode), directByte = 42;
+;0115 trace(from_microcode), directByte = 42;
 74,
 72,
 61,
@@ -4710,7 +4727,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0115 T <= IL_PC;
+;0116 T <= IL_PC;
 54,
 20,
 3C,
@@ -4727,7 +4744,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0116 XQhere <= T, readCore16(Prog_start);
+;0117 XQhere <= T, readCore16(Prog_start);
 58,
 51,
 68,
@@ -4744,7 +4761,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 65,
 61,
-;0117 if R_IS_ZERO then NOPROG_ERR;
+;0118 if R_IS_ZERO then NOPROG_ERR;
 69,
 66,
 20,
@@ -4761,7 +4778,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 68,
 65,
-;0118 BP <= T, T <= from_R;
+;0119 BP <= T, T <= from_R;
 42,
 50,
 20,
@@ -4778,7 +4795,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 66,
 72,
-;0119 Lino <= T, if false then continue else fetch;
+;011A Lino <= T, if false then continue else fetch;
 4C,
 69,
 6E,
@@ -4795,7 +4812,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 66,
 61,
-;011A trace(from_microcode), directByte = 44;
+;011B trace(from_microcode), directByte = 44;
 74,
 72,
 61,
@@ -4812,7 +4829,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;011B stop_run: directByte = 'S', outChar(from_microcode);
+;011C stop_run: directByte = 'S', outChar(from_microcode);
 73,
 74,
 6F,
@@ -4829,7 +4846,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 63,
 74,
-;011C directByte = 'T', outChar(from_microcode);
+;011D directByte = 'T', outChar(from_microcode);
 64,
 69,
 72,
@@ -4846,7 +4863,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 54,
 27,
-;011D directByte = 'O', outChar(from_microcode);
+;011E directByte = 'O', outChar(from_microcode);
 64,
 69,
 72,
@@ -4863,7 +4880,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 4F,
 27,
-;011E directByte = 'P', outChar(from_microcode);
+;011F directByte = 'P', outChar(from_microcode);
 64,
 69,
 72,
@@ -4880,7 +4897,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 50,
 27,
-;011F if false then continue else print_lino;
+;0120 if false then continue else print_lino;
 69,
 66,
 20,
@@ -4897,7 +4914,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0120 trace(from_microcode), directByte = 49;
+;0121 trace(from_microcode), directByte = 49;
 74,
 72,
 61,
@@ -4914,7 +4931,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0121 alu <= R_fromStack, ExpStack <= pop2;
+;0122 alu <= R_fromStack, ExpStack <= pop2;
 61,
 6C,
 75,
@@ -4931,7 +4948,7 @@ MEMORY_INITIALIZATION_VECTOR=
 53,
 74,
 61,
-;0122 T <= ExpStack, ExpStack <= pop2;
+;0123 T <= ExpStack, ExpStack <= pop2;
 54,
 20,
 3C,
@@ -4948,7 +4965,7 @@ MEMORY_INITIALIZATION_VECTOR=
 2C,
 20,
 45,
-;0123 alu <= S_fromStack, ExpStack <= pop2;
+;0124 alu <= S_fromStack, ExpStack <= pop2;
 61,
 6C,
 75,
@@ -4965,7 +4982,7 @@ MEMORY_INITIALIZATION_VECTOR=
 53,
 74,
 61,
-;0124 traceALU();
+;0125 traceALU();
 74,
 72,
 61,
@@ -4982,7 +4999,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0125 directByte = 20, if S_EQU_DB_MOD32 then u_peek8;
+;0126 directByte = 20, if S_EQU_DB_MOD32 then u_peek8;
 64,
 69,
 72,
@@ -4999,7 +5016,7 @@ MEMORY_INITIALIZATION_VECTOR=
 32,
 30,
 2C,
-;0126 directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
+;0127 directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
 64,
 69,
 72,
@@ -5016,7 +5033,7 @@ MEMORY_INITIALIZATION_VECTOR=
 32,
 34,
 2C,
-;0127 directByte = 21, if S_EQU_DB_MOD32 then u_peek16;
+;0128 directByte = 21, if S_EQU_DB_MOD32 then u_peek16;
 64,
 69,
 72,
@@ -5033,7 +5050,7 @@ MEMORY_INITIALIZATION_VECTOR=
 32,
 31,
 2C,
-;0128 directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
+;0129 directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
 64,
 69,
 72,
@@ -5050,7 +5067,7 @@ MEMORY_INITIALIZATION_VECTOR=
 32,
 35,
 2C,
-;0129 T <= binop, if false then continue else u_done;
+;012A T <= binop, if false then continue else u_done;
 54,
 20,
 3C,
@@ -5067,7 +5084,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 20,
 66,
-;012A u_peek8: readCore(T);
+;012B u_peek8: readCore(T);
 75,
 5F,
 70,
@@ -5084,7 +5101,7 @@ MEMORY_INITIALIZATION_VECTOR=
 43,
 6F,
 72,
-;012B u_in: T <= MDR;
+;012C u_in: T <= MDR;
 75,
 5F,
 69,
@@ -5101,7 +5118,7 @@ MEMORY_INITIALIZATION_VECTOR=
 52,
 3B,
 20,
-;012C u_done: ExpStack <= push_TWord, if false then continue else fetch;
+;012D u_done: ExpStack <= push_TWord, if false then continue else fetch;
 75,
 5F,
 64,
@@ -5118,7 +5135,7 @@ MEMORY_INITIALIZATION_VECTOR=
 61,
 63,
 6B,
-;012D u_peek16: readCore16(same);
+;012E u_peek16: readCore16(same);
 75,
 5F,
 70,
@@ -5135,7 +5152,7 @@ MEMORY_INITIALIZATION_VECTOR=
 64,
 43,
 6F,
-;012E T <= from_R, if false then continue else u_done;
+;012F T <= from_R, if false then continue else u_done;
 54,
 20,
 3C,
@@ -5152,7 +5169,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 66,
 20,
-;012F u_poke8: prepWrite();
+;0130 u_poke8: prepWrite();
 75,
 5F,
 70,
@@ -5169,7 +5186,7 @@ MEMORY_INITIALIZATION_VECTOR=
 57,
 72,
 69,
-;0130 writeCore(T, from_SLo);
+;0131 writeCore(T, from_SLo);
 77,
 72,
 69,
@@ -5186,7 +5203,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 72,
 6F,
-;0131 if false then continue else u_peek8;
+;0132 if false then continue else u_peek8;
 69,
 66,
 20,
@@ -5203,7 +5220,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0132 u_poke16: prepWrite();
+;0133 u_poke16: prepWrite();
 75,
 5F,
 70,
@@ -5220,7 +5237,7 @@ MEMORY_INITIALIZATION_VECTOR=
 70,
 57,
 72,
-;0133 writeCore(T, from_SHi), T <= inc;
+;0134 writeCore(T, from_SHi), T <= inc;
 77,
 72,
 69,
@@ -5237,7 +5254,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 72,
 6F,
-;0134 writeCore(T, from_SLo);
+;0135 writeCore(T, from_SLo);
 77,
 72,
 69,
@@ -5254,7 +5271,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 72,
 6F,
-;0135 T <= dec, if false then continue else u_peek16;
+;0136 T <= dec, if false then continue else u_peek16;
 54,
 20,
 3C,
@@ -5271,7 +5288,7 @@ MEMORY_INITIALIZATION_VECTOR=
 66,
 61,
 6C,
-;0136 prepWrite: T <= save;
+;0137 prepWrite: T <= save;
 70,
 72,
 65,
@@ -5288,7 +5305,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3C,
 3D,
 20,
-;0137 T <= from_R;
+;0138 T <= from_R;
 54,
 20,
 3C,
@@ -5305,7 +5322,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0138 alu <= S_fromT, T <= recall, if true then return else continue;
+;0139 alu <= S_fromT, T <= recall, if true then return else continue;
 61,
 6C,
 75,
@@ -5322,7 +5339,7 @@ MEMORY_INITIALIZATION_VECTOR=
 54,
 2C,
 20,
-;0139 trace(from_microcode), directByte = 19;
+;013A trace(from_microcode), directByte = 19;
 74,
 72,
 61,
@@ -5339,7 +5356,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;013A if STACK_IS_EMPTY then RSTACK_ERR;
+;013B if STACK_IS_EMPTY then RSTACK_ERR;
 69,
 66,
 20,
@@ -5356,7 +5373,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4D,
 50,
 54,
-;013B IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch;
+;013C IL_PC <= RetStack, RetStack <= pop, if false then continue else fetch;
 49,
 4C,
 5F,
@@ -5373,7 +5390,7 @@ MEMORY_INITIALIZATION_VECTOR=
 74,
 61,
 63,
-;013C trace(from_microcode), directByte = 20;
+;013D trace(from_microcode), directByte = 20;
 74,
 72,
 61,
@@ -5390,7 +5407,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;013D trace(from_microcode), directByte = 3;
+;013E trace(from_microcode), directByte = 3;
 74,
 72,
 61,
@@ -5407,7 +5424,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;013E if STACK_IS_FULL then RSTACK_ERR;
+;013F if STACK_IS_FULL then RSTACK_ERR;
 69,
 66,
 20,
@@ -5424,7 +5441,7 @@ MEMORY_INITIALIZATION_VECTOR=
 55,
 4C,
 4C,
-;013F RetStack <= push_IL_PC_PLUS_1, if false then continue else jump;
+;0140 RetStack <= push_IL_PC_PLUS_1, if false then continue else jump;
 52,
 65,
 74,
@@ -5441,7 +5458,7 @@ MEMORY_INITIALIZATION_VECTOR=
 75,
 73,
 68,
-;0140 trace(from_microcode), directByte = 21;
+;0141 trace(from_microcode), directByte = 21;
 74,
 72,
 61,
@@ -5458,7 +5475,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0141 trace(from_microcode), directByte = 3;
+;0142 trace(from_microcode), directByte = 3;
 74,
 72,
 61,
@@ -5475,7 +5492,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0142 jump: IL_PC <= direct11, if false then continue else fetch;
+;0143 jump: IL_PC <= direct11, if false then continue else fetch;
 6A,
 75,
 6D,
@@ -5492,7 +5509,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 64,
-;0143 trace(from_microcode), directByte = 7;
+;0144 trace(from_microcode), directByte = 7;
 74,
 72,
 61,
@@ -5509,7 +5526,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0144 IL_PC <= pc_plus_off6;
+;0145 IL_PC <= pc_plus_off6;
 49,
 4C,
 5F,
@@ -5526,7 +5543,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 75,
 73,
-;0145 br_exit: trace(from_microcode), directByte = 30;
+;0146 br_exit: trace(from_microcode), directByte = 30;
 62,
 72,
 5F,
@@ -5543,7 +5560,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 28,
 66,
-;0146 if false then continue else fetch;
+;0147 if false then continue else fetch;
 69,
 66,
 20,
@@ -5560,7 +5577,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0147 trace(from_microcode), directByte = 7;
+;0148 trace(from_microcode), directByte = 7;
 74,
 72,
 61,
@@ -5577,7 +5594,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0148 if false then continue else badop;
+;0149 if false then continue else badop;
 69,
 66,
 20,
@@ -5594,7 +5611,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0149 trace(from_microcode), directByte = 17;
+;014A trace(from_microcode), directByte = 17;
 74,
 72,
 61,
@@ -5611,7 +5628,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;014A T <= IL_PC, BP <= save, skipSpaces();
+;014B T <= IL_PC, BP <= save, skipSpaces();
 54,
 20,
 3C,
@@ -5628,7 +5645,7 @@ MEMORY_INITIALIZATION_VECTOR=
 50,
 20,
 3C,
-;014B bc_loop: trace(from_microcode), directByte = 3;
+;014C bc_loop: trace(from_microcode), directByte = 3;
 62,
 63,
 5F,
@@ -5645,7 +5662,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 28,
 66,
-;014C readCore(BP);
+;014D readCore(BP);
 72,
 65,
 61,
@@ -5662,7 +5679,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;014D if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
+;014E if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
 69,
 66,
 20,
@@ -5679,7 +5696,7 @@ MEMORY_INITIALIZATION_VECTOR=
 53,
 5F,
 49,
-;014E if ILCODEBYTE_BIT7 then bc_match;
+;014F if ILCODEBYTE_BIT7 then bc_match;
 69,
 66,
 20,
@@ -5696,7 +5713,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 42,
 49,
-;014F BP <= inc, IL_PC <= inc, if false then continue else bc_loop;
+;0150 BP <= inc, IL_PC <= inc, if false then continue else bc_loop;
 42,
 50,
 20,
@@ -5713,7 +5730,7 @@ MEMORY_INITIALIZATION_VECTOR=
 5F,
 50,
 43,
-;0150 bc_match: BP <= inc, IL_PC <= inc;
+;0151 bc_match: BP <= inc, IL_PC <= inc;
 62,
 63,
 5F,
@@ -5730,7 +5747,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3C,
 3D,
 20,
-;0151 traceBP();
+;0152 traceBP();
 74,
 72,
 61,
@@ -5747,7 +5764,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0152 if false then continue else fetch;
+;0153 if false then continue else fetch;
 69,
 66,
 20,
@@ -5764,7 +5781,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0153 bc_exit: BP <= recall, IL_PC <= T;
+;0154 bc_exit: BP <= recall, IL_PC <= T;
 62,
 63,
 5F,
@@ -5781,7 +5798,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 72,
-;0154 traceBP();
+;0155 traceBP();
 74,
 72,
 61,
@@ -5798,7 +5815,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0155 IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
+;0156 IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
 49,
 4C,
 5F,
@@ -5815,7 +5832,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 75,
 73,
-;0156 trace(from_microcode), directByte = 16;
+;0157 trace(from_microcode), directByte = 16;
 74,
 72,
 61,
@@ -5832,7 +5849,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0157 skipSpaces();
+;0158 skipSpaces();
 73,
 6B,
 69,
@@ -5849,7 +5866,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0158 MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;
+;0159 MDR <= ToUpper, if MDR_IS_ALPHA then bv_exec;
 4D,
 44,
 52,
@@ -5866,7 +5883,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 2C,
 20,
-;0159 IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
+;015A IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
 49,
 4C,
 5F,
@@ -5883,7 +5900,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 75,
 73,
-;015A bv_exec: T <= MDRx2, if STACK_IS_FULL then ESTACK_ERR;
+;015B bv_exec: T <= MDRx2, if STACK_IS_FULL then ESTACK_ERR;
 62,
 76,
 5F,
@@ -5900,7 +5917,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 4D,
 44,
-;015B ExpStack <= push_TByte, BP <= inc, if false then continue else fetch;
+;015C ExpStack <= push_TByte, BP <= inc, if false then continue else fetch;
 45,
 78,
 70,
@@ -5917,7 +5934,7 @@ MEMORY_INITIALIZATION_VECTOR=
 75,
 73,
 68,
-;015C trace(from_microcode), directByte = 14;
+;015D trace(from_microcode), directByte = 14;
 74,
 72,
 61,
@@ -5934,7 +5951,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;015D skipSpaces();
+;015E skipSpaces();
 73,
 6B,
 69,
@@ -5951,7 +5968,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;015E alu <= reset0, if MDR_IS_NUM then bn_loop;
+;015F alu <= reset0, if MDR_IS_NUM then bn_loop;
 61,
 6C,
 75,
@@ -5968,7 +5985,7 @@ MEMORY_INITIALIZATION_VECTOR=
 2C,
 20,
 69,
-;015F IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;
+;0160 IL_PC <= pc_plus_off5, if OFF_IS_ZERO then badop;
 49,
 4C,
 5F,
@@ -5985,7 +6002,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 75,
 73,
-;0160 bn_exit: traceY();
+;0161 bn_exit: traceY();
 62,
 6E,
 5F,
@@ -6002,7 +6019,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 59,
 28,
-;0161 trace(from_microcode), directByte = 30;
+;0162 trace(from_microcode), directByte = 30;
 74,
 72,
 61,
@@ -6019,7 +6036,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;0162 if false then continue else fetch;
+;0163 if false then continue else fetch;
 69,
 66,
 20,
@@ -6036,7 +6053,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0163 bn_loop: alu <= Yx10_plus_MDR, BP <= inc;
+;0164 bn_loop: alu <= Yx10_plus_MDR, BP <= inc;
 62,
 6E,
 5F,
@@ -6053,7 +6070,7 @@ MEMORY_INITIALIZATION_VECTOR=
 3C,
 3D,
 20,
-;0164 if ALU_OVERFLOW then OVERFLOW_ERR;
+;0165 if ALU_OVERFLOW then OVERFLOW_ERR;
 69,
 66,
 20,
@@ -6070,7 +6087,7 @@ MEMORY_INITIALIZATION_VECTOR=
 4F,
 57,
 20,
-;0165 readCore(BP);
+;0166 readCore(BP);
 72,
 65,
 61,
@@ -6087,7 +6104,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0166 if MDR_IS_NUM then bn_loop;
+;0167 if MDR_IS_NUM then bn_loop;
 69,
 66,
 20,
@@ -6104,7 +6121,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 74,
 68,
-;0167 T <= from_YLo, if STACK_IS_FULL then ESTACK_ERR;
+;0168 T <= from_YLo, if STACK_IS_FULL then ESTACK_ERR;
 54,
 20,
 3C,
@@ -6121,7 +6138,7 @@ MEMORY_INITIALIZATION_VECTOR=
 2C,
 20,
 69,
-;0168 ExpStack <= push_TWord, if false then continue else bn_exit;
+;0169 ExpStack <= push_TWord, if false then continue else bn_exit;
 45,
 78,
 70,
@@ -6138,7 +6155,7 @@ MEMORY_INITIALIZATION_VECTOR=
 75,
 73,
 68,
-;0169 trace(from_microcode), directByte = 13;
+;016A trace(from_microcode), directByte = 13;
 74,
 72,
 61,
@@ -6155,7 +6172,7 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 72,
 6F,
-;016A skipSpaces();
+;016B skipSpaces();
 73,
 6B,
 69,
@@ -6172,7 +6189,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;016B directByte = 0x0D, if MDR_EQU_DB then fetch;
+;016C directByte = 0x0D, if MDR_EQU_DB then fetch;
 64,
 69,
 72,
@@ -6189,7 +6206,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;016C IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
+;016D IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
 49,
 4C,
 5F,
@@ -6206,7 +6223,7 @@ MEMORY_INITIALIZATION_VECTOR=
 6C,
 75,
 73,
-;016D BREAK: gotChar = 1, trace(from_microcode), directByte = 55;
+;016E BREAK: gotChar = 1, trace(from_microcode), directByte = 55;
 42,
 52,
 45,
@@ -6223,7 +6240,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 20,
 3D,
-;016E outBeep();
+;016F outBeep();
 6F,
 75,
 74,
@@ -6240,7 +6257,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;016F directByte = 'B', outChar(from_microcode);
+;0170 directByte = 'B', outChar(from_microcode);
 64,
 69,
 72,
@@ -6257,7 +6274,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 42,
 27,
-;0170 directByte = 'R', outChar(from_microcode);
+;0171 directByte = 'R', outChar(from_microcode);
 64,
 69,
 72,
@@ -6274,7 +6291,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 52,
 27,
-;0171 directByte = 'K', outChar(from_microcode);
+;0172 directByte = 'K', outChar(from_microcode);
 64,
 69,
 72,
@@ -6291,7 +6308,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 4B,
 27,
-;0172 if false then continue else traceDetails;
+;0173 if false then continue else traceDetails;
 69,
 66,
 20,
@@ -6308,7 +6325,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0173 NOPROG_ERR: trace(from_microcode), directByte = 50;
+;0174 NOPROG_ERR: trace(from_microcode), directByte = 50;
 4E,
 4F,
 50,
@@ -6325,7 +6342,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 61,
 63,
-;0174 if false then continue else traceError;
+;0175 if false then continue else traceError;
 69,
 66,
 20,
@@ -6342,7 +6359,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0175 DIVBY0_ERR: trace(from_microcode), directByte = 57;
+;0176 DIVBY0_ERR: trace(from_microcode), directByte = 57;
 44,
 49,
 56,
@@ -6359,7 +6376,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 61,
 63,
-;0176 if false then continue else traceError;
+;0177 if false then continue else traceError;
 69,
 66,
 20,
@@ -6376,7 +6393,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0177 OVERFLOW_ERR: trace(from_microcode), directByte = 58;
+;0178 OVERFLOW_ERR: trace(from_microcode), directByte = 58;
 4F,
 56,
 45,
@@ -6393,7 +6410,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 74,
 72,
-;0178 if false then continue else traceError;
+;0179 if false then continue else traceError;
 69,
 66,
 20,
@@ -6410,7 +6427,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0179 SYNTAX_ERR: trace(from_microcode), directByte = 61;
+;017A SYNTAX_ERR: trace(from_microcode), directByte = 61;
 53,
 59,
 4E,
@@ -6427,7 +6444,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 61,
 63,
-;017A if false then continue else traceError;
+;017B if false then continue else traceError;
 69,
 66,
 20,
@@ -6444,7 +6461,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;017B INTERNAL_ERR: trace(from_microcode), directByte = 62;
+;017C INTERNAL_ERR: trace(from_microcode), directByte = 62;
 49,
 4E,
 54,
@@ -6461,7 +6478,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 74,
 72,
-;017C if false then continue else traceError;
+;017D if false then continue else traceError;
 69,
 66,
 20,
@@ -6478,7 +6495,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;017D ESTACK_ERR: trace(from_microcode), directByte = 60;
+;017E ESTACK_ERR: trace(from_microcode), directByte = 60;
 45,
 53,
 54,
@@ -6495,7 +6512,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 61,
 63,
-;017E if false then continue else traceError;
+;017F if false then continue else traceError;
 69,
 66,
 20,
@@ -6512,7 +6529,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;017F RSTACK_ERR: trace(from_microcode), directByte = 59;
+;0180 RSTACK_ERR: trace(from_microcode), directByte = 59;
 52,
 53,
 54,
@@ -6529,7 +6546,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 61,
 63,
-;0180 if false then continue else traceError;
+;0181 if false then continue else traceError;
 69,
 66,
 20,
@@ -6546,7 +6563,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0181 BSTACK_ERR: trace(from_microcode), directByte = 54;
+;0182 BSTACK_ERR: trace(from_microcode), directByte = 54;
 42,
 53,
 54,
@@ -6563,7 +6580,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 61,
 63,
-;0182 traceError: outBeep();
+;0183 traceError: outBeep();
 74,
 72,
 61,
@@ -6580,7 +6597,7 @@ MEMORY_INITIALIZATION_VECTOR=
 75,
 74,
 42,
-;0183 directByte = 'E', outChar(from_microcode);
+;0184 directByte = 'E', outChar(from_microcode);
 64,
 69,
 72,
@@ -6596,23 +6613,6 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 27,
 45,
-27,
-;0184 directByte = 'R', outChar(from_microcode);
-64,
-69,
-72,
-65,
-63,
-74,
-42,
-79,
-74,
-65,
-20,
-3D,
-20,
-27,
-52,
 27,
 ;0185 directByte = 'R', outChar(from_microcode);
 64,
@@ -6631,7 +6631,24 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 52,
 27,
-;0186 traceDetails: directByte = '#', outChar(from_microcode), T <= IL_PC;
+;0186 directByte = 'R', outChar(from_microcode);
+64,
+69,
+72,
+65,
+63,
+74,
+42,
+79,
+74,
+65,
+20,
+3D,
+20,
+27,
+52,
+27,
+;0187 traceDetails: directByte = '#', outChar(from_microcode), T <= IL_PC;
 74,
 72,
 61,
@@ -6648,7 +6665,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 64,
 69,
-;0187 T <= dec;
+;0188 T <= dec;
 54,
 20,
 3C,
@@ -6665,7 +6682,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0188 printDecR(R_fromT);
+;0189 printDecR(R_fromT);
 70,
 72,
 69,
@@ -6682,7 +6699,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 6F,
 6D,
-;0189 if IS_RUNMODE then next else err_done;
+;018A if IS_RUNMODE then next else err_done;
 69,
 66,
 20,
@@ -6699,7 +6716,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 74,
 68,
-;018A print_lino: directByte = ' ', outChar(from_microcode);
+;018B print_lino: directByte = ' ', outChar(from_microcode);
 70,
 72,
 69,
@@ -6716,7 +6733,7 @@ MEMORY_INITIALIZATION_VECTOR=
 69,
 72,
 65,
-;018B directByte = 'A', outChar(from_microcode);
+;018C directByte = 'A', outChar(from_microcode);
 64,
 69,
 72,
@@ -6733,7 +6750,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 41,
 27,
-;018C directByte = 'T', outChar(from_microcode), alu <= S_fromLino;
+;018D directByte = 'T', outChar(from_microcode), alu <= S_fromLino;
 64,
 69,
 72,
@@ -6750,7 +6767,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 54,
 27,
-;018D directByte = ' ', outChar(from_microcode), T <= from_S;
+;018E directByte = ' ', outChar(from_microcode), T <= from_S;
 64,
 69,
 72,
@@ -6767,7 +6784,7 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 20,
 27,
-;018E printDecR(R_fromT);
+;018F printDecR(R_fromT);
 70,
 72,
 69,
@@ -6784,7 +6801,7 @@ MEMORY_INITIALIZATION_VECTOR=
 72,
 6F,
 6D,
-;018F directByte = ' ', outChar(from_microcode), alu <= Y_fromTicks;
+;0190 directByte = ' ', outChar(from_microcode), T <= fromTicks;
 64,
 69,
 72,
@@ -6801,24 +6818,24 @@ MEMORY_INITIALIZATION_VECTOR=
 27,
 20,
 27,
-;0190 printY();
+;0191 printDecR(R_fromT);
 70,
 72,
 69,
 6E,
 74,
-59,
+44,
+65,
+63,
+52,
 28,
-29,
-3B,
-20,
-20,
-20,
-20,
-20,
-20,
-20,
-;0191 directByte = ' ', outChar(from_microcode), alu <= Y_recall;
+52,
+5F,
+66,
+72,
+6F,
+6D,
+;0192 directByte = '.', outChar(from_microcode), T <= recall;
 64,
 69,
 72,
@@ -6833,26 +6850,26 @@ MEMORY_INITIALIZATION_VECTOR=
 3D,
 20,
 27,
-20,
+2E,
 27,
-;0192 printY();
+;0193 printDecR(R_fromT);
 70,
 72,
 69,
 6E,
 74,
-59,
+44,
+65,
+63,
+52,
 28,
-29,
-3B,
-20,
-20,
-20,
-20,
-20,
-20,
-20,
-;0193 err_done: outCRLF();
+52,
+5F,
+66,
+72,
+6F,
+6D,
+;0194 err_done: outCRLF();
 65,
 72,
 72,
@@ -6869,7 +6886,7 @@ MEMORY_INITIALIZATION_VECTOR=
 43,
 52,
 4C,
-;0194 trace(crlf);
+;0195 trace(crlf);
 74,
 72,
 61,
@@ -6886,7 +6903,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 20,
 20,
-;0195 if false then continue else WarmStart;
+;0196 if false then continue else WarmStart;
 69,
 66,
 20,
@@ -6903,7 +6920,7 @@ MEMORY_INITIALIZATION_VECTOR=
 20,
 63,
 6F,
-;0196 findNextCR: readCore(T);
+;0197 findNextCR: readCore(T);
 66,
 69,
 6E,
@@ -6920,7 +6937,7 @@ MEMORY_INITIALIZATION_VECTOR=
 65,
 61,
 64,
-;0197 directByte = 0x0D, if MDR_EQU_DB then return;
+;0198 directByte = 0x0D, if MDR_EQU_DB then return;
 64,
 69,
 72,
@@ -6937,24 +6954,7 @@ MEMORY_INITIALIZATION_VECTOR=
 30,
 78,
 30,
-;0198 directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR;
-64,
-69,
-72,
-65,
-63,
-74,
-42,
-79,
-74,
-65,
-20,
-3D,
-20,
-30,
-78,
-30,
-;0199 T <= inc, if false then continue else findNextCR;
+;0199 T <= inc, directByte = 0x00, if MDR_EQU_DB then INTERNAL_ERR else findNextCR;
 54,
 20,
 3C,
@@ -6965,12 +6965,12 @@ MEMORY_INITIALIZATION_VECTOR=
 63,
 2C,
 20,
+64,
 69,
-66,
-20,
-66,
-61,
-6C,
+72,
+65,
+63,
+74,
 ;019A readCore16: alu <= reset1, readCore(T);
 72,
 65,
