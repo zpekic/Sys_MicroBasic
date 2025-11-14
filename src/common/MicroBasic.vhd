@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------
--- Company: 		 @Home
+-- Company: 		 https://hackaday.io/projects/hacker/233652
 -- Engineer: 		 zpekic@hotmail.com
 -- 
 -- Create Date:    21:29:29 10/05/2025 
@@ -8,7 +8,7 @@
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions:  ISE 14.7, mcc - microcode compiler
--- Description: 
+-- Description: https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic
 --
 -- Dependencies: 
 --
@@ -60,6 +60,7 @@ entity MicroBasic is
 			  inchar: in STD_LOGIC_VECTOR(7 downto 0);
 			  inchar_ready: in STD_LOGIC;
 			  -- debug / trace UART output
+			  overflowEnable: in STD_LOGIC;
 			  traceEnable: in STD_LOGIC;
            baudrate : in  STD_LOGIC;
            debug_txd : out  STD_LOGIC;
@@ -192,7 +193,7 @@ signal ready_alt_break: std_logic;
 signal last3Chars: std_logic_vector(23 downto 0);
 signal is_notRnd: std_logic;
 signal s_equ_db_mod32: std_logic;
-signal cpu_freq: std_logic_vector(31 downto 0);
+--signal cpu_freq: std_logic_vector(31 downto 0);
 
 begin
 
@@ -314,7 +315,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_Y_ZERO) => y_zero_alt_cp_skip,
 			cond(seq_cond_Y_SIGN) => Y(15),
 			cond(seq_cond_ALU_READY) => alu_ready,
-			cond(seq_cond_ALU_OVERFLOW) => (is_notRnd and alu_overflow),
+			cond(seq_cond_ALU_OVERFLOW) => (overflowEnable and is_notRnd and alu_overflow),
 			cond(seq_cond_ALU_SIGN) => alu_sign,
 			cond(seq_cond_AT_TAB) => at_tab,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
@@ -1049,7 +1050,7 @@ neg_overflow <= '1' when (R = X"8000") else '0';	-- can't negate -32768
 neg_s <= std_logic_vector(0 - signed(S));
 neg_y <= std_logic_vector(0 - signed(Y(15 downto 0)));
 
--- will use intrinsic multiplier on FPGA (which is also combinatorial, therefore this is sintesizable)
+-- will use intrinsic multiplier on FPGA (which is also combinatorial, therefore this is synthesizable)
 s_mul_r <= std_logic_vector(signed(R) * signed(S));
 mul_pos16 <= '1' when (s_mul_r(31 downto 15) = (X"0000" & '0')) else '0';
 mul_neg16 <= '1' when (s_mul_r(31 downto 15) = (X"FFFF" & '1')) else '0';

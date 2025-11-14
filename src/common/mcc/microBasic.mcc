@@ -5,10 +5,9 @@
 			.code 9, 80, mb:microBasic_code.vhd, 10;
 			.mapper 8, 16, mb:microBasic_map.vhd, 2;
 			.controller microBasic_control_unit.vhd, 4;
-			.symbol 9, 128, mb:microBasic_sym.vhd, mb:microBas_sym.coe, 16;
+			.symbol 9, 128, mb:microBasic_sym.vhd, 16;
 
 // System interface signals
-// nBUSREQ			.valfield 1 values 0, 1 default 1;
 nWR				.valfield 1 values 0, 1 default 1;
 nRD				.valfield 1 values 0, 1 default 1;
 // nBUSACK		consumed as condition
@@ -16,7 +15,7 @@ nRD				.valfield 1 values 0, 1 default 1;
 // D(7..0)
 
 seq_cond:		.if 5 values 
-				true, 			// hard-code to 1
+				true, 					// hard-code to 1
 				ILCODEBYTE_BIT7,	 
 				CHAROUT_READY,	
 				IL_A_VALID,				// value of IL program counter in valid range
@@ -32,8 +31,8 @@ seq_cond:		.if 5 values
 				SVP_IN_INPLINE,		
 				MDR_IS_NUM,				// MDR contains ASCII 0..9
 				MDR_IS_ALPHA,
-				STACK_IS_FULL,
-				STACK_IS_EMPTY,
+				STACK_IS_FULL,			// condition is multiplexed from BStack, EStack, or RStack state based on IL_OP value
+				STACK_IS_EMPTY,			// condition is multiplexed from BStack, EStack, or RStack state based on IL_OP value
 				MDR_MATCHES_ILCODEBYTE,
 				R_IS_ZERO,
 				Y_ZERO			| CP_SKIP,
@@ -47,7 +46,7 @@ seq_cond:		.if 5 values
 				S_EQU_DB_MOD32,	
 				CACHE_VALID,		
 				CACHE_HIT,		
-				false			// hard-code to 0
+				false					// hard-code to 0
 				default true;
 seq_then:	.then 9 values next | continue, repeat, return, fork, @ default next;						// any label
 seq_else:	.else 9 values next | continue, repeat, return, fork, 0b000000..0b111111, @ default next;	// any value as it can be a trace char
@@ -99,7 +98,7 @@ DBGINDEX		.regfield 2 values
 				crlf // shortcut to index 63 which should contain CR, LF, NULL sequence
 				default same;		
 
-// 10-bit IL program counter
+// 11-bit IL program counter
 IL_PC:			.regfield 3 values
 				same,
 				XQhere,
@@ -111,7 +110,7 @@ IL_PC:			.regfield 3 values
 				RetStack
 				default same;
 
-// 10-bit saved IL_PC
+// 11-bit saved IL_PC (pointing to start of XQ/execute routine in IL program)
 XQhere			.regfield 1 values
 				same,
 				T
@@ -339,7 +338,7 @@ traceALU:	.sub;
 traceY:		.sub;
 traceBP:	.sub;
 outBeep:	.sub;
-findLino:	.sub;
+findLino:	.sub T;
 copyLine:	.sub T;
 findPrgEnd:	.sub;
 prepWrite:	.sub;
@@ -364,7 +363,7 @@ WarmStart:	clear;
 			Lino <= T, IL_PC <= T, write2Nulls(BP);											// kills input line
 			
 fetch:		traceString 51;											// CR, LF, then trace Basic line number (in hex, for speed)
-			traceString 2; 											// trace IL_PC and future opcode
+fetch1:		traceString 2; 											// trace IL_PC and future opcode
 			IL_OP <= from_interpreter, IL_PC <= inc, traceSDepth;	// load opcode, advance IL_PC, indent by stack depth IL code if tracing is on
 			T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode (or break if we went into the weeds)
 			
@@ -375,8 +374,8 @@ badop:		goto INTERNAL_ERR;
 			.map 0b00000???;							// SX (Stack exchange, 0x00 .. 0x07)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 15;								// trace mnemonic
-			ExpStack <= startSwap;						// R <= ExpStack(0), S <= ExpStack(0 + param) 
-			ExpStack <= endSwap, goto fetch;			// ExpStack(0) <= S, ExpStack(0 + param) <= R
+			ExpStack <= startSwap, traceString 51;		// R <= ExpStack(0), S <= ExpStack(0 + param) 
+			ExpStack <= endSwap, goto fetch1;			// ExpStack(0) <= S, ExpStack(0 + param) <= R
 
 			.map 0x00;									// SX 0 does nothing, so map to just skip
 			traceString 15;								// trace mnemonic
@@ -439,9 +438,9 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			.map 0x12;									// FV (Fetch Variable)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 36;								// trace mnemonic
-			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR; // get index (variable name A-Z)
-			T <= from_vars, ExpStack <= pop1;			// T <= Vars(index)
-			ExpStack <= push_TWord, goto fetch;			// push onto stack
+			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR; 	// get index (variable name A-Z)
+			T <= from_vars, ExpStack <= pop1, traceString 51;				// T <= Vars(index)
+			ExpStack <= push_TWord, goto fetch1;							// push onto stack, go to 2rd fetch entry point as we overlapped 1 cycle
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x13;									// SV (Store Variable)
@@ -449,9 +448,8 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			traceString 37;								// trace mnemonic
 			if STACK_IS_EMPTY then ESTACK_ERR;
 			T <= ExpStack, ExpStack <= pop2;			// pop T from stack
-			if STACK_IS_EMPTY then ESTACK_ERR;
-			Vars <= indexFromExpStack, ExpStack <= pop1;// pop index (variable name A-Z)
-			Vars <= T, goto fetch;						// Vars(index) <= T
+			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR;
+			ExpStack <= pop1, Vars <= T, goto fetch;	// Vars(index) <= T and remove used stack entry
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x14;									// GS (GoSub - save Basic line for RETURN later)
@@ -467,8 +465,8 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			traceString 48;								// Trace mnemonic
 			if IS_RUNMODE then next else INTERNAL_ERR;
 			T <= BasStack_Hi,if STACK_IS_EMPTY then BSTACK_ERR;
-			Lino <= T, T <= BasStack_Lo;
-			BP <= T, BasStack <= pop, goto fetch;
+			Lino <= T, T <= BasStack_Lo, traceString 51;
+			BP <= T, BasStack <= pop, goto fetch1;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x16;									// GO (GOTO)
@@ -481,7 +479,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			// traceLino;
 			if CACHE_VALID then go_cvalid;
 			// INVALID: the cache entry is free, find target and store in cache (and stay there until end of run)
-			findLino();
+			findLino(Prog_start);
 			alu <= cache_store, goto fetch;	// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
 			
 go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
@@ -489,18 +487,17 @@ go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
 			BP <= T, goto fetch;
 
 			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
-go_cmiss:	findLino();			
+go_cmiss:	findLino(Prog_start);			
 			goto fetch;		  
 			
-findLino:	T <= Prog_start;						
-go_search:	alu <= reset1, readCore(T);
+findLino:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
 			alu <= S_fromLino, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
 			alu <= S_minus_R, if R_IS_ZERO then stop_run;	// TODO: "line xxx not found in yyy" message? (reached end of code without finding the target)
 			BP <= T, if Y_ZERO then return;					// target line number (S) is same as line number of inspected line (R), so bail (success)
 			findNextCR(same);
-			T <= inc, goto go_search;						
+			T <= inc, goto findLino;						
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x17;									// NE (Negate)
@@ -774,7 +771,7 @@ copyCore:	T <= from_S, if Y_ZERO then return;			// bail if no bytes left to copy
 			readCore(T);
 			T <= from_R;
 			writeCore(T, same);
-			traceALU();
+			//traceALU();
 			alu <= copy_next, goto copyCore;	// Y--, R and S incremented / decremented based on direction
 
 			////////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,22 @@
 ----------------------------------------------------------------------------------
--- Company: 	https://hackaday.io/projects/hacker/233652
--- Engineer:	zpekic@hotmail.com
----------------------------------------------------------------------------------- 
--- https://hackaday.io/project/TBD
+-- Company: 		 https://hackaday.io/projects/hacker/233652
+-- Engineer: 		 zpekic@hotmail.com
+-- 
+-- Create Date:    21:29:29 10/05/2025 
+-- Design Name: 
+-- Module Name:    MicroBasic - Behavioral 
+-- Project Name: 
+-- Target Devices: Digilent Anvyl board
+-- Tool versions:  ISE 14.7, mcc - microcode compiler
+-- Description: https://hackaday.io/project/204482-celebrating-50-years-of-tiny-basic
+--
+-- Dependencies: 
+--
+-- Revision: 
+-- Revision 0.01 - File Created
+-- Additional Comments: 
+--
 ----------------------------------------------------------------------------------
-
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
@@ -320,6 +332,7 @@ cpu: entity work.MicroBasic Port map (
 		inchar => RXD_CHAR,
 		inchar_ready => RXD_READY,
 		-- debug / trace
+		overflowEnable => dip(7),
 		traceEnable => not sw_traceDisable,
 		baudrate => baudrate_x1,
 		debug_txd => debug_txd, 
