@@ -35,18 +35,15 @@ entity sys_microbasic_anvyl is
 	 			-- 100MHz on the Anvyl board
 				CLK: in std_logic;
 				-- Switches
-				-- SW(0) -- LED display selection
-				-- SW(2 downto 1) -- tracing selection
-				-- SW(3)
-				-- SW(4)
-				-- SW(6 downto 5) -- system clock speed 
-				-- SW7
+				-- SW(7 downto 5) -- UART baudrate selection
+				-- SW(4 downto 2) -- CPU clock frequency selection
+				-- SW(1 downto 0) -- internal register selection for display
 				SW: in std_logic_vector(7 downto 0); 
 				-- Push buttons 
-				-- BTN0 - 
-				-- BTN1 - 
-				-- BTN2 - 
-				-- BTN3 - 
+				-- BTN0 - single step
+				-- BTN1 - signal for CPU (not used)
+				-- BTN2 - lamp test
+				-- BTN3 - RESET
 				BTN: in std_logic_vector(3 downto 0); 
 				-- 6 7seg LED digits
 				SEG: out std_logic_vector(6 downto 0); 
@@ -59,7 +56,7 @@ entity sys_microbasic_anvyl is
 				JA2: inout std_logic;
 				JA3: inout std_logic;
 				JA4: inout std_logic;
-				-- drive external 16-bit address bus
+				-- not used
 				--JB1: out std_logic;
 				--JB2: out std_logic;
 				--JB3: out std_logic;
@@ -76,7 +73,7 @@ entity sys_microbasic_anvyl is
 				--JC8: out std_logic;
 				--JC9: out std_logic;
 				--JC10: out std_logic;
-				-- drive external 8-bit address bus
+				-- not used
 				JD1: in std_logic;
 				JD2: in std_logic;
 				JD3: in std_logic;
@@ -93,7 +90,7 @@ entity sys_microbasic_anvyl is
 				--DIP switches
 				DIP_B4, DIP_B3, DIP_B2, DIP_B1: in std_logic;
 				DIP_A4, DIP_A3, DIP_A2, DIP_A1: in std_logic;
---				-- Hex keypad
+				-- Hex keypad
 				--KYPD_COL: out std_logic_vector(3 downto 0);
 				--KYPD_ROW: in std_logic_vector(3 downto 0);
 				-- SRAM --
@@ -137,6 +134,7 @@ entity sys_microbasic_anvyl is
 				--BB7: out std_logic;
 				--BB8: out std_logic;
 				--BB9: out std_logic;
+				-- EXTernal CLoCK
 				BB10: in std_logic
           );
 end sys_microbasic_anvyl;
@@ -216,7 +214,7 @@ signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
 signal x80, y60: std_logic_vector(7 downto 0);
 signal vga_fgcolor, vga_bgcolor: std_logic_vector(3 downto 0);
 signal ram_addr, inp_addr, prg_addr, mcc_addr, sym_addr: std_logic_vector(15 downto 0);	
-signal ram_char, sym_char, vga_char: std_logic_vector(7 downto 0);
+signal ram_char, sym_char, vga_char, sts_char: std_logic_vector(7 downto 0);
 signal complement: std_logic_vector(7 downto 0);
 signal inp_cursor, prg_cursor, mcc_cursor, vga_cursor: std_logic;
 signal inp_active, prg_active, mcc_active, mcc_active_out, vga_window: std_logic;
@@ -546,19 +544,35 @@ with win_sel select vga_fgcolor <=
 			"0110" when "01",		-- yellow for input buffer
 			"0111" when "10", 	-- white	for Basic program text
 			"0000" when "11", 	-- black for microcode symbols
-			dip(7 downto 4) when others;	-- border color check
+			"0000" when others;	-- white (but status line chars will be inverted)
 
 with win_sel select vga_bgcolor <= 
 			"0001" when "01",		-- blue for Core RAM 
 			"0001" when "10",		-- blue for Core RAM
 			"0010" when "11", 	-- green for Microcode symbols RAM
-			dip(3 downto 0) when others;	-- border color check
+			"1111" when others;	-- black (but status line chars will be inverted)
 
 with win_sel select vga_char <= 
 			ram_char when "01",
 			ram_char when "10",
 			sym_char when "11",
-			X"7F" when others;	-- tiny chessboard pattern
+			sts_char when others;	
+			
+sts_rom: entity work.statusrom
+    Generic map (
+			line => X"37"
+			)
+    Port map ( 
+			x => x80, 
+			y => y60,
+         status(11 downto 9) => sw_baudrate, 
+         status(8 downto 6) => sw_cpuclk,
+			-- which register is displayed as underline cursor
+         status(5 downto 3) => ('0' & sw_traceRegSel),
+			-- processor state (tracing, running)
+         status(2 downto 0) => ('0' & cpu_debug(31 downto 30)),
+         char => sts_char
+		);
 			
 ram_addr <= prg_addr when (prg_active = '1') else inp_addr; -- both mapped to same RAM
 complement <= X"80" when (ram_addr = cpu_t) else X"00";		-- also indicate location of T in RAM
@@ -567,7 +581,7 @@ ram_char <= complement xor ram(to_integer(unsigned(ram_addr(10 downto 0))));
 sym_ram: entity work.symTracer port map (
 		reset => RESET,
 		rom_clk => cnt50MHz(0),			-- 50MHz
-		refresh_clk => cnt50MHz(4),	-- must be at least 256* higher than cpu clock for full window refresh
+		refresh_clk => cnt50MHz(3),	-- must be at least 256* higher than cpu clock for full window refresh
 		cpu_clk => cpu_clk,
 		--- 
 		uipc => cpu_uipc,

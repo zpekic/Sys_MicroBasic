@@ -1119,7 +1119,7 @@ debug_uipc <= ui_address;		-- output microinstruction program counter to show mi
 		(X"B5" & BP) when "10",
 		(X"5E" & PrgEnd) when others;
 
-	debug_bus(31 downto 24) <= "00010000"; -- indicate "name.value" on LEDs
+	debug_bus(31 downto 24) <= (traceEnable & is_runmode & "010000"); -- indicate "name.value" on LEDs
 
 -- serial debug port
 tracer: entity work.serialtracer2 Port map (
