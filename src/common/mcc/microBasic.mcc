@@ -488,7 +488,7 @@ go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
 
 			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
 go_cmiss:	findLino(Prog_start);			
-			goto fetch;		  
+			goto fetch;
 			
 findLino:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
@@ -880,9 +880,7 @@ br_exit:	traceGoto;									// trace target
 bc_loop:	traceString 3;								// trace value of IL(IL_PC) (char we try to match)
 			readCore(BP);
 			if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
-			if ILCODEBYTE_BIT7 then bc_match;
-			BP <= inc, IL_PC <= inc, goto bc_loop;
-bc_match: 	BP <= inc, IL_PC <= inc;					// leave pointers right after
+			BP <= inc, IL_PC <= inc, if ILCODEBYTE_BIT7 then next else bc_loop;
 			traceBP();
 			goto fetch;
 bc_exit:	BP <= recall, IL_PC <= T; 					// not found, restore BP and IL_PC

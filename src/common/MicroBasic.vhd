@@ -177,12 +177,12 @@ signal lino_tick: std_logic_vector(15 downto 0);
 
 -- GOTO cache
 signal cache: ram32x32;
-signal cache_valid: std_logic_vector(31 downto 0) := (others => '0');
+signal cache_v: std_logic_vector(31 downto 0) := (others => '0');
 signal lino_clk: std_logic_vector(15 downto 0);
 signal cache_entry: std_logic_vector(31 downto 0);
 alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5); 
 alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
-signal cache_hit: std_logic;
+signal cache_hit, cache_valid: std_logic;
 
 -- other
 signal T, T_saved: std_logic_vector(15 downto 0);
@@ -198,10 +198,11 @@ signal s_equ_db_mod32: std_logic;
 begin
 
 -- GOTO cache
-cache_empty <= '1' when (cache_valid = X"00000000") else '0';	-- all 32 entries free
-cache_full <= '1' when (cache_valid = X"FFFFFFFF") else '0';	-- all 32 entries used
-cache_entry <= cache(to_integer(unsigned(Lino_index)));			-- data/tag cache entry pointed to by Lino 
+cache_empty <= '1' when (cache_v = X"00000000") else '0';	-- all 32 entries free
+cache_full <= '1' when (cache_v = X"FFFFFFFF") else '0';		-- all 32 entries used
+cache_entry <= cache(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
 cache_hit <= '1' when (cache_tag = Lino_tag) else '0';
+cache_valid <= cache_v(to_integer(unsigned(Lino_index)));
 
 -- Tristate system bus (64k address, bidirectional 8-bit data to Basic RAM "core")
 nRD <= mb_nRD when (nBUSACK = '0') else 'Z';
@@ -321,7 +322,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
 			cond(seq_cond_S_EQU_DB_MOD32) => s_equ_db_mod32,	
-			cond(seq_cond_CACHE_VALID) => cache_valid(to_integer(unsigned(Lino_index))),
+			cond(seq_cond_CACHE_VALID) => cache_valid,
 			cond(seq_cond_CACHE_HIT) => cache_hit,
 			cond(seq_cond_false) => '0',
 			-- outputs
@@ -823,7 +824,7 @@ end process;
 		-- clear cache valid bits at start of run (when Lino goes from 0 to some valid Basic line number)
 		lino_clk <= Lino;
 		if ((is_runmode = '1') and (lino_clk = X"0000")) then
-			cache_valid <= (others => '0');
+			cache_v <= (others => '0');
 		end if;
 		case mb_alu is
 --			when alu_nop =>
@@ -1016,7 +1017,7 @@ end process;
 				Y <= Y_saved;
 			when alu_cache_store =>
 				cache(to_integer(unsigned(Lino_index))) <= BP & Lino;
-				cache_valid(to_integer(unsigned(Lino_index))) <= '1';
+				cache_v(to_integer(unsigned(Lino_index))) <= '1';
 			when others =>
 				null;
 		end case;

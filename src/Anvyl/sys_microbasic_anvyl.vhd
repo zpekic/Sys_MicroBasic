@@ -466,7 +466,7 @@ vga: entity work.mwvga Port map (
 	
 inpwin: entity work.hwindow
 		Generic map (
-			top => 	X"08",
+			top => 	X"0A",
 			left => 	X"08",
 			width => X"40",
 			height => X"02"			
@@ -485,7 +485,7 @@ inpwin: entity work.hwindow
 
 prgwin: entity work.hwindow
 		Generic map (
-			top => 	X"0C",
+			top => 	X"0E",
 			left => 	X"08",
 			width => X"40",
 			height => X"1E"			
@@ -560,7 +560,7 @@ with win_sel select vga_char <=
 			
 sts_rom: entity work.statusrom
     Generic map (
-			line => X"37"
+			line => X"06"
 			)
     Port map ( 
 			x => x80, 
