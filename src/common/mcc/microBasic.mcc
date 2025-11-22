@@ -477,14 +477,14 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			T <= from_R;
 			Lino <= T, if R_IS_ZERO then NOPROG_ERR;			// once Lino is set, CACHE_HIT and CACHE_VALID are meaningful
 			// traceLino;
-			if CACHE_VALID then go_cvalid;
+			T <= Cache_Data, if CACHE_VALID then go_cvalid;		// load T with assumed "good" cached data
 			// INVALID: the cache entry is free, find target and store in cache (and stay there until end of run)
 			findLino(Prog_start);
 			alu <= cache_store, goto fetch;	// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
 			
-go_cvalid:	T <= Cache_Data, if CACHE_HIT then next else go_cmiss;
+go_cvalid:	BP <= T, if CACHE_HIT then fetch else go_cmiss;
 			// VALID HIT: pick it up and use it
-			BP <= T, goto fetch;
+			//BP <= T, goto fetch;
 
 			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
 go_cmiss:	findLino(Prog_start);			
