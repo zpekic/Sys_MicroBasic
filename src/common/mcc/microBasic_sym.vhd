@@ -95,8 +95,8 @@ constant mb_symbol_entry: t_mb_symbol_entry := (
 -- IL_OP <= from_interpreter, IL_PC <= inc, trace(from_microcode), directByte = 56;
 11 => X"49_4C_5F_4F_50_20_3C_3D_20_66_72_6F_6D_5F_69_6E",
 
--- L0368@000C 54203C3D207A65726F2C20616C75203C.  T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
--- T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
+-- L0368@000C 54203C3D207A65726F2C20616C75203C.  T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;
+-- T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;
 12 => X"54_20_3C_3D_20_7A_65_72_6F_2C_20_61_6C_75_20_3C",
 
 -- L0371@000D 6261646F703A2069662066616C736520.badop:  if false then continue else INTERNAL_ERR;

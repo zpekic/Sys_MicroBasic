@@ -314,7 +314,7 @@ cpu: entity work.MicroBasic Port map (
 		-- Intermediate language (IL) read-only memory
 		IL_A => il_a,
 		IL_D => il_d,
-		IL_A_VALID => il_a_valid,
+		TB_EXTENDED => '1',
 		-- Basic code and command line memory
 		nBUSREQ => nBUSREQ,
 		nBUSACK => nBUSACK,
@@ -341,10 +341,13 @@ cpu: entity work.MicroBasic Port map (
 	);
 
 -- ROM containing the IL language instructions
-cu_il: entity work.il_rom Port map ( 
-		a => il_a,
-      d => il_d,
-		a_valid => il_a_valid
+cu_il: entity work.il_rom
+		Generic map (
+			ADDR_DEPTH => 9
+		)
+		Port map ( 
+			a => il_a,
+			d => il_d
 		);
 
 -- infer simple 2k RAM

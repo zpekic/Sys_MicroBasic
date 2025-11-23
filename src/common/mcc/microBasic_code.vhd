@@ -41,13 +41,13 @@ alias mb_nRD: 	std_logic is mb_uinstruction(78);
 ---- End boilerplate code
 
 --
--- L0017.seq_cond: .if 5 values true, ILCODEBYTE_BIT7, CHAROUT_READY, IL_A_VALID, DBG_READY | KBD_BREAK, MDR_EQU_DB, nBUSACK, INLEND_MAX | BASLINE_FOUND, INLEND_MIN | IMPLINE_EMPTY, CHARIN_PRINTABLE, CHARIN_EQU_DB, CHARIN_READY, BP_IN_INPLINE, SVP_IN_INPLINE, MDR_IS_NUM, MDR_IS_ALPHA, STACK_IS_FULL, STACK_IS_EMPTY, MDR_MATCHES_ILCODEBYTE, R_IS_ZERO, Y_ZERO   | CP_SKIP, Y_SIGN, ALU_READY  | LS_PARAMS_OK, ALU_OVERFLOW  | LS_PASSED_END, ALU_SIGN  | LS_IN_RANGE, AT_TAB, OFF_IS_ZERO, IS_RUNMODE, S_EQU_DB_MOD32, CACHE_VALID, CACHE_HIT, false default true;
+-- L0017.seq_cond: .if 5 values true, ILCODEBYTE_BIT7, CHAROUT_READY, TB_EXTENDED, DBG_READY | KBD_BREAK, MDR_EQU_DB, nBUSACK, INLEND_MAX | BASLINE_FOUND, INLEND_MIN | IMPLINE_EMPTY, CHARIN_PRINTABLE, CHARIN_EQU_DB, CHARIN_READY, BP_IN_INPLINE, SVP_IN_INPLINE, MDR_IS_NUM, MDR_IS_ALPHA, STACK_IS_FULL, STACK_IS_EMPTY, MDR_MATCHES_ILCODEBYTE, R_IS_ZERO, Y_ZERO   | CP_SKIP, Y_SIGN, ALU_READY  | LS_PARAMS_OK, ALU_OVERFLOW  | LS_PASSED_END, ALU_SIGN  | LS_IN_RANGE, AT_TAB, OFF_IS_ZERO, IS_RUNMODE, S_EQU_DB_MOD32, CACHE_VALID, CACHE_HIT, false default true;
 --
 alias mb_seq_cond: 	std_logic_vector(4 downto 0) is mb_uinstruction(77 downto 73);
 constant seq_cond_true: 	integer := 0;
 constant seq_cond_ILCODEBYTE_BIT7: 	integer := 1;
 constant seq_cond_CHAROUT_READY: 	integer := 2;
-constant seq_cond_IL_A_VALID: 	integer := 3;
+constant seq_cond_TB_EXTENDED: 	integer := 3;
 constant seq_cond_DBG_READY: 	integer := 4;
 constant seq_cond_KBD_BREAK: 	integer := 4;
 constant seq_cond_MDR_EQU_DB: 	integer := 5;
@@ -88,7 +88,7 @@ constant seq_cond_false: 	integer := 31;
 --  cond(seq_cond_true) => '1',
 --  cond(seq_cond_ILCODEBYTE_BIT7) => ILCODEBYTE_BIT7,
 --  cond(seq_cond_CHAROUT_READY) => CHAROUT_READY,
---  cond(seq_cond_IL_A_VALID) => IL_A_VALID,
+--  cond(seq_cond_TB_EXTENDED) => TB_EXTENDED,
 --  cond(seq_cond_DBG_READY | KBD_BREAK) => DBG_READY | KBD_BREAK,
 --  cond(seq_cond_MDR_EQU_DB) => MDR_EQU_DB,
 --  cond(seq_cond_nBUSACK) => nBUSACK,
@@ -944,10 +944,10 @@ constant mb_microcode: mb_code_memory := (
 --  nWR = 1, nRD = 1, if (00000) then 111010000 else 111010000, directByte = 0111000, T <= 00000, DBGINDEX <= 01, IL_PC <= 010, XQhere <= 0, IL_OP <= 1, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
 11 => '1' & '1' & "00000" & O"720" & O"720" & "0111000" & "00000" & "01" & O"2" & '0' & '1' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00000" & '0' & '0' & '0' & '0' & '0' & '0',
 
--- T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
--- L0368@000C C603BB7F380000000040.  T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;
---  nWR = 1, nRD = 1, if (00011) then 000000011 else 101110110, directByte = 1111111, T <= 00111, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
-12 => '1' & '1' & "00011" & O"003" & O"566" & "1111111" & "00111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
+-- T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;
+-- L0368@000C C003BB7F380000000040.  T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;
+--  nWR = 1, nRD = 1, if (00000) then 000000011 else 101110110, directByte = 1111111, T <= 00111, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 00, alu <= 00001, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0, dummy = 0;
+12 => '1' & '1' & "00000" & O"003" & O"566" & "1111111" & "00111" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & "00" & "00001" & '0' & '0' & '0' & '0' & '0' & '0',
 
 -- goto INTERNAL_ERR;
 -- L0371@000D FE00BB7F000000000000.badop:  if false then continue else INTERNAL_ERR;

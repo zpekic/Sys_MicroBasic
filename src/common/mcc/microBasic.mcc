@@ -18,7 +18,7 @@ seq_cond:		.if 5 values
 				true, 					// hard-code to 1
 				ILCODEBYTE_BIT7,	 
 				CHAROUT_READY,	
-				IL_A_VALID,				// value of IL program counter in valid range
+				TB_EXTENDED,			// 1 if Tiny Basic is in extended mode
 				DBG_READY | KBD_BREAK,	// high if tracer has processed the trace character, or presence of CTRL/C in charin if not tracing
 				MDR_EQU_DB,		
 				nBUSACK,				// low if memory is ready for read/write		
@@ -365,7 +365,7 @@ WarmStart:	clear;
 fetch:		traceString 51;											// CR, LF, then trace Basic line number (in hex, for speed)
 fetch1:		traceString 2; 											// trace IL_PC and future opcode
 			IL_OP <= from_interpreter, IL_PC <= inc, traceSDepth;	// load opcode, advance IL_PC, indent by stack depth IL code if tracing is on
-			T <= zero, alu <= reset0, if IL_A_VALID then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode (or break if we went into the weeds)
+			T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode
 			
 			.map 0b????????;							// opcode sink of last resort
 badop:		goto INTERNAL_ERR;

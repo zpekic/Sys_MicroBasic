@@ -44,7 +44,7 @@ entity MicroBasic is
 			  -- Intermediate language (IL) read-only memory
 			  IL_A: out STD_LOGIC_VECTOR(10 downto 0);
 			  IL_D: in STD_LOGIC_VECTOR(7 downto 0);
-			  IL_A_VALID: in STD_LOGIC;
+			  TB_EXTENDED: in STD_LOGIC;
 			  -- Input line and Basic program memory (up to 64k)
 			  nBUSREQ : out STD_LOGIC;
            nBUSACK : in  STD_LOGIC;
@@ -296,7 +296,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_true) => '1',
 			cond(seq_cond_ILCODEBYTE_BIT7) => il_codebyte(7),
 			cond(seq_cond_CHAROUT_READY) => outchar_ready,
-			cond(seq_cond_IL_A_VALID) => IL_A_VALID,
+			cond(seq_cond_TB_EXTENDED) => TB_EXTENDED,
 			cond(seq_cond_DBG_READY) => ready_alt_break,
 			cond(seq_cond_MDR_EQU_DB) => mdr_equ_db,
 			cond(seq_cond_nBUSACK) => nBUSACK,
