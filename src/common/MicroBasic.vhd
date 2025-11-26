@@ -117,7 +117,7 @@ signal mdr_matches_db, mdr_matches_ilcodebyte, mdr_matches_varname, mdr_matches_
 constant Inline_Start: std_logic_vector(15 downto 0) := X"0000";	-- input buffer at start of RAM
 constant Inline_End: std_logic_vector(15 downto 0) := X"007F";		-- input buffer up to 128 characters  	
 constant Prog_Start: std_logic_vector(15 downto 0) := X"0080"; 	-- Basic program right after that
-constant Core_End: std_logic_vector(15 downto 0) := X"07FF";		-- up to 2k (but can go up to 64k)
+
 -- key pointers (for parsing)
 signal BP, BP_saved: std_logic_vector(15 downto 0);
 signal SvPt, BE: std_logic_vector(15 downto 0);
@@ -125,6 +125,8 @@ signal bp_in_inpline, svp_in_inpline: std_logic;
 signal InlEnd, LS, LE, PrgEnd: std_logic_vector(15 downto 0);
 signal inlend_max, inlend_min: std_logic;
 signal inlend_max_alt_basline_found, inlend_min_alt_impline_empty, basline_found, impline_empty: std_logic;
+-- TODO: find the actual end of RAM instead of hard coding it here 
+signal Core_End: std_logic_vector(15 downto 0) := X"07FF";			-- up to 2k (but can go up to 64k)
 
 -- expression stack, 16 bytes == 8 words
 signal ExpStack: ram16x8;
@@ -585,6 +587,9 @@ begin
 				T <= BasicNext;
 			when T_index2address =>
 				T <= std_logic_vector(unsigned(PrgEnd) + unsigned(T(14 downto 0) & '1'));
+			when T_fromSize =>
+				-- TODO: CoreEnd should not be a constant!
+				T <= std_logic_vector(unsigned(Core_End) - unsigned(PrgEnd));			
 			when others =>
 				null;
 		end case;

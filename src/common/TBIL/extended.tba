@@ -19,20 +19,20 @@
 
 // LET 
 :STMT	BC FORI, "LET"
-:LETLP	BC A2Z, "@"
-:ARRAY	LN 31			//POKE16, but with address = 2 * index + PrgEnd + 1
+:LETLP	BV ARRAY
+:LET	BC *, "="
+		JS EXPR         //GO GET EXPRESSION
+		BC LETDN, ","	//more assignments?
+		SV				//yes, then store result
+		BR LETLP		//and look for next variable
+:ARRAY	BC *, "@"		//wasn't A..Z, so must be @(index)		
+		LN 31			//POKE16, but with address = 2 * index + PrgEnd + 1
 		JS FUNC			//eval expression and make sure it is closed by )
 		BC *, "="		//must be followed by equals
 		JS EXPR			//get the value
 		US				//execute assignment
 		BC LETEX, ","	//more assignments?
 		BR LETLP		//yes, back to loop	
-:A2Z	BV *            //MUST BE A VARIABLE NAME
-		BC *, "="
-:LET	JS EXPR         //GO GET EXPRESSION
-		BC LETDN, ","	//more assignments?
-		SV
-		BR LETLP
 :LETDN	BE *            //IF STATEMENT END,
 		SV              //STORE RESULT
 		NX
@@ -175,11 +175,9 @@
 		NX				// just skip to next CR 
 
 // ASSUMED LET
-:DFLT 	BC TRYLET, "@"	//array assignment?
-		J ARRAY			//yes
-:TRYLET	BV *            //NO KEYWORD
-		BC *, "="       //TRY FOR LET
-		J LET           //IT'S A GOOD BET
+:DFLT 	BV TRYARR		//is it A..Z?
+		J LET			//yes, continue as LET statement
+:TRYARR J ARRAY
 
 //
 //  SUBROUTINES
@@ -237,19 +235,28 @@
 		DV              //PERFORM MOD FUNCTION
 		MP
 		SU
-		DS              //PERFORM ABS FUNCTION
+:ABS	DS              //PERFORM ABS FUNCTION
 		LB 6			// magic binary number 110 means >=
 		LN 0
 		CP              //(SKIP IF + OR 0)
 		NE
 		RT
 		
-:F2   	BC F2USR, "@"	//get from @() array?
+:F2   	BC F2ARR, "ABS"
+		JS FUNC			//one parameter function
+		BR ABS			//go to ABS above
+		
+:F2ARR	BC F2SIZE, "@"	//get from @() array?
 		LN 30			//PEEK16, but with address = 2 * index + PrgEnd + 1
 		JS FUNC			//array index
-		LN 0			//dummy
+:F2CONT	LN 0			//dummy
 		BR F2EXE
 
+:F2SIZE	BC F2USR, "SIZE"	//size function with no params?
+		LN 29				//yes,function index
+		LN 0				//dummy parameter
+		BR F2CONT			//push another dummy and execute
+		
 :F2USR	BC F3, "USR"    //*USR FUNCTION*
 		BC *, "("       //3 ARGUMENTS POSSIBLE
 		JS EXPR         //ONE REQUIRED

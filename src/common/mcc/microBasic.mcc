@@ -85,7 +85,7 @@ T			.regfield 5 values
 				from_var_For,
 				from_var_Next,
 				index2address,
-				-,
+				fromSize,		// free RAM size calculation result
 				-,
 				-				
 				default same;
@@ -871,7 +871,8 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
 			directByte = 21, if S_EQU_DB_MOD32 then u_peek16;
 			directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
-			// TODO implement other fun functions (26 to 29)!
+			// TODO implement other fun functions (26 to 28)!
+			directByte = 29, if S_EQU_DB_MOD32 then u_size;		// size function		
 			T <= index2address;									// calculate memory address from index in TAB
 			directByte = 30, if S_EQU_DB_MOD32 then u_peek16;	// get @(index)
 			directByte = 31, if S_EQU_DB_MOD32 then u_poke16;	// @(index) = value		
@@ -880,6 +881,8 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 u_peek8: 	readCore(T);								// MDR <= Core(T)
 u_in:		T <= MDR;
 u_done:		ExpStack <= push_TWord, goto fetch;
+
+u_size:		T <= fromSize, goto u_done;					//TODO: proper SIZE calculation
 			
 u_peek16:	readCore16(same);
 			T <= from_R, goto u_done;
