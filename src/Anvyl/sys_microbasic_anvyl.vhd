@@ -143,7 +143,7 @@ architecture Structural of sys_microbasic_anvyl is
 
 -- IL Code
 signal il_a: std_logic_vector(10 downto 0); -- up to 2k supported
-signal il_d: std_logic_vector(7 downto 0);
+signal il_d, d_original, d_extended: std_logic_vector(7 downto 0);
 signal il_a_valid: std_logic;
 
 -- stores Basic program and input line, everything else is custom registers inside CPU!
@@ -206,6 +206,7 @@ alias sw_traceRegSel: std_logic_vector(1 downto 0) is switch(1 downto 0);
 alias sw_traceDisable: std_logic is switch(4);
 signal button: std_logic_vector(7 downto 0);
 signal dip: std_logic_vector(7 downto 0);
+alias dip_extended: std_logic is dip(7);
 
 ---- UART
 signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
@@ -314,7 +315,7 @@ cpu: entity work.MicroBasic Port map (
 		-- Intermediate language (IL) read-only memory
 		IL_A => il_a,
 		IL_D => il_d,
-		TB_EXTENDED => '1',
+		TB_EXTENDED => dip_extended,
 		-- Basic code and command line memory
 		nBUSREQ => nBUSREQ,
 		nBUSACK => nBUSACK,
@@ -341,13 +342,26 @@ cpu: entity work.MicroBasic Port map (
 	);
 
 -- ROM containing the IL language instructions
-cu_il: entity work.il_rom
+il_d <= d_extended when (dip_extended = '1') else d_original;
+
+-- Original version, > prompt
+il_original: entity work.original_rom
 		Generic map (
 			ADDR_DEPTH => 9
 		)
 		Port map ( 
 			a => il_a,
-			d => il_d
+			d => d_original
+		);
+
+-- Extended version, : prompt
+il_extended: entity work.extended_rom
+		Generic map (
+			ADDR_DEPTH => 9
+		)
+		Port map ( 
+			a => il_a,
+			d => d_extended
 		);
 
 -- infer simple 2k RAM

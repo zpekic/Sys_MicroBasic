@@ -85,10 +85,13 @@ signal off_is_zero: std_logic;
 -- some IL opcodes that are useful to be known to hardware, not just the microcode
 constant OP_GS: std_logic_vector(7 downto 0) := X"14";	-- Go Subroutine (push to Basic return stack)
 constant OP_RS: std_logic_vector(7 downto 0) := X"15";	-- ReStore (pop from Basic return stack)
+constant OP_GO: std_logic_vector(7 downto 0) := X"16";	-- GO (to)
 constant OP_CP: std_logic_vector(7 downto 0) := X"1C";	-- ComPare
 constant OP_PQ: std_logic_vector(7 downto 0) := X"21";	-- Print basic string (from RAM to output)
 constant OP_GL: std_logic_vector(7 downto 0) := X"27";	-- Get Line
 constant OP_RT: std_logic_vector(7 downto 0) := X"2F";	-- ReTurn (pop from IL return stack)
+-- extended Tiny Basic specific opcode
+constant OP_FS: std_logic_vector(7 downto 0) := X"25";	-- For Start
 
 -- single char output
 signal CHAROUT: std_logic_vector(7 downto 0);
@@ -107,7 +110,8 @@ signal DBG_READY, dbg_start: std_logic;
 -- external memory interface (stores Basic code and input buffer)
 signal MAR: std_logic_vector(15 downto 0);
 signal MDR, MDR_UpperCase: std_logic_vector(7 downto 0);
-signal mdr_equ_db, mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase, mdr_matches_ilcodebyte: std_logic;
+signal mdr_is_num, mdr_is_alpha, mdr_is_lowercase, mdr_is_uppercase: std_logic;
+signal mdr_matches_db, mdr_matches_ilcodebyte, mdr_matches_varname, mdr_matches_ilcodebyte_alt_varname: std_logic;
 
 -- key pointers (memory map constants, TODO: make them variable to configure RAM layout and size) 
 constant Inline_Start: std_logic_vector(15 downto 0) := X"0000";	-- input buffer at start of RAM
@@ -143,9 +147,15 @@ signal bstack_is_empty, bstack_is_full: std_logic;
 -- stack error conditions
 signal stack_is_full, stack_is_empty: std_logic;
 
--- Basic variables A-Z are stored internally in 32*16 RAM, few locations unused
-signal vars: ram32x16;
-signal vars_index: std_logic_vector(7 downto 0); 	-- 8 bits to make some arithmetic easier
+-- Basic variables A-Z are stored internally in 32*48 RAM, few locations unused
+signal vars, vars_for, vars_next: ram32x16;
+signal vars_index, var_name: std_logic_vector(7 downto 0); 	-- 8 bits to make some arithmetic easier
+signal var_address: integer range 0 to 31;
+signal BasicVar, BasicFor, BasicNext: std_logic_vector(15 downto 0);		
+signal for_set, next_set: std_logic;
+signal for_v: std_logic_vector(31 downto 0)  := (others => '0');
+signal next_v: std_logic_vector(31 downto 0) := (others => '0');
+signal lino_var: std_logic_vector(15 downto 0) := X"0000";
 
 -- ALU with own internal state
 signal bcd_sum: std_logic_vector(23 downto 0);		-- 24 bits to contain BCD digits e.g. 032767
@@ -154,6 +164,7 @@ alias ListFrom: std_logic_vector(15 downto 0) is Y(31 downto 16);
 alias ListTo: std_logic_vector(15 downto 0) is Y(15 downto 0);
 signal R, S: std_logic_vector(15 downto 0);			-- ALU input arguments are 16 bit
 signal s_plus_r, s_minus_r, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
+signal t_plus_r, t_minus_s: std_logic_vector(15 downto 0);
 signal s_mul_r: std_logic_vector(31 downto 0);		-- output of combinatorial multiplier
 signal subc: std_logic_vector(16 downto 0);			-- 17 bits, MSB is carry out which is needed in division step 
 signal y_zero, r_is_zero: std_logic;					-- combinatorial state of Y and R
@@ -178,11 +189,12 @@ signal lino_tick: std_logic_vector(15 downto 0);
 -- GOTO cache
 signal cache: ram32x32;
 signal cache_v: std_logic_vector(31 downto 0) := (others => '0');
-signal lino_clk: std_logic_vector(15 downto 0);
+signal lino_alu: std_logic_vector(15 downto 0);
 signal cache_entry: std_logic_vector(31 downto 0);
 alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5); 
 alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
 signal cache_hit, cache_valid: std_logic;
+signal cache_hit_alt_next_set, cache_valid_alt_for_set: std_logic;
 
 -- other
 signal T, T_saved: std_logic_vector(15 downto 0);
@@ -203,6 +215,15 @@ cache_full <= '1' when (cache_v = X"FFFFFFFF") else '0';		-- all 32 entries used
 cache_entry <= cache(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
 cache_hit <= '1' when (cache_tag = Lino_tag) else '0';
 cache_valid <= cache_v(to_integer(unsigned(Lino_index)));
+
+-- Basic variable store
+var_name <= X"7F" and std_logic_vector(unsigned(vars_index) + X"40");
+var_address <= to_integer(unsigned(vars_index(4 downto 0)));
+BasicVar <= vars(var_address);
+BasicFor <= vars_for(var_address);
+BasicNext <= vars_next(var_address);
+for_set <= '0' when (BasicFor = X"0000") else for_v(var_address);
+next_set <= '0' when (BasicNext = X"0000") else next_v(var_address);
 
 -- Tristate system bus (64k address, bidirectional 8-bit data to Basic RAM "core")
 nRD <= mb_nRD when (nBUSACK = '0') else 'Z';
@@ -298,7 +319,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_CHAROUT_READY) => outchar_ready,
 			cond(seq_cond_TB_EXTENDED) => TB_EXTENDED,
 			cond(seq_cond_DBG_READY) => ready_alt_break,
-			cond(seq_cond_MDR_EQU_DB) => mdr_equ_db,
+			cond(seq_cond_MDR_MATCHES_DB) => mdr_matches_db,
 			cond(seq_cond_nBUSACK) => nBUSACK,
 			cond(seq_cond_INLEND_MAX) => inlend_max_alt_basline_found,
 			cond(seq_cond_INLEND_MIN) => inlend_min_alt_impline_empty,
@@ -311,7 +332,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_MDR_IS_ALPHA) => mdr_is_alpha,
 			cond(seq_cond_STACK_IS_FULL) => stack_is_full,
 			cond(seq_cond_STACK_IS_EMPTY) => stack_is_empty,
-			cond(seq_cond_MDR_MATCHES_ILCODEBYTE) => mdr_matches_ilcodebyte,
+			cond(seq_cond_MDR_MATCHES_ILCODEBYTE) => mdr_matches_ilcodebyte_alt_varname,
 			cond(seq_cond_R_IS_ZERO) => r_is_zero,
 			cond(seq_cond_Y_ZERO) => y_zero_alt_cp_skip,
 			cond(seq_cond_Y_SIGN) => Y(15),
@@ -322,8 +343,8 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
 			cond(seq_cond_S_EQU_DB_MOD32) => s_equ_db_mod32,	
-			cond(seq_cond_CACHE_VALID) => cache_valid,
-			cond(seq_cond_CACHE_HIT) => cache_hit,
+			cond(seq_cond_CACHE_VALID) => cache_valid_alt_for_set,
+			cond(seq_cond_CACHE_HIT) => cache_hit_alt_next_set,
 			cond(seq_cond_false) => '0',
 			-- outputs
 			ui_nextinstr => ui_nextinstr,
@@ -345,8 +366,16 @@ inlend_min_alt_impline_empty <= inlend_min when (IL_OP = OP_GL) else impline_emp
 cp_skip <= (T(10) and s_gt_r) or (T(9) and s_equ_r) or (T(8) and s_minus_r(15));
 y_zero_alt_cp_skip <= cp_skip when (IL_OP = OP_CP) else y_zero;
 
-mdr_matches_ilcodebyte <= '1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
-mdr_equ_db <=			'1' when (MDR(6 downto 0) = mb_directByte) else '0';
+-- GOTO cache and FOR/NEXT
+cache_valid_alt_for_set <= cache_valid when (IL_OP = OP_GO) else for_set;
+cache_hit_alt_next_set <= cache_hit when (IL_OP = OP_GO) else next_set;
+
+-- other conditional codes
+mdr_matches_ilcodebyte_alt_varname <= mdr_matches_varname when (IL_OP = OP_FS) else mdr_matches_ilcodebyte;
+mdr_matches_ilcodebyte <= 	'1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
+mdr_matches_varname <=		'1' when (MDR_UpperCase(6 downto 0) = var_name(6 downto 0)) else '0';
+mdr_matches_db <=				'1' when (MDR_UpperCase(6 downto 0) = mb_directByte) else '0';
+--mdr_equ_db <=			'1' when (MDR(6 downto 0) = mb_directByte) else '0';
 mdr_is_num <=			'1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
 mdr_is_lowercase <=	'1' when ((unsigned(MDR) > 96) and (unsigned(MDR) < 123)) else '0';
 mdr_is_uppercase <=	'1' when ((unsigned(MDR) > 64) and (unsigned(MDR) < 91)) else '0';
@@ -494,7 +523,7 @@ begin
 			when T_XQhere =>
 				T <= "00000" & XQhere;
 			when T_from_vars =>
-				T <= vars(to_integer(unsigned(vars_index(4 downto 0))));
+				T <= BasicVar;
 			when T_ExpStack =>
 				T <= ExpSTHi & ExpSTLo;
 			when T_from_YLo =>
@@ -550,6 +579,12 @@ begin
 			when T_fromTicks =>
 				T <= cnt_tick1000;
 				T_saved <= cnt_tick;
+			when T_from_var_For =>
+				T <= BasicFor;
+			when T_from_var_Next =>
+				T <= BasicNext;
+			when T_index2address =>
+				T <= std_logic_vector(unsigned(PrgEnd) + unsigned(T(14 downto 0) & '1'));
 			when others =>
 				null;
 		end case;
@@ -667,21 +702,46 @@ S2 <= (others => S(2));
  end if;
  end process;
 	
- update_Vars: process(clk, mb_Vars)
+ update_Vars: process(clk, reset, mb_Vars)
  begin
-	if (rising_edge(clk)) then
-		case mb_Vars is
---			when Vars_same =>
---				Vars <= Vars;
-			when Vars_indexFromExpStack =>
-				-- top byte on expressions stack (ExpSTLo) contains twice the upper - case ASCII code of the variable name
-				vars_index <= std_logic_vector(unsigned('0' & ExpSTLo(7 downto 1)) - X"40");
-			when Vars_T =>
-				Vars(to_integer(unsigned(vars_index(4 downto 0)))) <= T;
-			when others =>
-				null;
-		end case;
- end if;
+--	if (reset = '1') then
+--		for_v <= (others => '0');
+--		next_v <= (others => '0');
+--	else
+		if (rising_edge(clk)) then
+
+			-- clear for/next state at start of run (when Lino goes from 0 to some valid Basic line number)
+			lino_var <= Lino;
+			if ((is_runmode = '1') and (lino_var = X"0000")) then
+				for_v <= (others => '0');
+				next_v <= (others => '0');
+			end if;
+		
+			case mb_Vars is
+		--			when Vars_same =>
+		--				Vars <= Vars;
+				when Vars_indexFromExpStack =>
+					-- top byte on expressions stack (ExpSTLo) contains twice the upper - case ASCII code of the variable name
+					vars_index <= std_logic_vector(unsigned('0' & ExpSTLo(7 downto 1)) - X"40");
+				when Vars_T =>
+					Vars(var_address) <= T;
+				when Vars_for_fromLino =>
+					Vars_For(var_address) <= Lino;
+					for_v(var_address) <= '1';
+				when Vars_next_fromBP =>
+					Vars_Next(var_address) <= BP;
+					next_v(var_address) <= '1';
+				when Vars_for_clear =>
+					Vars_For(var_address) <= X"0000";
+					for_v(var_address) <= '0';
+				when Vars_next_clear =>
+					Vars_Next(var_address) <= X"0000";
+					next_v(var_address) <= '0';
+				when others =>
+					null;
+			end case;
+		end if;
+--	end if;
  end process;
 	
 -------------------------------------------------------------------------------	
@@ -822,8 +882,8 @@ end process;
  begin
 	if (rising_edge(clk)) then
 		-- clear cache valid bits at start of run (when Lino goes from 0 to some valid Basic line number)
-		lino_clk <= Lino;
-		if ((is_runmode = '1') and (lino_clk = X"0000")) then
+		lino_alu <= Lino;
+		if ((is_runmode = '1') and (lino_alu = X"0000")) then
 			cache_v <= (others => '0');
 		end if;
 		case mb_alu is
@@ -1018,6 +1078,14 @@ end process;
 			when alu_cache_store =>
 				cache(to_integer(unsigned(Lino_index))) <= BP & Lino;
 				cache_v(to_integer(unsigned(Lino_index))) <= '1';
+			when alu_for_check =>
+				if (t_minus_s = X"0000") then
+					alu_ready <= '1';
+				else
+					alu_ready <= R(15) xor (t_minus_s(15));
+				end if;
+			when alu_for_step =>
+				Y <= X"0000" & t_plus_r;
 			when others =>
 				null;
 		end case;
@@ -1038,9 +1106,10 @@ converter: entity work.bin2bcd Port map (
 -- combinatorial operations
 s_plus_r <= std_logic_vector(signed(S) + signed(R));
 plus_overflow <= ((not R(15)) and (not S(15))) when (s_plus_r(15) = '1') else (R(15) and S(15));
+t_plus_r <= std_logic_vector(signed(T) + signed(R));
+t_minus_s <= std_logic_vector(signed(T) - signed(S));
 
 s_minus_r <= std_logic_vector(signed(S) - signed(R));
---r_minus_s <= std_logic_vector(signed(R) - signed(S));
 minus_overflow <= '0';
 s_equ_r <= '1' when (s_minus_r = X"0000") else '0';
 s_gt_r <= not(s_minus_r(15)) and not(s_equ_r);
@@ -1130,15 +1199,24 @@ tracer: entity work.serialtracer2 Port map (
 		start => dbg_start,
 		index => DBGINDEX,
 		slevel => RetSp,
+		--X"80"
 		data(3) => '0',
 		data(2 downto 0) => IL_PC(10 downto 8),
+		--X"81"
 		data(7 downto 4) => IL_PC(7 downto 4),
+		--X"82"
 		data(11 downto 8) => IL_PC(3 downto 0),
+		--X"83"
 		data(15 downto 12) => il_codeByte(7 downto 4),
+		--X"84"
 		data(19 downto 16) => il_codeByte(3 downto 0),
+		--X"85"
 		data(23 downto 20) => MDR(7 downto 4),
+		--X"86"
 		data(27 downto 24) => MDR(3 downto 0),
+		--X"87"
 		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
+		--X"88"..X"89"
 		data(47 downto 32) => Lino,
 		data(63 downto 48) => T,
 		txd => debug_txd,
