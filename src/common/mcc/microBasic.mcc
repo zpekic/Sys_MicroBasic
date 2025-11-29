@@ -159,7 +159,7 @@ CHAROUT:		.regfield 3 values
 				from_MDR,
 				from_YtoAlpha,	// load ASCII code based on BCD character in Y top nibble	
 				from_YtoAlphaZ, // same, but with leading zero supression
-				-		
+				-
 				default same;
 
 // 16-bit Memory Address Register
@@ -321,7 +321,7 @@ traceSDepth:.alias trace(from_microcode), directByte = 56;	// trace stack depth 
 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 //dump_il:	.sub;
-dump_input:	.sub;
+//dump_input:	.sub;
 trace:		.sub DBGINDEX;
 outCRLF:	.sub;
 outChar:	.sub CHAROUT;
@@ -361,7 +361,6 @@ _reset3:	nop;
 
 //	indicate availability and wait for start signal
 //	---------------------------------------------------------------------------
-//ColdStart:	traceString 4;	// output "MicroBas" on debug UART
 ColdStart:	write2Nulls(Prog_start);														// kills program area
 WarmStart:	clear, findPrgEnd();															// correct PrgEnd is needed for @(..) array and SIZE()
 			BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero; 
@@ -420,8 +419,7 @@ lb_push:	traceString 3, T <= codeByte;
 			.map 0x0C;									// SP (Stack Pop)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 34;
-			if STACK_IS_EMPTY then ESTACK_ERR;
-			ExpStack <= pop2, goto fetch;
+			ExpStack <= pop2, if STACK_IS_EMPTY then ESTACK_ERR else fetch;
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x10;									// SB (Save Basic Pointer)
@@ -623,7 +621,7 @@ ls_nextLine:findNextCR(same);
 pq_loop:	BP <= inc, readCore(BP);
 			directByte = '"', if MDR_MATCHES_DB then pq_done;
 			outChar(from_MDR);
-			traceString 3;
+			//traceString 3;
 			directByte = CR, if MDR_MATCHES_DB then INTERNAL_ERR else pq_loop;	// found CR under quotes!
 pq_done:	traceBP();
 			goto fetch;
@@ -737,7 +735,7 @@ gl_bs:		if INLEND_MIN then gl_ignore;
 			
 gl_cr:		writeCore(InlEnd, CHARIN), InlEnd <= inc;
 			writeCore(InlEnd, zero);
-			dump_input();
+			//dump_input();
 			outCRLF();
 			gotChar = 1, BP <= Inline_start, goto fetch;	
 
@@ -868,22 +866,32 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			traceALU();
 			// TODO: better / faster "switch" implementation?
 			directByte = 20, if S_EQU_DB_MOD32 then u_peek8;
-			directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
 			directByte = 21, if S_EQU_DB_MOD32 then u_peek16;
+			directByte = 22, if S_EQU_DB_MOD32 then u_charout;
+			directByte = 23, if S_EQU_DB_MOD32 then u_charin;
+			directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
 			directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
 			// TODO implement other fun functions (26 to 28)!
 			directByte = 29, if S_EQU_DB_MOD32 then u_size;		// size function		
-			T <= index2address;									// calculate memory address from index in TAB
-			directByte = 30, if S_EQU_DB_MOD32 then u_peek16;	// get @(index)
-			directByte = 31, if S_EQU_DB_MOD32 then u_poke16;	// @(index) = value		
-			T <= binop, goto u_done;					// by default, execute binary operation T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
-						
+			directByte = 30, if S_EQU_DB_MOD32 then u_getarray;	// get @(index)
+			directByte = 31, if S_EQU_DB_MOD32 then u_setarray;	// @(index) = value	
+			T <= binop, goto u_done;							// by default, execute binary operation T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
+
+u_charout:	alu <= S_fromT;
+			MDR <= from_SLo;
+			outChar(from_MDR);
+			ExpStack <= push_TWord, goto fetch;
+
+u_charin:	if CHARIN_READY then next else repeat;				// wait for input character
+			gotChar = 1, MDR <= CHARIN, goto u_in;
+
 u_peek8: 	readCore(T);								// MDR <= Core(T)
 u_in:		T <= MDR;
 u_done:		ExpStack <= push_TWord, goto fetch;
 
 u_size:		T <= fromSize, goto u_done;					//TODO: proper SIZE calculation
 			
+u_getarray: T <= index2address;			
 u_peek16:	readCore16(same);
 			T <= from_R, goto u_done;
 
@@ -891,6 +899,7 @@ u_poke8:	prepWrite();
 			writeCore(T, from_SLo);
 			goto u_peek8;								// slow, but allows X = USR(poke8, A, X) trick to check if byte has been written correctly
 			
+u_setarray: T <= index2address;
 u_poke16:	prepWrite(); 
 			writeCore(T, from_SHi), T <= inc;
 			writeCore(T, from_SLo);
@@ -1088,13 +1097,13 @@ readCore:	nRD = 0, if nBUSACK then repeat else next;
 
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		
-dump_input: InlEnd <= InLine_start, trace(crlf);
-dump_inlp:	readCore(InlEnd);
-			directByte = 9, trace(from_microcode);		// display memory byte as Hex
-			directByte = NULL, if MDR_MATCHES_DB then dump_inex;
-			InlEnd <= inc, goto dump_inlp; 
-dump_inex:	trace(crlf);
-			back;			
+//dump_input: InlEnd <= InLine_start, trace(crlf);
+//dump_inlp:	readCore(InlEnd);
+//			directByte = 9, trace(from_microcode);		// display memory byte as Hex
+//			directByte = NULL, if MDR_MATCHES_DB then dump_inex;
+//			InlEnd <= inc, goto dump_inlp; 
+//dump_inex:	trace(crlf);
+//			back;			
 			
 traceBP:	ExpStack <= push_TWord, T <= BP;
 			traceString 33;
