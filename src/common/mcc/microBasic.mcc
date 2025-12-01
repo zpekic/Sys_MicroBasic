@@ -322,6 +322,7 @@ traceSDepth:.alias trace(from_microcode), directByte = 56;	// trace stack depth 
 // gosub definitions - this works because "jump" pushes return address to stack if both then/else are same
 //dump_il:	.sub;
 //dump_input:	.sub;
+div_mod:	.sub;
 trace:		.sub DBGINDEX;
 outCRLF:	.sub;
 outChar:	.sub CHAROUT;
@@ -507,8 +508,7 @@ findLino:	alu <= reset1, readCore(T);
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 25;								// Trace mnemonic
 			alu <= R_fromStack, if STACK_IS_EMPTY then ESTACK_ERR;
-			ExpStack <= pop2;
-			alu <= neg_R, if ALU_READY then alu_done else repeat;
+			ExpStack <= pop2, alu <= neg_R, goto alu_done;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x18;									// AD (Add)
@@ -518,7 +518,7 @@ findLino:	alu <= reset1, readCore(T);
 			alu <= S_plus_R, if ALU_READY then next else repeat;
 alu_done:	traceALU();
 			T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
-			ExpStack <= push_TWord, goto fetch;
+u_done:		ExpStack <= push_TWord, goto fetch;		
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x19;									// SB (Substract)
@@ -539,11 +539,14 @@ alu_done:	traceALU();
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 35;								// Trace mnemonic
 			pullRS();
-			alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
+			div_mod();
+			goto alu_done;
+			
+div_mod:	alu <= div_start, if R_IS_ZERO then DIVBY0_ERR;
 div_loop:	alu <= div_shift;
 			if ALU_READY then div_done;
 			alu <= div_subset, goto div_loop; 
-div_done:	alu <= div_end, goto alu_done;
+div_done:	alu <= div_end, back;						// quotient is in YLo, remainder in YHi
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1C;									// CP (Compare)
@@ -552,9 +555,9 @@ div_done:	alu <= div_end, goto alu_done;
 			alu <= R_fromStack, ExpStack <= pop2;
 			ExpStack <= push_TByte;						// push dummy byte to make it even
 			T <= ExpStack, ExpStack <= pop2;			// load condition mask into T (16 bit)
-			alu <= S_fromStack, ExpStack <= pop2;
-			if CP_SKIP then next else fetch;
-			IL_PC <= inc, goto fetch;
+			alu <= S_fromStack, ExpStack <= pop2, traceString 51;
+			if CP_SKIP then next else fetch1;
+			IL_PC <= inc, goto fetch1;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x1D;									// NX (Next Basic statement)
@@ -812,7 +815,7 @@ scanProgram:T <= zero;
 scan_loop:  LS <= T, readCore16(same);						// assume this will be LS (LE also needed to make it "found")
 			alu <= S_fromLino, if R_IS_ZERO then return;	// found end of Basic program (2 NULLs)?
 scan_check:	alu <= S_minus_R;								// Lino - current line, T at first character of the Basic statement text
-			traceALU();
+			//traceALU();
 			if Y_ZERO then scan_found else next; 
 			if Y_SIGN then scan_found else next;			// we care only about same or higher
 scan_next:	findNextCR(same);								// skip to end of current line
@@ -871,23 +874,26 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 23, if S_EQU_DB_MOD32 then u_charin;
 			directByte = 24, if S_EQU_DB_MOD32 then u_poke8;
 			directByte = 25, if S_EQU_DB_MOD32 then u_poke16;
-			// TODO implement other fun functions (26 to 28)!
+			// TODO implement other fun function 26!
+			directByte = 27, if S_EQU_DB_MOD32 then u_modulo;	// modulo operator
 			directByte = 29, if S_EQU_DB_MOD32 then u_size;		// size function		
 			directByte = 30, if S_EQU_DB_MOD32 then u_getarray;	// get @(index)
 			directByte = 31, if S_EQU_DB_MOD32 then u_setarray;	// @(index) = value	
 			T <= binop, goto u_done;							// by default, execute binary operation T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
 
+u_modulo: 	alu <= S_fromT, div_mod();
+			T <= from_YHi, goto u_done;
+			
 u_charout:	alu <= S_fromT;
 			MDR <= from_SLo;
 			outChar(from_MDR);
 			ExpStack <= push_TWord, goto fetch;
 
-u_charin:	if CHARIN_READY then next else repeat;				// wait for input character
+u_charin:	if CHARIN_READY then next else repeat;		// wait for input character
 			gotChar = 1, MDR <= CHARIN, goto u_in;
 
 u_peek8: 	readCore(T);								// MDR <= Core(T)
-u_in:		T <= MDR;
-u_done:		ExpStack <= push_TWord, goto fetch;
+u_in:		T <= MDR, goto u_done;
 
 u_size:		T <= fromSize, goto u_done;					//TODO: proper SIZE calculation
 			
@@ -1105,12 +1111,10 @@ readCore:	nRD = 0, if nBUSACK then repeat else next;
 //dump_inex:	trace(crlf);
 //			back;			
 			
-traceBP:	ExpStack <= push_TWord, T <= BP;
-			traceString 33;
+traceBP:	ExpStack <= push_TWord, T <= BP, traceString 33;
 			T <= ExpStack, ExpStack <= pop2, back;
 
-traceY:		ExpStack <= push_TWord, T <= from_YLo;
-			traceString 32;
+traceY:		ExpStack <= push_TWord, T <= from_YLo, traceString 32;
 			T <= ExpStack, ExpStack <= pop2, back;
 			
 traceALU:	trace(crlf);

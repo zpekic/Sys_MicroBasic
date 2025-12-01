@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2025-11-28T21:32:32</DateModified>
+  <DateModified>2025-11-30T20:09:55</DateModified>
   <ModuleName>sys_microbasic_anvyl</ModuleName>
-  <SummaryTimeStamp>2025-11-28T20:38:53</SummaryTimeStamp>
+  <SummaryTimeStamp>2025-11-30T19:47:54</SummaryTimeStamp>
   <SavedFilePath>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/Anvyl/iseconfig/sys_microbasic_anvyl.xreport</SavedFilePath>
   <ImplementationReportsDirectory>C:/Users/zoltanp/Documents/HexCalc/Sys_MicroBasic/src/Anvyl\</ImplementationReportsDirectory>
   <DateInitialized>2025-10-20T18:13:25</DateInitialized>

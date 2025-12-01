@@ -143,8 +143,7 @@ architecture Structural of sys_microbasic_anvyl is
 
 -- IL Code
 signal il_a: std_logic_vector(10 downto 0); -- up to 2k supported
-signal il_d, d_original, d_extended: std_logic_vector(7 downto 0);
-signal il_a_valid: std_logic;
+signal il_d: std_logic_vector(7 downto 0);
 
 -- stores Basic program and input line, everything else is custom registers inside CPU!
 type memory is array (0 to 2047) of std_logic_vector(7 downto 0);
@@ -222,7 +221,6 @@ signal inp_active, prg_active, mcc_active, mcc_active_out, vga_window: std_logic
 -- 3 independent windows can overlap as they wish, but higher priority window will occluse the lower ones
 signal win_vector: std_logic_vector(2 downto 0);	-- 3 bits for 3 independent windows
 signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
-
 
 begin
 
@@ -331,7 +329,7 @@ cpu: entity work.MicroBasic Port map (
 		inchar => RXD_CHAR,
 		inchar_ready => RXD_READY,
 		-- debug / trace
-		overflowEnable => dip(7),
+		overflowEnable => dip_extended,
 		traceEnable => not sw_traceDisable,
 		baudrate => baudrate_x1,
 		debug_txd => debug_txd, 
@@ -341,28 +339,12 @@ cpu: entity work.MicroBasic Port map (
 		debug_bus => cpu_debug			
 	);
 
--- ROM containing the IL language instructions
-il_d <= d_extended when (dip_extended = '1') else d_original;
-
--- Original version, > prompt
-il_original: entity work.original_rom
-		Generic map (
-			ADDR_DEPTH => 9
-		)
-		Port map ( 
-			a => il_a,
-			d => d_original
-		);
-
--- Extended version, : prompt
-il_extended: entity work.extended_rom
-		Generic map (
-			ADDR_DEPTH => 9
-		)
-		Port map ( 
-			a => il_a,
-			d => d_extended
-		);
+-- ROM containing the IL language instructions (2 versions of Tiny Basic interpreter)
+il_rom: entity work.tbil port map ( 
+		extended => dip_extended,
+		a => il_a,
+		d => il_d 
+	);
 
 -- infer simple 2k RAM
 on_cpuclk: process(cpu_clk)
@@ -607,4 +589,3 @@ sym_ram: entity work.symTracer port map (
 		char_out => sym_char		
 	);
 end;
-

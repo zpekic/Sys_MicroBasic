@@ -208,7 +208,20 @@
 		JS  FACT
 		DV
 		BR T0
-:T2   	RT
+:T2		BC T3, "%"		//factors separated by modulo
+		JS FACT
+		LN 27			//a % b = USR(27, a, b)
+		SX 1
+		SX 5
+		SX 1
+		SX 4			//rearrange stack so that 0x001B (USR code) is at the bottom
+		SX 1			//swap TOS and NOS
+		SX 3
+		SX 1
+		SX 2
+		US
+		BR T0
+:T3   	RT
 
 //
 :FACT 	BC F0, "RND"    //*RND FUNCTION*

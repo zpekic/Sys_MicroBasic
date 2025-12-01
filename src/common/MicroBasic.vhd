@@ -164,14 +164,16 @@ signal bcd_sum: std_logic_vector(23 downto 0);		-- 24 bits to contain BCD digits
 signal Y, Y_saved: std_logic_vector(31 downto 0);	-- double size needed for MUL, DIV, BCD conversion
 alias ListFrom: std_logic_vector(15 downto 0) is Y(31 downto 16);
 alias ListTo: std_logic_vector(15 downto 0) is Y(15 downto 0);
+alias YHi: std_logic_vector(15 downto 0) is Y(31 downto 16);
+alias YLo: std_logic_vector(15 downto 0) is Y(15 downto 0);
 signal R, S: std_logic_vector(15 downto 0);			-- ALU input arguments are 16 bit
-signal s_plus_r, s_minus_r, neg_r, neg_s, neg_y: std_logic_vector(15 downto 0);
+signal s_plus_r, s_minus_r, neg_r, neg_s, neg_ylo, neg_yhi: std_logic_vector(15 downto 0);
 signal t_plus_r, t_minus_s: std_logic_vector(15 downto 0);
 signal s_mul_r: std_logic_vector(31 downto 0);		-- output of combinatorial multiplier
 signal subc: std_logic_vector(16 downto 0);			-- 17 bits, MSB is carry out which is needed in division step 
 signal y_zero, r_is_zero: std_logic;					-- combinatorial state of Y and R
 signal y_zero_alt_cp_skip, cp_skip: std_logic;		-- compare flags
-signal alu_sign, alu_overflow, alu_ready: std_logic;	-- state needed for BCD, signed division
+signal alu_sign, alu_overflow, alu_ready, alu_s15: std_logic;	-- state needed for BCD, signed division
 alias ls_params_ok: std_logic is alu_ready;
 alias ls_in_range: std_logic is alu_sign;
 alias ls_passed_end: std_logic is alu_overflow;
@@ -978,7 +980,8 @@ end process;
 						alu_sign <= '0';	-- -/-
 					end if;
 					Y <= X"0000" & neg_s;
-				end if;				
+				end if;	
+				alu_s15 <= S(15);		-- will be used to correct the sign of remainder
 				alu_overflow <= '0';	-- By definition can't overflow
 				alu_ready <= '0';
 				S <= X"0010";	-- use S as the 16 steps counter 
@@ -1004,8 +1007,11 @@ end process;
 			when alu_div_end =>
 				if (alu_sign = '1') then
 					-- correct quotient sign
-					-- TODO also correct remainder sign which by definition should be same as dividend (reg S)
-					Y(15 downto 0) <= neg_y;
+					YLo <= neg_ylo;
+				end if;
+				if (alu_s15 = '1') then
+					-- correct remainder sign (otherwise remainder would be always positive or zero)
+					YHi <= neg_yhi;
 				end if;
 			when alu_Yx10_plus_MDR =>
 				-- used for string to numeric conversion
@@ -1123,7 +1129,8 @@ neg_r <= std_logic_vector(0 - signed(R));
 neg_overflow <= '1' when (R = X"8000") else '0';	-- can't negate -32768
 
 neg_s <= std_logic_vector(0 - signed(S));
-neg_y <= std_logic_vector(0 - signed(Y(15 downto 0)));
+neg_ylo <= std_logic_vector(0 - signed(YLo));
+neg_yhi <= std_logic_vector(unsigned(YHi xor X"FFFF") + 1);
 
 -- will use intrinsic multiplier on FPGA (which is also combinatorial, therefore this is synthesizable)
 s_mul_r <= std_logic_vector(signed(R) * signed(S));

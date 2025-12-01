@@ -98,7 +98,7 @@ begin
 		bitSel <= (others => '0');
 	else
 		if (rising_edge(bitClk)) then
-			if (bitSel = X"E") then
+			if (bitSel = X"D") then
 				bitSel <= (others => '0');
 			else
 				bitSel <= std_logic_vector(unsigned(bitSel) + 1);
