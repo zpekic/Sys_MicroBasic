@@ -206,6 +206,7 @@ alias sw_traceDisable: std_logic is switch(4);
 signal button: std_logic_vector(7 downto 0);
 signal dip: std_logic_vector(7 downto 0);
 alias dip_extended: std_logic is dip(7);
+alias dip_overflowenable: std_logic is dip(6);
 
 ---- UART
 signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
@@ -329,7 +330,7 @@ cpu: entity work.MicroBasic Port map (
 		inchar => RXD_CHAR,
 		inchar_ready => RXD_READY,
 		-- debug / trace
-		overflowEnable => dip_extended,
+		overflowEnable => dip_overflowEnable,
 		traceEnable => not sw_traceDisable,
 		baudrate => baudrate_x1,
 		debug_txd => debug_txd, 
