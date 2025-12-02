@@ -30,7 +30,8 @@
 		JS FUNC			//eval expression and make sure it is closed by )
 		BC *, "="		//must be followed by equals
 		JS EXPR			//get the value
-		US				//execute assignment
+		US			//execute assignment
+		SP			//assigment was done so remove stack top to prevent stack overflow
 		BC LETEX, ","	//more assignments?
 		BR LETLP		//yes, back to loop	
 :LETDN	BE *            //IF STATEMENT END,

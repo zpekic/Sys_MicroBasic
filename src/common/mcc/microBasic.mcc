@@ -86,7 +86,7 @@ T			.regfield 5 values
 				from_var_Next,
 				index2address,
 				fromSize,		// free RAM size calculation result
-				-,
+				from_microcode,
 				-				
 				default same;
 				
@@ -333,7 +333,6 @@ skipSpaces: .sub;
 pullRS:		.sub;
 printDec:	.sub;
 printDecR:	.sub alu;
-printY:		.sub;
 copyCore:	.sub alu;
 scanProgram:.sub;
 findNextCR:	.sub T;
@@ -583,30 +582,30 @@ nx_err:		directByte = BEEP, outChar(from_microcode);	// TODO - write some error 
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 41;								// Trace mnemonic
 			alu <= reset1, if IS_RUNMODE then badop;	// S == from == 0, R == to == 65535			
-ls_parload:	T <= from_R, if STACK_IS_EMPTY then ls_parchk;
+ls_parload:		T <= from_R, if STACK_IS_EMPTY then ls_parchk;
 			alu <= S_fromT;
 			alu <= R_fromStack, ExpStack <= pop2, goto ls_parload;
-ls_parchk:  alu <= ls_load;								// loads Y with S and R, also checks that R >= S and neither are 0
+ls_parchk:  		alu <= ls_load;								// loads Y with S and R, also checks that R >= S and neither are 0
 			if LS_PARAMS_OK then next else SYNTAX_ERR;
-ls_start:	T <= Prog_start;
-ls_lineloop:if CHARIN_READY then next else ls_continue;	// check if a character came in
+ls_start:		T <= Prog_start;
+ls_lineloop:		if CHARIN_READY then next else ls_continue;	// check if a character came in
 			if KBD_BREAK then BREAK;
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;	// SPACE pauses/resumes listing
-ls_pause:	if CHARIN_READY then next else repeat;			// SPACE detected, now wait for next char
+ls_pause:		if CHARIN_READY then next else repeat;			// SPACE detected, now wait for next char
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause; 
-ls_continue:gotChar = 1, readCore16(same); 	// read line number into R
-			alu <= ls_check, if R_IS_ZERO then fetch;	// end of program, bail
+ls_continue:		gotChar = 1, readCore16(same); 	// read line number into R
+			alu <= ls_check, if R_IS_ZERO then fetch;		// end of program, bail
 			if LS_PASSED_END then fetch;				// passed the end, bail
 			if LS_IN_RANGE then next else ls_nextLine;
-			printDecR(Y_save);							// output line number (in decimal!) - this trashes Y so we need to restore it after
-			alu <= Y_recall, directByte = ' ', outChar(from_microcode);	// followed by a single space
-ls_charloop:readCore(T);
+			T <= save, printDecR(Y_save);				// output line number (in decimal!) - this trashes T, Y so we need to restore them after
+			T <= recall, alu <= Y_recall, directByte = ' ', outChar(from_microcode);	// followed by a single space
+ls_charloop:		readCore(T);
 			outChar(from_MDR);
-ls_nextchar:directByte = CR, if MDR_MATCHES_DB then next else ls_next;  // loop until CR found, which is end of Basic line
-			directByte = LF, outChar(from_microcode);				// CR was already printed, so just LF
+ls_nextchar:		directByte = CR, if MDR_MATCHES_DB then next else ls_next;  	// loop until CR found, which is end of Basic line
+			directByte = LF, outChar(from_microcode);			// CR was already printed, so just LF
 			T <= inc, goto ls_lineloop;
-ls_next:	T <= inc, goto ls_charloop;
-ls_nextLine:findNextCR(same);
+ls_next:		T <= inc, goto ls_charloop;
+ls_nextLine:		findNextCR(same);
 			T <= inc, goto ls_lineloop;
 			
 			////////////////////////////////////////////////////////////////////////////////
@@ -1070,17 +1069,21 @@ printDecR:	alu <= bcd_start;
 			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
 			if ALU_SIGN then next else printY;
 			directByte = '-', outChar(from_microcode); 		// print minus sign
-printY:		outNZChar(from_YtoAlphaZ);						// 7 (8 BCD digits in 32-bit register Y)
-			outNZChar(from_YtoAlphaZ);						// 6
-			outNZChar(from_YtoAlphaZ);						// 5
-			outNZChar(from_YtoAlphaZ);						// 4
-			outNZChar(from_YtoAlphaZ);						// 3
-			outNZChar(from_YtoAlphaZ);						// 2
-			outNZChar(from_YtoAlphaZ);						// 1
+//printY:			outNZChar(from_YtoAlphaZ);						// 7 (8 BCD digits in 32-bit register Y)
+//			outNZChar(from_YtoAlphaZ);						// 6
+//			outNZChar(from_YtoAlphaZ);						// 5
+//			outNZChar(from_YtoAlphaZ);						// 4
+//			outNZChar(from_YtoAlphaZ);						// 3
+//			outNZChar(from_YtoAlphaZ);						// 2
+//			outNZChar(from_YtoAlphaZ);						// 1
+printY:			directByte = 6, T <= from_microcode, outNZChar(from_YtoAlphaZ);		// a total of 8 characters
+printYlp:		outNZChar(from_YtoAlphaZ), T <= dec;
+			alu <= R_fromT;
+			if R_IS_ZERO then next else printYlp;
 			CHAROUT <= from_YtoAlpha, goto outChar;			// saving 1 microinstruction here...
 
 outNZChar:	outChar(from_YtoAlphaZ);
-out_skip:	alu <= Yx16, back;
+		alu <= Yx16, back;
 				
 skipSpaces: readCore(BP);
 			directByte = ' ', if MDR_MATCHES_DB then skipSp;

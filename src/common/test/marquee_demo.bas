@@ -48,6 +48,5 @@ clear
 1042 goto 1030
 1050 let f=f+1
 1051 goto 1020
-list
 
 

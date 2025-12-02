@@ -591,7 +591,9 @@ begin
 				T <= std_logic_vector(unsigned(PrgEnd) + unsigned(T(14 downto 0) & '1'));
 			when T_fromSize =>
 				-- TODO: CoreEnd should not be a constant!
-				T <= std_logic_vector(unsigned(Core_End) - unsigned(PrgEnd));			
+				T <= std_logic_vector(unsigned(Core_End) - unsigned(PrgEnd));		
+			when T_from_microcode =>
+				T <= "000000000" & mb_directByte;
 			when others =>
 				null;
 		end case;
