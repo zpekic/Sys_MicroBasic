@@ -30,11 +30,11 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity bcddigitadder is
-    Port ( ci : in  STD_LOGIC;
+    Port ( cin : in  STD_LOGIC;
            a : in  STD_LOGIC_VECTOR (3 downto 0);
            b : in  STD_LOGIC_VECTOR (3 downto 0);
            y : out  STD_LOGIC_VECTOR (3 downto 0);
-           cout : out  STD_LOGIC);
+           cout : buffer  STD_LOGIC);
 end bcddigitadder;
 
 architecture Behavioral of bcddigitadder is
@@ -45,7 +45,7 @@ alias adjust: std_logic is cout;
 
 begin
 
-binarysum <= std_logic_vector(unsigned('0' & a & ci) + unsigned('0' & b & ci));
+binarysum <= std_logic_vector(unsigned('0' & a & cin) + unsigned('0' & b & cin));
 adjustedsum <= std_logic_vector(unsigned('0' & binarysum(4 downto 1)) + "00110");
 adjust <= '1' when (binarysum(4 downto 2) = "101" or binarysum(4 downto 3) = "11") else binarysum(5);
 

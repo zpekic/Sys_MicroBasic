@@ -31,9 +31,8 @@ type rom16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
 type ram512x8 is array(0 to 511) of std_logic_vector(7 downto 0);
 type ram32x32 is array (0 to 31) of std_logic_vector(31 downto 0);
 type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
---type ram32x48 is array (0 to 31) of std_logic_vector(47 downto 0);
 type ram32x4 is array (0 to 31) of std_logic_vector(3 downto 0);
-type ram8x32 is array (0 to 15) of std_logic_vector(31 downto 0);
+type ram16x32 is array (0 to 15) of std_logic_vector(31 downto 0);
 type ram16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
 type ram16x16 is array (0 to 15) of std_logic_vector(15 downto 0);
 
@@ -57,6 +56,7 @@ constant hex2ascii: rom16x8 := (
 );
 
 constant bin2bcd: rom256x8 := (
+-- 000..099
 	X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09",
 	X"10", X"11", X"12", X"13", X"14", X"15", X"16", X"17", X"18", X"19",
 	X"20", X"21", X"22", X"23", X"24", X"25", X"26", X"27", X"28", X"29",
@@ -67,7 +67,7 @@ constant bin2bcd: rom256x8 := (
 	X"70", X"71", X"72", X"73", X"74", X"75", X"76", X"77", X"78", X"79",
 	X"80", X"81", X"82", X"83", X"84", X"85", X"86", X"87", X"88", X"89",
 	X"90", X"91", X"92", X"93", X"94", X"95", X"96", X"97", X"98", X"99",
---
+-- 100..199
 	X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09",
 	X"10", X"11", X"12", X"13", X"14", X"15", X"16", X"17", X"18", X"19",
 	X"20", X"21", X"22", X"23", X"24", X"25", X"26", X"27", X"28", X"29",
@@ -78,7 +78,7 @@ constant bin2bcd: rom256x8 := (
 	X"70", X"71", X"72", X"73", X"74", X"75", X"76", X"77", X"78", X"79",
 	X"80", X"81", X"82", X"83", X"84", X"85", X"86", X"87", X"88", X"89",
 	X"90", X"91", X"92", X"93", X"94", X"95", X"96", X"97", X"98", X"99",
---
+-- 200..255
 	X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09",
 	X"10", X"11", X"12", X"13", X"14", X"15", X"16", X"17", X"18", X"19",
 	X"20", X"21", X"22", X"23", X"24", X"25", X"26", X"27", X"28", X"29",

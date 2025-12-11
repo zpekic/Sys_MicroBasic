@@ -146,13 +146,13 @@ signal il_a: std_logic_vector(10 downto 0); -- up to 2k supported
 signal il_d: std_logic_vector(7 downto 0);
 
 -- stores Basic program and input line, everything else is custom registers inside CPU!
-type memory is array (0 to 2047) of std_logic_vector(7 downto 0);
+type memory is array (0 to 4095) of std_logic_vector(7 downto 0);
 signal ram: memory;
 signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
 signal pattern, memData: std_logic_vector(7 downto 0); 
-signal sel_hi4k: std_logic;
+signal sel_lo4k: std_logic;
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -303,7 +303,12 @@ end process;
 	
 -- 
 nBUSACK <= '0';	-- nothing competes for the RAM
-cpu: entity work.MicroBasic Port map (
+cpu: entity work.MicroBasic 
+		Generic map (
+		 --MSB => 15	-- 16-bit vars / arithmetic
+		 MSB => 31	-- 32-bit vars / arithmetic
+		)
+		Port map (
 		reset => RESET,
 		clk => cpu_clk,
 		clk_tick => freq1kHz,
@@ -347,18 +352,18 @@ il_rom: entity work.tbil port map (
 		d => il_d 
 	);
 
--- infer simple 2k RAM
+-- infer simple 4k RAM
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nBUSACK or nWR or sel_hi4k) = '0') then 
-			ram(to_integer(unsigned(A(10 downto 0)))) <= D;
+		if ((nBUSACK or nWR or sel_lo4k) = '0') then 
+			ram(to_integer(unsigned(A(11 downto 0)))) <= D;
 		end if;
 	end if;
 end process;
 
-sel_hi4k <= '1' when (A(15 downto 12) = X"F") else '0';
-memData <= pattern when (sel_hi4k = '1') else ram(to_integer(unsigned(A(10 downto 0))));
+sel_lo4k <= '0' when (A(15 downto 12) = X"0") else '1';
+memData <= pattern when (sel_lo4k = '1') else ram(to_integer(unsigned(A(11 downto 0))));
 D <= memData when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 
 -- Character generator ROM handy for the marquee demo

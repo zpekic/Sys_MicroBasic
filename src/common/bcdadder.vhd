@@ -44,7 +44,6 @@ architecture Behavioral of bcdadder is
 
 
 signal carry: std_logic_vector(DIGITS downto 0);
-signal bcd_a: std_logic_vector(23 downto 0);
 
 begin
 
@@ -53,13 +52,20 @@ carry_out <= carry(DIGITS);
 
 na_generate: for i in 0 to (DIGITS - 1) generate
 begin
-	na: entity work.nibbleadder Port map ( 
+--	na: entity work.nibbleadder Port map ( 
+--				cin => carry(i),
+--				a => a((3 + 4 * i) downto (4 * i)),
+--				b => b((3 + 4 * i) downto (4 * i)),
+--				na => '0',
+--				nb => '0',
+--				bcd => '1',
+--				y => sum((3 + 4 * i) downto (4 * i)),
+--				cout => carry(i + 1)
+--			);
+	na: entity work.bcddigitadder Port map ( 
 				cin => carry(i),
 				a => a((3 + 4 * i) downto (4 * i)),
 				b => b((3 + 4 * i) downto (4 * i)),
-				na => '0',
-				nb => '0',
-				bcd => '1',
 				y => sum((3 + 4 * i) downto (4 * i)),
 				cout => carry(i + 1)
 			);
