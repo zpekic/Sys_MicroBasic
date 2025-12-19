@@ -21,211 +21,221 @@
 :STMT	BC FORI, "LET"
 :LETLP	BV ARRAY
 :LET	BC *, "="
-		JS EXPR         //GO GET EXPRESSION
-		BC LETDN, ","	//more assignments?
-		SV				//yes, then store result
-		BR LETLP		//and look for next variable
+	JS EXPR         //GO GET EXPRESSION
+	BC LETDN, ","	//more assignments?
+	SV			//yes, then store result
+	BR LETLP		//and look for next variable
 :ARRAY	BC *, "@"		//wasn't A..Z, so must be @(index)		
-		LN 31			//POKE16, but with address = 2 * index + PrgEnd + 1
-		JS FUNC			//eval expression and make sure it is closed by )
-		BC *, "="		//must be followed by equals
-		JS EXPR			//get the value
-		US			//execute assignment
-		SP			//assigment was done so remove stack top to prevent stack overflow
-		BC LETEX, ","	//more assignments?
-		BR LETLP		//yes, back to loop	
+	LN 31			//POKE16/32, but with address = (2 or 4) * index + PrgEnd + 1
+	JS FUNC			//eval expression and make sure it is closed by )
+	BC *, "="		//must be followed by equals
+	JS EXPR			//get the value
+	US			//execute assignment
+	SP			//assigment was done so remove stack top to prevent stack overflow
+	BC LETEX, ","	//more assignments?
+	BR LETLP		//yes, back to loop	
 :LETDN	BE *            //IF STATEMENT END,
-		SV              //STORE RESULT
-		NX
+	SV              //STORE RESULT
+	NX
 :FORI	BR FOR			//island to overcome branch extent limit
 :LETEX	BE *			//no, ensure we are at end of statement
-		NX
+	NX
 
 // for
 :FOR	BC NEXT, "FOR"
-		BV *			// pick up variable name
-		BC *, "="		// followed by =
-		JS EXPR			// start value
-		BC *, "TO"		// followed by TO
-		JS EXPR			// end value
-		BC STEP1, "STEP"	// check if STEP was given
-		JS EXPR			// yes, push it to stack
-		BR FORCHK
+	BV *			// pick up variable name
+	BC *, "="		// followed by =
+	JS EXPR			// start value
+	BC *, "TO"		// followed by TO
+	JS EXPR			// end value
+	BC STEP1, "STEP"	// check if STEP was given
+	JS EXPR			// yes, push it to stack
+	BR FORCHK
 :STEP1	LN 1			// push default step value 1
 :FORCHK	FS				// do FOR magic, FS will leave on stack Lino of next statement, which is either one after NEXT or one after FOR
-		GO
+	GO
 
 // next
 :NEXT	BC GOTO, "NEXT"
-		BV *			// enforce variable name that must follow NEXT
-		FE				// do NEXT magic
-		GO				// FE will leave line number of its FOR statement on stack, so go there for next iteration 
-		
+	BV *			// enforce variable name that must follow NEXT
+	FE				// do NEXT magic
+	GO				// FE will leave line number of its FOR statement on stack, so go there for next iteration 
+	
 // GOTO/GOSUB
 :GOTO 	BC PRNT, "GO"
-		BC GOSB, "TO"
-		JS EXPR         //GET LINE NUMBER
-		BE *
-		SB              //(DO THIS FOR STARTING)
-		RB
-		GO              //GO THERE
+	BC GOSB, "TO"
+	JS EXPR         //GET LINE NUMBER
+	BE *
+	SB              //(DO THIS FOR STARTING)
+	RB
+	GO              //GO THERE
 :GOSB 	BC *, "SUB"     //NO OTHER WORD BEGINS "GO//////"
-		JS EXPR
-		BE *
-		GS
-		GO
+	JS EXPR
+	BE *
+	GS
+	GO
 
 // PRINT 
 :PRNT 	BC SKIP, "PR"
-		BC P0, "INT"    //OPTIONALLY OMIT "INT"
+	BC P0, "INT"    //OPTIONALLY OMIT "INT"
 :P0   	BE P3
-		BR P6           //IF DONE, GO TO END
+	BR P6           //IF DONE, GO TO END
 :P1   	BC P4, ";"
 :P2   	BE P3
-		NX              //NO CRLF IF ENDED BY ; OR ,
+	NX              //NO CRLF IF ENDED BY ; OR ,
 :P3   	BC P7, '"'
-		PQ              //QUOTE MARKS STRING
-		BR P1           //GO CHECK DELIMITER
+	PQ              //QUOTE MARKS STRING
+	BR P1           //GO CHECK DELIMITER
 :SKIP 	BR IF           //(ON THE WAY THRU)
 :P4   	BC P5, ","
-		PT              //COMMA SPACING
-		BR P2
+	PT              //COMMA SPACING
+	BR P2
 :P5   	BC P6, ":"
-		PC "S^"         //OUTPUT X-OFF
+	PC "S^"         //OUTPUT X-OFF
 :P6   	BE *
-		NL              //THEN CRLF
-		NX
+	NL              //THEN CRLF
+	NX
 :P7   	JS EXPR         //TRY FOR AN EXPRESSION
-		PN
-		BR P1
+	PN
+	BR P1
 
 // IF <cond> THEN
 :IF   	BC INPT, "IF"
-		JS EXPR
-		JS RELO
-		JS EXPR
-		BC I1, "THEN"   //OPTIONAL NOISEWORD
-:I1		CP              //COMPARE SKIPS NEXT IF TRUE
-		NX              //FALSE// 
-		BN THEN			//decimal number after THEN? 
-		SB				//yes, it is shortcut for GOTO
-		RB
-		GO 
+	JS EXPR
+	JS RELO
+	JS EXPR
+	BC I1, "THEN"   //OPTIONAL NOISEWORD
+:I1	CP              //COMPARE SKIPS NEXT IF TRUE
+	NX              //FALSE// 
+	BN THEN		//decimal number after THEN? 
+	SB		//yes, it is shortcut for GOTO
+	RB
+	GO 
 :THEN	J STMT          //TRUE// GO PROCESS STATEMENT
 		
 // INPUT
-:INPT 	BC RETN, "INPUT"
-		BC I2, '"'		//any prompt to print out first?
-		PQ
-		BC *, ","		//expect comma after the prompt
+:INPT 	BC POKE, "INPUT"
+	BC I2, '"'	//any prompt to print out first?
+	PQ
+	BC *, ","	//expect comma after the prompt
 :I2   	BV *            //GET VARIABLE
-		SB              //SWAP POINTERS
-		BE I4
+	SB              //SWAP POINTERS
+	BE I4
 :I3   	PC "? Q^"       //LINE IS EMPTY; TYPE PROMPT
-		GL              //READ INPUT LINE
-		BE I4           //DID ANYTHING COME?
-		BR I3           //NO, TRY AGAIN
+	GL              //READ INPUT LINE
+	BE I4           //DID ANYTHING COME?
+	BR I3           //NO, TRY AGAIN
 :I4   	BC I5, ","      //OPTIONAL COMMA
 :I5   	JS EXPR         //READ A NUMBER
-		SV              //STORE INTO VARIABLE
-		RB              //SWAP BACK
-		BC I6, ","      //ANOTHER?
-		BR I2           //YES IF COMMA
+	SV              //STORE INTO VARIABLE
+	RB              //SWAP BACK
+	BC I6, ","      //ANOTHER?
+	BR I2           //YES IF COMMA
 :I6   	BE *            //OTHERWISE QUIT
-		NX
+	NX
+
+// POKE
+:POKE	BC RETN, "POKE"
+	LN 24		//POKE = usr(24, address, byte)
+	JS EXPR		//address
+	BC *, ","	//expect comma
+	JS EXPR		//byte value
+	US
+	SP		//drop usr() return value
+	NX
 		
 // RETURN
 :RETN 	BC END, "RETURN"
-		BE *
-		RS              //RECOVER SAVED LINE
-		NX
+	BE *
+	RS              //RECOVER SAVED LINE
+	NX
 
 // END
 :END  	BC LIST, "END"
-		BE *
-		WS
+	BE *
+	WS
 
 // LIST
 :LIST 	BC RUN, "LIST"
-		BE L2
+	BE L2
 :L1   	PC "@^@^@^@^J^@^" 	//PUNCH LEADER
-		LS              	//LIST
-		PC "S^"         	//PUNCH X-OFF
-		NL
-		NX
+	LS              	//LIST
+	PC "S^"         	//PUNCH X-OFF
+	NL
+	NX
 :L2   	JS EXPR         	//GET A LINE NUMBER
-		BE L3
-		BR L1
+	BE L3
+	BR L1
 :L3   	BC *, ","        	//SEPARATED BY COMMAS
-		BR L2
+	BR L2
 
 // RUN
 :RUN  	BC CLER, "RUN"
-		J XEC
+	J XEC
 
 // CLEAR
 :CLER 	BC NEW, "CLEAR"
-		MT
+	MT
 
 // NEW
 :NEW	BC REM, "NEW"	// new is same as clear but many Basic dialects have it
-		MT
+	MT
 		
 // REM
 :REM  	BC DFLT, "REM"
-		NX				// just skip to next CR 
+	NX				// just skip to next CR 
 
 // ASSUMED LET
 :DFLT 	BV TRYARR		//is it A..Z?
-		J LET			//yes, continue as LET statement
+	J LET			//yes, continue as LET statement
 :TRYARR J ARRAY
 
 //
 //  SUBROUTINES
 //
 :EXPR 	BC E0, "-"      //TRY FOR UNARY MINUS
-		JS TERM         //AHA
-		NE
-		BR E1
+	JS TERM         //AHA
+	NE
+	BR E1
 :E0   	BC E4, "+"      //IGNORE UNARY PLUS
 :E4   	JS TERM
 :E1   	BC E2, "+"      //TERMS SEPARATED BY PLUS
-		JS TERM
-		AD
-		BR E1
+	JS TERM
+	AD
+	BR E1
 :E2   	BC E3, "-"      //TERMS SEPARATED BY MINUS
-		JS TERM
-		SU
-		BR E1
+	JS TERM
+	SU
+	BR E1
 :E3   	RT
 
 //
 :TERM 	JS FACT
 :T0   	BC T1, "*"      //FACTORS SEPARATED BY TIMES
-		JS FACT
-		MP
-		BR T0
+	JS FACT
+	MP
+	BR T0
 :T1   	BC T2, "/"      //FACTORS SEPARATED BY DIVIDE
-		JS  FACT
-		DV
-		BR T0
-:T2		BC T3, "%"		//factors separated by modulo
-		JS FACT
-		LN 27			//a % b = USR(27, a, b)
-		SX 1
-		SX 5
-		SX 1
-		SX 4			//rearrange stack so that 0x001B (USR code) is at the bottom
-		SX 1			//swap TOS and NOS
-		SX 3
-		SX 1
-		SX 2
-		US
-		BR T0
+	JS  FACT
+	DV
+	BR T0
+:T2	BC T3, "%"		//factors separated by modulo
+	JS FACT
+	LN 27			//a % b = USR(27, a, b)
+	SX 1
+	SX 5
+	SX 1
+	SX 4			//rearrange stack so that 0x001B (USR code) is at the bottom
+	SX 1			//swap TOS and NOS
+	SX 3
+	SX 1
+	SX 2
+	US
+	BR T0
 :T3   	RT
 
 //
-:FACT 	BC F0, "RND"    //*RND FUNCTION*
+:FACT 		BC F0, "RND"    //*RND FUNCTION*
 		LN 257*128      //STACK POINTER FOR STORE
 		FV              //THEN GET RNDM
 		LN 2345         //R:=R*2345+6789
@@ -238,8 +248,8 @@
 		DS
 		JS FUNC         //GET ARGUMENT
 		BR F1
-:F0   	BR F2           //(SKIPPING)
-:F1   	DS
+:F0   		BR F2           //(SKIPPING)
+:F1   		DS
 		SX 2            //PUSH TOP INTO STACK
 		SX 4
 		SX 2
@@ -249,81 +259,87 @@
 		DV              //PERFORM MOD FUNCTION
 		MP
 		SU
-:ABS	DS              //PERFORM ABS FUNCTION
-		LB 6			// magic binary number 110 means >=
+:ABS		DS              //PERFORM ABS FUNCTION
+		LB 6		// magic binary number 110 means >=
 		LN 0
 		CP              //(SKIP IF + OR 0)
 		NE
 		RT
 		
-:F2   	BC F2ARR, "ABS"
+:F2   		BC F2ABS, "PEEK"	// peek function
+		LN 20			// peek is usr(20, param, param), always PEEK8
+		JS FUNC
+		BR F2CONT
+
+:F2ABS		BC F2ARR, "ABS"
 		JS FUNC			//one parameter function
 		BR ABS			//go to ABS above
 		
-:F2ARR	BC F2SIZE, "@"	//get from @() array?
-		LN 30			//PEEK16, but with address = 2 * index + PrgEnd + 1
+:F2ARR		BC F2SIZE, "@"	//get from @() array?
+		LN 30			//PEEK16 or PEEK32, but with address = (2 or 4) * index + PrgEnd + 1
 		JS FUNC			//array index
-:F2CONT	LN 0			//dummy
+:F2CONT		LN 0			//dummy
 		BR F2EXE
 
-:F2SIZE	BC F2USR, "SIZE"	//size function with no params?
-		LN 29				//yes,function index
-		LN 0				//dummy parameter
-		BR F2CONT			//push another dummy and execute
+:F2SIZE		BC F2USR, "SIZE"	//size function with no params?
+		LN 29			//yes,function index
+		LN 0			//dummy parameter
+		BR F2CONT		//push another dummy and execute
 		
-:F2USR	BC F3, "USR"    //*USR FUNCTION*
+:F2USR		BC F3, "USR"    //*USR FUNCTION*
 		BC *, "("       //3 ARGUMENTS POSSIBLE
 		JS EXPR         //ONE REQUIRED
 		JS ARG
 		JS ARG
 		BC *, ")"
-:F2EXE	US              //GO DO IT
+:F2EXE		US              //GO DO IT
 		RT
 		
 :F3   	BV F4           //VARIABLE?
-		FV              //YES//  GET IT
-		RT
+	FV              //YES//  GET IT
+	RT
 		
 :F4   	BN F5           //NUMBER?
-		RT              //GOT IT//
+	RT              //GOT IT//
 		
 :F5   	BC *, "("       //OTHERWISE MUST BE (EXPR)
 :F6   	JS EXPR
-		BC *, ")"
-		RT
+	BC *, ")"
+	RT
 
 :ARG  	BC A0, ","       //COMMA?
-		J  EXPR          //YES, GET EXPRESSION
+	J  EXPR          //YES, GET EXPRESSION
 :A0   	DS               //NO, DUPLICATE STACK TOP
-		RT
+	RT
 
 :FUNC 	BC *, "("
-		BR F6
-		RT
+	BR F6
+	RT
 
 :RELO 	BC R0, "="       //CONVERT RELATION OPERATORS
-		LB 2             //TO CODE BYTE ON STACK
-		RT               //=
+	LB 2             //TO CODE BYTE ON STACK
+	RT               //=
 		
 :R0   	BC R4, "<"
-		BC R1, "="
-		LB 3             //<=
-		RT
+	BC R1, "="
+	LB 3             //<=
+	RT
 		
 :R1   	BC R3, ">"
-		LB 5             //<>
-		RT
+	LB 5             //<>
+	RT
+
 :R3   	LB 1             //<
-		RT
+	RT
 		
 :R4   	BC *, ">"
-		BC R5, "="
-		LB 6             //>=
-		RT
+	BC R5, "="
+	LB 6             //>=
+	RT
 		
 :R5   	BC R6, "<"
-		LB 5             //><
-		RT
+	LB 5             //><
+	RT
 		
 :R6   	LB 4             //>
-		RT
+	RT

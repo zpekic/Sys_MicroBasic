@@ -303,10 +303,10 @@ ESC:		.alias 0x1b;
 BEEP:		.alias 0x07;
 BACKSPACE:	.alias 0x08;
 TAB:		.alias 0x09;
-LF:			.alias 0x0A;
-CR:			.alias 0x0D;
-//SPACE:		.alias 0x20;
-//DQUOTE:		.alias 0x22;
+LF:		.alias 0x0A;
+CR:		.alias 0x0D;
+//SPACE:	.alias 0x20;
+//DQUOTE:	.alias 0x22;
 clear:		.alias DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0;
 nop:		.alias if true then continue else repeat;
 goto:		.alias if false then continue else;
@@ -329,14 +329,14 @@ outChar:	.sub CHAROUT;
 outNZChar:	.sub CHAROUT;
 writeCore:	.sub MAR, MDR;
 readCore:	.sub MAR;
-skipSpaces: .sub;
+skipSpaces:	.sub;
 pullRS:		.sub;
 printDec:	.sub;
 printDecR:	.sub alu;
 copyCore:	.sub alu;
-scanProgram:.sub;
+scanProgram:	.sub;
 findNextCR:	.sub T;
-write2Nulls:.sub T;
+write2Nulls:	.sub T;
 readCore16:	.sub alu, T;
 traceALU:	.sub;
 traceY:		.sub;
@@ -365,7 +365,7 @@ _reset3:	nop;
 ColdStart:	write2Nulls(Prog_start);														// kills program area
 WarmStart:	clear, findPrgEnd();															// correct PrgEnd is needed for @(..) array and SIZE()
 WarmStart2:	BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero; 
-		Lino <= T, IL_PC <= T, write2Nulls(BP);											// kills input line
+			Lino <= T, IL_PC <= T, write2Nulls(BP);											// kills input line
 			
 fetch:		traceString 51;											// CR, LF, then trace Basic line number (in hex, for speed)
 fetch1:		traceString 2; 											// trace IL_PC and future opcode
@@ -517,7 +517,7 @@ findLino:	alu <= reset1, readCore(T);
 			traceString 22;								// Trace mnemonic
 			pullRS();
 			alu <= S_plus_R, if ALU_READY then next else repeat;
-alu_done:		traceALU();
+alu_done:	traceALU();
 			T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
 u_done:		ExpStack <= push_TWord, goto fetch;		
 
@@ -576,7 +576,7 @@ findNx:		findNextCR(BP);
 			BP <= T;										// BP at start of next statement, which is 2 bytes containing the line number
 			readCore16(reset1, BP);
 			BP <= T, T <= from_R, if R_IS_ZERO then next else return; // BP at start of statement text, load T with new line number, check if at the end of program			 
-nx_err:		directByte = BEEP, outChar(from_microcode);	// TODO - write some error that we ran out of code?
+nx_err:		directByte = BEEP, outChar(from_microcode);		// TODO - write some error that we ran out of code?
 			goto stop_run;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -584,32 +584,32 @@ nx_err:		directByte = BEEP, outChar(from_microcode);	// TODO - write some error 
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 41;								// Trace mnemonic
 			alu <= reset1, if IS_RUNMODE then badop;	// S == from == 0, R == to == 65535			
-ls_parload:		T <= from_R, if STACK_IS_EMPTY then ls_parchk;
+ls_parload:	T <= from_R, if STACK_IS_EMPTY then ls_parchk;
 			alu <= S_fromT;
 			alu <= R_fromStack, ExpStack <= pop2, goto ls_parload;
-ls_parchk:  		alu <= ls_load;								// loads Y with S and R, also checks that R >= S and neither are 0
+ls_parchk:  alu <= ls_load;								// loads Y with S and R, also checks that R >= S and neither are 0
 			if LS_PARAMS_OK then next else SYNTAX_ERR;
 			//traceALU();
-ls_start:		T <= Prog_start;
-ls_lineloop:		if CHARIN_READY then next else ls_continue;	// check if a character came in
+ls_start:	T <= Prog_start;
+ls_lineloop:if CHARIN_READY then next else ls_continue;	// check if a character came in
 			if KBD_BREAK then BREAK;
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_continue;	// SPACE pauses/resumes listing
-ls_pause:		if CHARIN_READY then next else repeat;			// SPACE detected, now wait for next char
+ls_pause:	if CHARIN_READY then next else repeat;			// SPACE detected, now wait for next char
 			gotChar = 1, directByte = ' ', if CHARIN_EQU_DB then next else ls_pause; 
-ls_continue:		gotChar = 1, readCore16(reset1, same); 	// read line number into R
+ls_continue:gotChar = 1, readCore16(reset1, same); 			// read line number into R
 			alu <= ls_check, if R_IS_ZERO then fetch;		// end of program, bail
-			if LS_PASSED_END then fetch;				// passed the end, bail
+			if LS_PASSED_END then fetch;					// passed the end, bail
 			if LS_IN_RANGE then next else ls_nextLine;
 			//traceALU();
-			T <= save, printDecR(Y_save);				// output line number (in decimal!) - this trashes T, Y so we need to restore them after
+			T <= save, printDecR(Y_save);					// output line number (in decimal!) - this trashes T, Y so we need to restore them after
 			T <= recall, alu <= Y_recall, directByte = ' ', outChar(from_microcode);	// followed by a single space
-ls_charloop:		readCore(T);
+ls_charloop:readCore(T);
 			outChar(from_MDR);
-ls_nextchar:		directByte = CR, if MDR_MATCHES_DB then next else ls_next;  	// loop until CR found, which is end of Basic line
+ls_nextchar:directByte = CR, if MDR_MATCHES_DB then next else ls_next;  	// loop until CR found, which is end of Basic line
 			directByte = LF, outChar(from_microcode);			// CR was already printed, so just LF
 			T <= inc, goto ls_lineloop;
-ls_next:		T <= inc, goto ls_charloop;
-ls_nextLine:		findNextCR(same);
+ls_next:	T <= inc, goto ls_charloop;
+ls_nextLine:findNextCR(same);
 			T <= inc, goto ls_lineloop;
 			
 			////////////////////////////////////////////////////////////////////////////////
@@ -624,12 +624,12 @@ ls_nextLine:		findNextCR(same);
 			.map 0x21;									// PQ (Print basic string)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 18;								// Trace mnemonic
-pq_loop:		BP <= inc, readCore(BP);
+pq_loop:	BP <= inc, readCore(BP);
 			directByte = '"', if MDR_MATCHES_DB then pq_done;
 			outChar(from_MDR);
 			//traceString 3;
 			directByte = CR, if MDR_MATCHES_DB then INTERNAL_ERR else pq_loop;	// found CR under quotes!
-pq_done:		traceBP();
+pq_done:	traceBP();
 			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -886,15 +886,15 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 29, if S_EQU_DB_MOD32 then u_size;		// size function		
 			T <= binop, goto u_done;				// by default, execute binary operation T(x) <= S(2) xor ((S(1) xor T) nor (S(0) xor R))
 
-u_modulo: 		alu <= S_fromT, div_mod();
+u_modulo: 	alu <= S_fromT, div_mod();
 			T <= from_YHi, goto u_done;
 			
-u_charout:		alu <= S_fromT;
+u_charout:	alu <= S_fromT;
 			MDR <= from_SLo;
 			outChar(from_MDR);
 			ExpStack <= push_TWord, goto fetch;
 
-u_charin:		if CHARIN_READY then next else repeat;		// wait for input character
+u_charin:	if CHARIN_READY then next else repeat;		// wait for input character
 			gotChar = 1, MDR <= CHARIN, goto u_in;
 
 u_peek8: 	readCore(T);								// MDR <= Core(T)
@@ -902,30 +902,31 @@ u_in:		T <= MDR, goto u_done;
 
 u_size:		T <= fromSize, goto u_done;					//TODO: proper SIZE calculation
 			
-u_getarray: 	T <= index2address, if IS_CPU32 then u_peek32;
+u_getarray: T <= index2address, if IS_CPU32 then u_peek32;
 u_peek16:	readCore16(reset0, same);
-		T <= from_R, goto u_done;
+			T <= from_R, goto u_done;
 u_peek32:	readCore16(reset0, same);
-		readCore16(nop, same);
-		T <= from_R, goto u_done;
+			readCore16(nop, same);
+			T <= from_R, goto u_done;
 
 u_poke8:	prepWrite();
-		writeCore(T, from_SLo);
-		goto u_peek8;							// slow, but allows X = USR(poke8, A, X) trick to check if byte has been written correctly
+			writeCore(T, from_SLo);
+			goto u_peek8;							// slow, but allows X = USR(poke8, A, X) trick to check if byte has been written correctly
 			
-u_setarray: 	T <= index2address, if IS_CPU32 then u_poke32;
+u_setarray: T <= index2address, if IS_CPU32 then u_poke32;
 u_poke16:	prepWrite();
-		writeS16(); 
-u_poke_end:	T <= dec, if IS_CPU32 then u_peek32 else u_peek16;		// same comment as above, but for 16-bits
+			T <= inc, writeS16(); 
+u_poke_end:	T <= inc, if IS_CPU32 then u_peek32 else u_peek16;		// same comment as above, but for 16-bits
 u_poke32:	prepWrite();
-		alu <= S_swap32, writeS16();
-		alu <= S_swap32, T <= inc, writeS16();
-		T <= dec;
-		T <= dec, goto u_poke_end;
+			T <= inc;
+			T <= inc;
+			T <= inc, writeS16();
+			alu <= S_swap32, writeS16();
+			goto u_poke_end;
 				
-prepWrite:	T <= save;							// will need the IO or memory address
-		T <= from_R;							// get data to be written
-		alu <= S_fromT, T <= recall, back;				// copy to S and get target address back to T
+prepWrite:	T <= save;								// will need the IO or memory address
+			T <= from_R;							// get data to be written
+			alu <= S_fromT, T <= recall, back;		// copy to S and get target address back to T
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2F;									// RT (IL subroutine return)
@@ -953,8 +954,8 @@ jump:		IL_PC <= direct11, goto fetch;
 			.map 0b01??????;							// BR (relative branch, 0x40..0x7F)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 7;								// Trace mnemonic
-			IL_PC <= pc_plus_off6;							// jump destination (+/- 31 locations)
-br_exit:		traceGoto;								// trace target
+			IL_PC <= pc_plus_off6;						// jump destination (+/- 31 locations)
+br_exit:	traceGoto;									// trace target
 			goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -968,13 +969,13 @@ br_exit:		traceGoto;								// trace target
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 17;								// Trace mnemonic
 			T <= IL_PC, BP <= save, skipSpaces();
-bc_loop:		traceString 3;								// trace value of IL(IL_PC) (char we try to match)
+bc_loop:	traceString 3;								// trace value of IL(IL_PC) (char we try to match)
 			readCore(BP);
 			if MDR_MATCHES_ILCODEBYTE then next else bc_exit;
 			BP <= inc, IL_PC <= inc, if ILCODEBYTE_BIT7 then next else bc_loop;
 			//traceBP();
 			goto fetch;
-bc_exit:		BP <= recall, IL_PC <= T; 					// not found, restore BP and IL_PC
+bc_exit:	BP <= recall, IL_PC <= T; 					// not found, restore BP and IL_PC
 			//traceBP();
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;
 					
@@ -1013,7 +1014,7 @@ bn_loop:	alu <= Yx10_plus_MDR, BP <= inc;
 			directByte = CR, if MDR_MATCHES_DB then fetch;	// found a CR, continue with next IL instruction
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;		// jump destination (+ 31 locations)
 			
-BREAK:			gotChar = 1, traceString 55;
+BREAK:		gotChar = 1, traceString 55;
 			outBeep();
 			directByte = 'B', outChar(from_microcode);
 			directByte = 'R', outChar(from_microcode);
@@ -1024,7 +1025,7 @@ NOPROG_ERR:		traceString 50;
 				goto traceError;
 DIVBY0_ERR:		traceString 57;
 				goto traceError;
-OVERFLOW_ERR: 	traceString 58;
+OVERFLOW_ERR:	traceString 58;
 				goto traceError;
 SYNTAX_ERR:		traceString 61; 
 				goto traceError;
@@ -1060,7 +1061,7 @@ findNextCR: readCore(T);
 			directByte = CR, if MDR_MATCHES_DB then return;										// return with T pointing to CR
 			T <= inc, directByte = NULL, if MDR_MATCHES_DB then INTERNAL_ERR else findNextCR;	// finding NULL before CR is unexpected, TODO "code corruption error"?
 
-readCore16:		readCore(T);
+readCore16:	readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
 			readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc, back;				// return with T pointing to first char after the 16-bit word
@@ -1082,16 +1083,16 @@ printDecR:	alu <= bcd_start;
 			alu <= bcd_next, if ALU_READY then next else repeat;	// repeat 16 times for each bit in R 
 			if ALU_SIGN then next else printY;
 			directByte = '-', outChar(from_microcode); 		// print minus sign
-printY:			directByte = 6, T <= from_microcode, if IS_CPU32 then next else printY1;	// total of 8 chars for 16-bit mode
+printY:		directByte = 6, T <= from_microcode, if IS_CPU32 then next else printY1;	// total of 8 chars for 16-bit mode
  			directByte = 14, T <= from_microcode;						// total of 16 chars for 32-bit mode
-printY1:		outNZChar(from_YtoAlphaZ);		
-printYlp:		outNZChar(from_YtoAlphaZ), T <= dec;
+printY1:	outNZChar(from_YtoAlphaZ);		
+printYlp:	outNZChar(from_YtoAlphaZ), T <= dec;
 			alu <= R_fromT;
 			if R_IS_ZERO then next else printYlp;
 			CHAROUT <= from_YtoAlpha, goto outChar;			// saving 1 microinstruction here...
 
 outNZChar:	outChar(from_YtoAlphaZ);
-		alu <= Yx16, back;
+			alu <= Yx16, back;
 				
 skipSpaces: readCore(BP);
 			directByte = ' ', if MDR_MATCHES_DB then skipSp;
@@ -1107,12 +1108,12 @@ outCRLF:	directByte = CR, outChar(from_microcode);
 outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
 			if CHAROUT_READY then return else repeat;
 
-writeS16:	writeCore(T, from_SHi), T <= inc;
-		MAR <= T, MDR <= from_SLo;
+writeS16:	writeCore(T, from_SLo), T <= dec;
+			MAR <= T, MDR <= from_SHi, T <= dec;
 writeCore:	nWR = 0, if nBUSACK then repeat else return;
 
 readCore:	nRD = 0, if nBUSACK then repeat else next;
-		nRD = 0, MDR <= from_Bus, back;
+			nRD = 0, MDR <= from_Bus, back;
 
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		
@@ -1125,21 +1126,21 @@ readCore:	nRD = 0, if nBUSACK then repeat else next;
 //			back;			
 			
 traceBP:	ExpStack <= push_TWord, T <= BP, traceString 33;
-		T <= ExpStack, ExpStack <= pop2, back;
+			T <= ExpStack, ExpStack <= pop2, back;
 
 traceY:		ExpStack <= push_TWord, T <= from_YLo, traceString 32;
-		T <= ExpStack, ExpStack <= pop2, back;
+			T <= ExpStack, ExpStack <= pop2, back;
 			
 traceALU:	trace(crlf);
-		T <= save, traceT;
-		T <= from_S, traceString 52;
-		T <= from_R, traceString 52;
-		T <= from_YHi, traceString 53;		// this traces 32 bits, YHi and YLo
-		T <= from_YLo, traceString 52;		
-		T <= recall, DBGINDEX <= crlf;		
+			T <= save, traceT;
+			T <= from_S, traceString 52;
+			T <= from_R, traceString 52;
+			T <= from_YHi, traceString 53;		// this traces 32 bits, YHi and YLo
+			T <= from_YLo, traceString 52;		
+			T <= recall, DBGINDEX <= crlf;		
 trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
-		if DBG_READY then next else repeat;
-		DBGINDEX <= zero, back;				// clear the serial debug output register and return
+			if DBG_READY then next else repeat;
+			DBGINDEX <= zero, back;				// clear the serial debug output register and return
 					
 //dump_il:	directByte = 1, trace(from_microcode);		// display current IL and header to ROM
 //			trace(crlf);
