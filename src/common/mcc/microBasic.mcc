@@ -21,7 +21,7 @@ seq_cond:		.if 5 values
 				IS_CPU32,				// 1 if Tiny Basic CPU uses 32-bit data
 				DBG_READY | KBD_BREAK,	// high if tracer has processed the trace character, or presence of CTRL/C in charin if not tracing
 				MDR_MATCHES_DB,		
-				nBUSACK,				// low if memory is ready for read/write		
+				nBUSACK,				   // low if memory is ready for read/write		
 				INLEND_MAX	| BASLINE_FOUND,		
 				INLEND_MIN	| IMPLINE_EMPTY,		
 				CHARIN_PRINTABLE,		// ASCII code in range 0x20 .. 0x7E		
@@ -1113,7 +1113,7 @@ writeS16:	writeCore(T, from_SLo), T <= dec;
 			MAR <= T, MDR <= from_SHi, T <= dec;
 writeCore:	nWR = 0, if nBUSACK then repeat else return;
 
-readCore:	nRD = 0, if nBUSACK then repeat else next;
+readCore:	nRD = 0, if nBUSACK then repeat;
 			nRD = 0, MDR <= from_Bus, back;
 
 // 	Debug related subroutines

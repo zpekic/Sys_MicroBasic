@@ -56,15 +56,15 @@ entity sys_microbasic_anvyl is
 				JA2: inout std_logic;
 				JA3: inout std_logic;
 				JA4: inout std_logic;
-				-- not used
+				--FPU - PMOD
 				--JB1: out std_logic;
 				--JB2: out std_logic;
 				--JB3: out std_logic;
 				--JB4: out std_logic;
-				--JB7: out std_logic;
-				--JB8: out std_logic;
-				--JB9: out std_logic;
-				--JB10: out std_logic;
+				--JB7: in std_logic;
+				--JB8: in std_logic;
+				--JB9: in std_logic;
+				--JB10: in std_logic;
 				--JC1: out std_logic;
 				--JC2: out std_logic;
 				--JC3: out std_logic;
@@ -114,7 +114,7 @@ entity sys_microbasic_anvyl is
 				VSYNC_O: out std_logic;
 				RED_O: out std_logic_vector(3 downto 0);
 				GREEN_O: out std_logic_vector(3 downto 0);
-				BLUE_O: out std_logic_vector(3 downto 0);
+				BLUE_O: out std_logic_vector(3 downto 0)
 				-- TFT
 --				TFT_R_O: out std_logic_vector(7 downto 0);
 --				TFT_G_O: out std_logic_vector(7 downto 0);
@@ -124,18 +124,17 @@ entity sys_microbasic_anvyl is
 --				TFT_DISP_O: out std_logic;
 --				TFT_BKLT_O: out std_logic;
 --				TFT_VDDEN_O: out std_logic;
-				-- breadboard signal connections
-				--BB1: out std_logic;
-				--BB2: out std_logic;
-				--BB3: out std_logic;
-				--BB4: out std_logic;
-				--BB5: out std_logic;
-				--BB6: out std_logic;
-				--BB7: out std_logic;
-				--BB8: out std_logic;
-				--BB9: out std_logic;
-				-- EXTernal CLoCK
-				BB10: in std_logic
+				-- FPU - breadboard signal connections
+--				BB1: inout std_logic;
+--				BB2: inout std_logic;
+--				BB3: inout std_logic;
+--				BB4: inout std_logic;
+--				BB5: inout std_logic;
+--				BB6: inout std_logic;
+--				BB7: inout std_logic;
+--				BB8: inout std_logic;
+--				BB9: out std_logic;
+--				BB10: out std_logic
           );
 end sys_microbasic_anvyl;
 
@@ -152,7 +151,7 @@ signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
 signal pattern, memData: std_logic_vector(7 downto 0); 
-signal sel_lo4k: std_logic;
+signal nSel_0XXX, nSel_FFXX: std_logic;
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -166,7 +165,17 @@ alias PMOD_TXD1: std_logic is JE3;
 alias PMOD_CTS1: std_logic is JE4;
 
 alias RESET: std_logic is BTN(3);
-alias EXT_CLK: std_logic is BB10;	-- external crystal can frequency
+
+-- Am9511A FPU connections
+--alias FPU_nCS: std_logic is JB1;		-- dk gray
+--alias FPU_nWR: std_logic is JB2;		-- brown
+--alias FPU_nRD: std_logic is JB3;		-- blue
+--alias FPU_CnD: std_logic is JB4;		-- green
+--alias FPU_nPAUSE: std_logic is JB7; -- yellow
+
+--signal FPU_DB: std_logic_vector(7 downto 0);
+--alias FPU_CLK: std_logic is BB9;
+--alias FPU_RESET: std_logic is BB10;	
 
 -- debug
 signal T, freqcnt_value: std_logic_vector(31 downto 0);
@@ -224,6 +233,23 @@ signal win_vector: std_logic_vector(2 downto 0);	-- 3 bits for 3 independent win
 signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
 
 begin
+
+-- Am9511A connections
+--FPU_RESET <= RESET;
+--FPU_CLK <= cnt50MHz(5);	-- 1.5625MHz
+--FPU_nRD <= nRD;
+--FPU_nWR <= nWR;
+--FPU_nCS <= nSel_FFXX;
+--FPU_CnD <= A(2);
+--BB8 <= D(7) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB7 <= D(6) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB6 <= D(5) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB5 <= D(4) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB4 <= D(3) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB3 <= D(2) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB2 <= D(1) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--BB1 <= D(0) when ((nWR or nSel_FFXX) = '0') else 'Z';
+--
 
 LDT1R <= not nWR;
 LDT1G <= not nRD;
@@ -312,7 +338,6 @@ cpu: entity work.MicroBasic
 		reset => RESET,
 		clk => cpu_clk,
 		clk_tick => freq1kHz,
-		cond_external => button(1),
 		-- internal GOTO cache state
 		cache_empty => cpu_cache_empty,
 		cache_full => cpu_cache_full,
@@ -356,14 +381,17 @@ il_rom: entity work.tbil port map (
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nBUSACK or nWR or sel_lo4k) = '0') then 
+		if ((nBUSACK or nWR or nSel_0XXX) = '0') then 
 			ram(to_integer(unsigned(A(11 downto 0)))) <= D;
 		end if;
 	end if;
 end process;
 
-sel_lo4k <= '0' when (A(15 downto 12) = X"0") else '1';
-memData <= pattern when (sel_lo4k = '1') else ram(to_integer(unsigned(A(11 downto 0))));
+-- Data bus input MUX
+nSel_0XXX <= '0' when (A(15 downto 12) = X"0") else '1';
+--nSel_FFXX <= nMEMREQ when (A(15 downto 8) = X"FF") else '1';
+memData <= ram(to_integer(unsigned(A(11 downto 0)))) when (nSel_0XXX = '0') else pattern;
+--data <= (BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1) when (nSel_FFXX = '0') else memData;
 D <= memData when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 
 -- Character generator ROM handy for the marquee demo

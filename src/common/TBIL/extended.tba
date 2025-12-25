@@ -183,11 +183,13 @@
 		
 // REM
 :REM  	BC DFLT, "REM"
-	NX				// just skip to next CR 
+	NX			// just skip to next CR 
 
 // ASSUMED LET
-:DFLT 	BV TRYARR		//is it A..Z?
+:DFLT 	BV TRYQ			//is it A..Z?
 	J LET			//yes, continue as LET statement
+:TRYQ	BC TRYARR, "?"		//? is short form of PRINT in many Basic dialects
+	J P0			//yes, continue with PRINT statement
 :TRYARR J ARRAY
 
 //

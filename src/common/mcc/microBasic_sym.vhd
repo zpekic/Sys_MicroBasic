@@ -2031,8 +2031,8 @@ constant mb_symbol_entry: t_mb_symbol_entry := (
 -- writeCore: nWR = 0, if nBUSACK then repeat else return;
 495 => X"77_72_69_74_65_43_6F_72_65_3A_20_6E_57_52_20_3D",
 
--- L1116@01F0 72656164436F72653A206E5244203D20.readCore:  nRD = 0, if nBUSACK then repeat else next;
--- readCore: nRD = 0, if nBUSACK then repeat else next;
+-- L1116@01F0 72656164436F72653A206E5244203D20.readCore:  nRD = 0, if nBUSACK then repeat;
+-- readCore: nRD = 0, if nBUSACK then repeat;
 496 => X"72_65_61_64_43_6F_72_65_3A_20_6E_52_44_20_3D_20",
 
 -- L1117@01F1 6E5244203D20302C204D4452203C3D20.  nRD = 0, MDR <= from_Bus, if true then return else continue;

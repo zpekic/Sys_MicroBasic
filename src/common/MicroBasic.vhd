@@ -40,7 +40,6 @@ entity MicroBasic is
 			reset : in  STD_LOGIC;
 			clk : in  STD_LOGIC;
 			clk_tick: in STD_LOGIC;
-			cond_external: in STD_LOGIC;
 			-- GOTO cache state
 			cache_empty : out STD_LOGIC;
 			cache_full : out STD_LOGIC;
@@ -50,7 +49,7 @@ entity MicroBasic is
 			TB_EXTENDED: in STD_LOGIC;
 			-- Input line and Basic program memory (up to 64k)
 			nBUSREQ : out STD_LOGIC;
-			nBUSACK : in  STD_LOGIC;
+			nBUSACK : in STD_LOGIC;
 			nRD : out STD_LOGIC;
 			nWR : out STD_LOGIC;
 			ABUS: out STD_LOGIC_VECTOR(15 downto 0);
@@ -114,7 +113,7 @@ constant OP_FS: std_logic_vector(7 downto 0) := X"25";	-- For Start
 signal CHAROUT: std_logic_vector(7 downto 0);
 signal CHAROUT_SEND, CHAROUT_READY, caret_escape, is_pq: std_logic;
 signal lz: std_logic := '1';
-signal hex_ascii: std_logic_vector(7 downto  0);
+signal hex_ascii: std_logic_vector(7 downto 0);
 
 -- single char input
 signal CHARIN: std_logic_vector(7 downto 0);
@@ -123,7 +122,6 @@ signal charin_equ_db, charin_printable, charin_ready, charin_is_break: std_logic
 -- serial debug port
 signal DBGINDEX: std_logic_vector(5 downto 0); -- 64 entries supported
 signal DBG_READY, dbg_start: std_logic;
-signal T16: std_logic_vector(15 downto 0);
 
 -- external memory interface (stores Basic code and input buffer)
 signal MAR: std_logic_vector(15 downto 0);
@@ -1301,12 +1299,9 @@ tracer: entity work.serialtracer2 Port map (
 		--X"88"..X"89"
 		data(47 downto 32) => Lino,
 		data(63 downto 48) => T(15 downto 0),
---		data(63 downto 48) => T16,
 		txd => debug_txd,
 		ready => DBG_READY
 		);
-
---T16 <= T(31 downto 16) when (cond_external = '1') else T(15 downto 0);
 
  update_DBGINDEX: process(clk, mb_DBGINDEX)
  begin
