@@ -250,12 +250,12 @@ for_set <= '0' when (BasicFor = X"0000") else for_v(var_address);
 next_set <= '0' when (BasicNext = X"0000") else next_v(var_address);
 
 -- Tristate system bus (64k address, bidirectional 8-bit data to Basic RAM "core")
-nRD <= mb_nRD when (nBUSACK = '0') else 'Z';
-nWR <= mb_nWR when (nBUSACK = '0') else 'Z';
+nRD <= mb_nRD;-- when (nBUSACK = '0') else 'Z';
+nWR <= mb_nWR;-- when (nBUSACK = '0') else 'Z';
 -- if read or write request, pull nBUSREQ low, but wait until nBUSACK goes low to proceed
-nBUSREQ <= mb_nRD or mb_nWR;
+nBUSREQ <= mb_nRD and mb_nWR;
 
-ABUS <= MAR when (nBUSACK = '0') else "ZZZZZZZZZZZZZZZZ";
+ABUS <= MAR;-- when (nBUSACK = '0') else "ZZZZZZZZZZZZZZZZ";
 update_MAR: process(clk, mb_MAR)
 begin
 	if (rising_edge(clk)) then
@@ -276,7 +276,8 @@ end process;
 
 is_notRnd <= '0' when (last3Chars = X"524E44") else '1';	-- magic number is ASCII for RND
  
-DBUS <= MDR when ((mb_nWR or nBUSACK) = '0') else "ZZZZZZZZ";
+--DBUS <= MDR when ((mb_nWR or nBUSACK) = '0') else "ZZZZZZZZ";
+DBUS <= MDR when (mb_nWR = '0') else "ZZZZZZZZ";
 update_MDR: process(clk, mb_MDR)
 begin
 	if (rising_edge(clk)) then

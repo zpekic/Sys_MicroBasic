@@ -799,8 +799,7 @@ copyLine:	alu <= S_fromLino;							// go back two to overwrite the first NULL ch
 			T <= inc;
 app_loop:	readCore(BP);								// copy from input buffer
 			writeCore(T, same);							// to Basic program area
-			BP <= inc, T <= inc;			
-			directByte = CR, if MDR_MATCHES_DB then return else app_loop;
+			BP <= inc, T <= inc, directByte = CR, if MDR_MATCHES_DB then return else app_loop;
 					
 findPrgEnd:	T <= Prog_start;
 fpe_loop:	readCore16(reset1, same);
@@ -1068,8 +1067,7 @@ readCore16:	readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc, back;				// return with T pointing to first char after the 16-bit word
 
 write2Nulls:writeCore(T, zero), T <= inc;
-			writeCore(T, zero);									// return with T pointing to last NULL! 
-			back;			
+			MAR <= T, MDR <= zero, goto writeCore;									// return with T pointing to last NULL! 
 			
 			// get 2 parameters from top of evaluation stack into ALU input registers R and S
 pullRS:		if STACK_IS_EMPTY then ESTACK_ERR;
@@ -1111,10 +1109,11 @@ outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
 
 writeS16:	writeCore(T, from_SLo), T <= dec;
 			MAR <= T, MDR <= from_SHi, T <= dec;
-writeCore:	nWR = 0, if nBUSACK then repeat else return;
+writeCore:	nWR = 0;
+			nWR = 0, if nBUSACK then repeat else return;
 
-readCore:	nRD = 0, if nBUSACK then repeat;
-			nRD = 0, MDR <= from_Bus, back;
+readCore:	nRD = 0;
+			nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
 
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		

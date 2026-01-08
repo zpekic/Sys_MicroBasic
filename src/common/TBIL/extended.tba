@@ -1,14 +1,14 @@
-//ORIGINAL TINY BASIC INTERMEDIATE INTERPRETER
-// 
+// EXTENDED TINY BASIC INTERMEDIATE INTERPRETER
+// See: https://hackaday.io/project/204482-cpu-running-basic
 // EXECUTIVE INITIALIZATION
 
-		.ORG 0			//reset sets IL_PC to 0
+	.ORG 0		//reset sets IL_PC to 0
 :STRT	PC ":Q^"      	//PROMPT, X-ON
         GL
         SB
         BE L0           //BRANCH IF NOT EMPTY
         BR STRT         //TRY AGAIN IF NULL LINE
-:L0		BN STMT         //TEST FOR LINE NUMBER
+:L0	BN STMT         //TEST FOR LINE NUMBER
         IL              //IF SO, INSERT INTO PROGRAM
         BR STRT         //GO GET NEXT
 :XEC	SB              //SAVE POINTERS FOR RUN WITH

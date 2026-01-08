@@ -175,6 +175,7 @@
 	NET "JB8"	LOC = W14	|	IOSTANDARD=LVCMOS33;	#Bank = 2, pin name = IO_L16P_2,							Sch name = JB8
 	NET "JB9"	LOC = T14		|	IOSTANDARD=LVCMOS33;	#Bank = 2, pin name = IO_L20P_2,							Sch name = JB9
 	NET "JB10"	LOC=W11		|	IOSTANDARD=LVCMOS33;	#Bank = 2, pin name = IO_L29P_GCLK3_2,				Sch name = JB10
+	NET "JB7" CLOCK_DEDICATED_ROUTE = FALSE;
 	
 ## JC
 	NET "JC1"	LOC = Y10	|	IOSTANDARD=LVCMOS33;	#Bank = 2, pin name = IO_L29N_GCLK2_2,								Sch name = JC1

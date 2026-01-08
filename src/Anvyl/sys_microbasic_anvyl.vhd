@@ -62,17 +62,7 @@ entity sys_microbasic_anvyl is
 				JB3: out std_logic;
 				JB4: out std_logic;
 				JB7: in std_logic;
-				--JB8: in std_logic;
-				--JB9: in std_logic;
-				--JB10: in std_logic;
-				--JC1: out std_logic;
-				--JC2: out std_logic;
-				--JC3: out std_logic;
-				--JC4: out std_logic;
-				--JC7: out std_logic;
-				--JC8: out std_logic;
-				--JC9: out std_logic;
-				--JC10: out std_logic;
+				JB8: in std_logic;
 				-- not used
 				JD1: in std_logic;
 				JD2: in std_logic;
@@ -147,11 +137,13 @@ signal il_d: std_logic_vector(7 downto 0);
 -- stores Basic program and input line, everything else is custom registers inside CPU!
 type memory is array (0 to 4095) of std_logic_vector(7 downto 0);
 signal ram: memory;
-signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
+signal nBUSREQ, nBUSACK, nRD, nWR, RESET: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
 signal pattern, memData, data: std_logic_vector(7 downto 0); 
-signal nSel_0XXX, nSel_FFXX: std_logic;
+signal reset_delay: std_logic_vector(7 downto 0) := X"00"; 
+signal nSel_0XXX, nSel_FFFX, nSel_FFFX_delayed: std_logic;
+signal nSel_FFFX_sel: std_logic_vector(1 downto 0);
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -164,17 +156,18 @@ alias PMOD_RXD1: std_logic is JE2;
 alias PMOD_TXD1: std_logic is JE3;
 alias PMOD_CTS1: std_logic is JE4;
 
-alias RESET: std_logic is BTN(3);
-
 -- Am9511A FPU connections
 alias FPU_nCS: std_logic is JB1;		-- dk gray
 alias FPU_nWR: std_logic is JB2;		-- brown
 alias FPU_nRD: std_logic is JB3;		-- blue
 alias FPU_CnD: std_logic is JB4;		-- green
 alias FPU_nPAUSE: std_logic is JB7; -- yellow
+alias FPU_nEND: std_logic is  JB8;	-- white
+alias FPU_CLK: std_logic is BB9;		-- yellow
+alias FPU_RESET: std_logic is BB10;	-- purple
+-- Am9511A FPU signals
 signal FPU_DB: std_logic_vector(7 downto 0);
-alias FPU_CLK: std_logic is BB9;
-alias FPU_RESET: std_logic is BB10;	
+signal cnt_end, cnt_pause: std_logic_vector(11 downto 0);
 
 -- debug
 signal T, freqcnt_value: std_logic_vector(31 downto 0);
@@ -188,14 +181,15 @@ signal cpu_uipc: std_logic_vector(8 downto 0);		-- microcode program counter val
 
 signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
-signal cnt50MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 100MHz
+signal cnt50MHz: std_logic_vector(11 downto 0); -- 12 bit counter driven by 100MHz
 alias vga_clk: std_logic is cnt50MHz(1);
+alias Am9511_clk: std_logic is cnt50MHz(5);
 signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
 alias freq19200: std_logic is cnt307200(4);
 
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
-signal cpu_clk: std_logic;
+signal cpu_clk, sys_clk, sysclk_sel: std_logic;
 signal freq1kHz: std_logic;
 
 -- single char UART output
@@ -233,14 +227,28 @@ signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
 
 begin
 
+-- Main reset, ensure it is at least 8 FPU clocks long
+RESET <= '0' when (reset_delay = X"FF") else '1';
+
+on_Am9511_clk: process(Am9511_clk, BTN(3))
+begin
+	if (BTN(3) = '1') then
+		reset_delay <= (others => '0');
+	else
+		if (rising_edge(Am9511_clk)) then
+			reset_delay <= reset_delay(6 downto 0) & '1';
+			FPU_nRD <= nRD;
+			FPU_nWR <= nWR;
+		end if;
+	end if;
+end process;
+
 -- Am9511A connections
-FPU_RESET <= RESET;
-FPU_CLK <= cnt50MHz(5);	-- 1.5625MHz
-FPU_nRD <= nRD;
-FPU_nWR <= nWR;
-FPU_nCS <= nSel_FFXX;
+FPU_RESET <= RESET or button(2);
+FPU_CLK <= Am9511_clk;	-- 1.5625MHz
+FPU_nCS <= nSel_FFFX;
 FPU_CnD <= A(2);
-FPU_DB <= D when ((nWR or nSel_FFXX) = '0') else "ZZZZZZZZ";
+FPU_DB <= D when ((nWR or nSel_FFFX) = '0') else "ZZZZZZZZ";
 BB8 <= FPU_DB(7);
 BB7 <= FPU_DB(6);
 BB6 <= FPU_DB(5);
@@ -253,7 +261,7 @@ BB1 <= FPU_DB(0);
 
 LDT1R <= not nWR;
 LDT1G <= not nRD;
-LDT1Y <= not nBUSREQ;
+LDT1Y <= sysclk_sel;
 LDT2R <= cpu_cache_full;
 LDT2G <= cpu_cache_empty;
 LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
@@ -264,12 +272,12 @@ LED <= RXD_CHAR when (button(2) = '0') else switch;
 -- divide internal clock   	
 on_mclk: process(CLK, cnt307200, cnt4096, cnt50MHz)
 begin
-	if (RESET = '1') then
-		prescale_baud <= 0;
-		prescale_power <= 0;
-		cnt307200 <= (others => '0');
-		cnt4096 <= (others => '0');
-	else
+--	if (RESET = '1') then
+--		prescale_baud <= 0;
+--		prescale_power <= 0;
+--		cnt307200 <= (others => '0');
+--		cnt4096 <= (others => '0');
+--	else
 		if (rising_edge(CLK)) then
 			cnt50MHz <= std_logic_vector(unsigned(cnt50MHz) + 1);
 			-- baudrate clock generation
@@ -294,7 +302,22 @@ begin
 				prescale_ms <= prescale_ms - 1;
 			end if;
 		end if;
-	end if;
+		if (falling_edge(CLK)) then
+			nSel_FFFX_delayed <= nSel_FFFX;
+			if (nSel_FFFX = '0') then
+				if (nSel_FFFX_delayed = '1') then
+					-- switch system to use Am9511 clk for FPU operation
+					sysclk_sel <= '1';
+				end if;
+			else
+				if (nSel_FFFX_delayed = '0') then
+					-- switch system to use user selected clock frequency
+					sysclk_sel <= '0';
+				end if;
+			end if;
+			--Am9511_nAccess <= nSel_FFFX or (not nSel_FFFX_delayed);
+		end if;
+--	end if;
 end process;
 
 --	debounce noisy inputs
@@ -326,9 +349,37 @@ end process;
 		signal_raw(0) => DIP_A1,
 		signal_debounced => dip
 	);
+
+on_FPU_nPause: process(FPU_nPause, reset)
+begin
+	if (reset = '1') then
+		cnt_pause <= (others => '0');
+	else
+		if (rising_edge(FPU_nPause)) then
+			cnt_pause <= std_logic_vector(unsigned(cnt_pause) + 1);
+		end if;
+	end if;
+end process;
+
+on_FPU_nEnd: process(FPU_nEnd, reset)
+begin
+	if (reset = '1') then
+		cnt_end <= (others => '0');
+	else
+		if (rising_edge(FPU_nEnd)) then
+			cnt_end <= std_logic_vector(unsigned(cnt_end) + 1);
+		end if;
+	end if;
+end process;
+
+--Am9511_wait <= not (nSel_FFFX and Am9511_nWait);
+--Am9511_nWait <= not (FPU_nPause and Am9511_wait);
 	
--- 
-nBUSACK <= (not FPU_nPAUSE) when (nSel_FFXX = '0') else '0';
+--nBUSACK <= Am9511_wait when (nSel_FFFX = '0') else '0';
+nBUSACK <= (not FPU_nPause) when (nSel_FFFX = '0') else '0';
+sys_clk <= Am9511_clk when (sysclk_sel = '1') else cpu_clk;
+--
+
 cpu: entity work.MicroBasic 
 		Generic map (
 		 --MSB => 15	-- 16-bit vars / arithmetic
@@ -336,7 +387,7 @@ cpu: entity work.MicroBasic
 		)
 		Port map (
 		reset => RESET,
-		clk => cpu_clk,
+		clk => sys_clk,
 		clk_tick => freq1kHz,
 		-- internal GOTO cache state
 		cache_empty => cpu_cache_empty,
@@ -389,9 +440,9 @@ end process;
 
 -- Data bus input MUX
 nSel_0XXX <= '0' when (A(15 downto 12) = X"0") else '1';
-nSel_FFXX <= '0' when (A(15 downto 8) = X"FF") else '1';
+nSel_FFFX <= '0' when (A(15 downto 4) = X"FFF") else '1';
 memData <= ram(to_integer(unsigned(A(11 downto 0)))) when (nSel_0XXX = '0') else pattern;
-data <= (BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1) when (nSel_FFXX = '0') else memData;
+data <= (BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1) when (nSel_FFFX = '0') else memData;
 D <= data when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 
 -- Character generator ROM handy for the marquee demo
@@ -416,6 +467,7 @@ with sw_cpuclk select cpu_clk <=
 leds: entity work.sixdigitsevensegled port map ( 
 			  -- inputs
 			  data => cpu_debug(23 downto 0),
+--			  data => (cnt_pause & cnt_end),
 			  digsel => cnt4096(6 downto 4),
            showdigit => "111111",
 			  showdot => cpu_debug(29 downto 24),
@@ -463,18 +515,6 @@ baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
 baudrate_x2 <= cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
 baudrate_x4 <= cnt307200(to_integer(8 - unsigned('0' & sw_baudrate)));
 							
--- count signal frequencies
---freqcnt: entity work.freqcounter Port map ( 
---		reset => RESET,
---		clk => freq2,
---		freq => baudrate_x1,
---		bcd => '1',
---		add => X"00000004",
---		cin => '0',
---		cout => open,
---		value => freqcnt_value
---	);		
-
 -- VGA to visualize Basic memory and microcode execution
 -- 32 rows by 64 chars are displayed, so whole 2k RAM fits into display
 vga: entity work.mwvga Port map ( 
