@@ -1719,377 +1719,367 @@ constant mb_symbol_entry: t_mb_symbol_entry := (
 -- if false then continue else traceDetails;
 417 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
 
--- L1024@01A2 4E4F50524F475F4552523A2074726163.NOPROG_ERR:  trace(from_microcode), directByte = 50;
--- NOPROG_ERR: trace(from_microcode), directByte = 50;
-418 => X"4E_4F_50_52_4F_47_5F_45_52_52_3A_20_74_72_61_63",
-
--- L1025@01A3 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-419 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1026@01A4 4449564259305F4552523A2074726163.DIVBY0_ERR:  trace(from_microcode), directByte = 57;
--- DIVBY0_ERR: trace(from_microcode), directByte = 57;
-420 => X"44_49_56_42_59_30_5F_45_52_52_3A_20_74_72_61_63",
-
--- L1027@01A5 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-421 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1028@01A6 4F564552464C4F575F4552523A207472.OVERFLOW_ERR:  trace(from_microcode), directByte = 58;
--- OVERFLOW_ERR: trace(from_microcode), directByte = 58;
-422 => X"4F_56_45_52_46_4C_4F_57_5F_45_52_52_3A_20_74_72",
-
--- L1029@01A7 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-423 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1030@01A8 53594E5441585F4552523A2074726163.SYNTAX_ERR:  trace(from_microcode), directByte = 61;
--- SYNTAX_ERR: trace(from_microcode), directByte = 61;
-424 => X"53_59_4E_54_41_58_5F_45_52_52_3A_20_74_72_61_63",
-
--- L1031@01A9 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-425 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1032@01AA 494E5445524E414C5F4552523A207472.INTERNAL_ERR:  trace(from_microcode), directByte = 62;
--- INTERNAL_ERR: trace(from_microcode), directByte = 62;
-426 => X"49_4E_54_45_52_4E_41_4C_5F_45_52_52_3A_20_74_72",
-
--- L1033@01AB 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-427 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1034@01AC 45535441434B5F4552523A2074726163.ESTACK_ERR:  trace(from_microcode), directByte = 60;
--- ESTACK_ERR: trace(from_microcode), directByte = 60;
-428 => X"45_53_54_41_43_4B_5F_45_52_52_3A_20_74_72_61_63",
-
--- L1035@01AD 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-429 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1036@01AE 52535441434B5F4552523A2074726163.RSTACK_ERR:  trace(from_microcode), directByte = 59;
--- RSTACK_ERR: trace(from_microcode), directByte = 59;
-430 => X"52_53_54_41_43_4B_5F_45_52_52_3A_20_74_72_61_63",
-
--- L1037@01AF 69662066616C7365207468656E20636F.  if false then continue else traceError;
--- if false then continue else traceError;
-431 => X"69_66_20_66_61_6C_73_65_20_74_68_65_6E_20_63_6F",
-
--- L1038@01B0 42535441434B5F4552523A2074726163.BSTACK_ERR:  trace(from_microcode), directByte = 54;
--- BSTACK_ERR: trace(from_microcode), directByte = 54;
-432 => X"42_53_54_41_43_4B_5F_45_52_52_3A_20_74_72_61_63",
-
--- L1039@01B1 74726163654572726F723A206F757442.traceError:  outBeep();
--- traceError: outBeep();
-433 => X"74_72_61_63_65_45_72_72_6F_72_3A_20_6F_75_74_42",
-
--- L1040@01B2 64697265637442797465203D20274527.  directByte = 'E', outChar(from_microcode);
--- directByte = 'E', outChar(from_microcode);
-434 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_45_27",
-
--- L1041@01B3 64697265637442797465203D20275227.  directByte = 'R', outChar(from_microcode);
--- directByte = 'R', outChar(from_microcode);
-435 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_52_27",
-
--- L1042@01B4 64697265637442797465203D20275227.  directByte = 'R', outChar(from_microcode);
--- directByte = 'R', outChar(from_microcode);
-436 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_52_27",
-
--- L1043@01B5 747261636544657461696C733A206469.traceDetails:  directByte = '#', outChar(from_microcode), T <= IL_PC;
--- traceDetails: directByte = '#', outChar(from_microcode), T <= IL_PC;
-437 => X"74_72_61_63_65_44_65_74_61_69_6C_73_3A_20_64_69",
-
--- L1044@01B6 54203C3D206465633B20202020202020.  T <= dec;
--- T <= dec;
-438 => X"54_20_3C_3D_20_64_65_63_3B_20_20_20_20_20_20_20",
-
--- L1045@01B7 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
--- printDecR(R_fromT);
-439 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
-
--- L1046@01B8 69662049535F52554E4D4F4445207468.  if IS_RUNMODE then next else err_done;
--- if IS_RUNMODE then next else err_done;
-440 => X"69_66_20_49_53_5F_52_55_4E_4D_4F_44_45_20_74_68",
-
--- L1047@01B9 7072696E745F6C696E6F3A2064697265.print_lino:  directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
--- print_lino: directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
-441 => X"70_72_69_6E_74_5F_6C_69_6E_6F_3A_20_64_69_72_65",
-
--- L1048@01BA 64697265637442797465203D20274127.  directByte = 'A', outChar(from_microcode), T <= from_S;
--- directByte = 'A', outChar(from_microcode), T <= from_S;
-442 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_41_27",
-
--- L1049@01BB 64697265637442797465203D20275427.  directByte = 'T', outChar(from_microcode), LS <= T;
--- directByte = 'T', outChar(from_microcode), LS <= T;
-443 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_54_27",
-
--- L1050@01BC 64697265637442797465203D20272027.  directByte = ' ', outChar(from_microcode), T <= LS;
--- directByte = ' ', outChar(from_microcode), T <= LS;
-444 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_20_27",
-
--- L1051@01BD 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
--- printDecR(R_fromT);
-445 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
-
--- L1052@01BE 64697265637442797465203D20272027.  directByte = ' ', outChar(from_microcode), T <= fromTicks;
--- directByte = ' ', outChar(from_microcode), T <= fromTicks;
-446 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_20_27",
-
--- L1053@01BF 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
--- printDecR(R_fromT);
-447 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
-
--- L1054@01C0 64697265637442797465203D20272E27.  directByte = ' 64697265637442797465203D20272E27.', outChar(from_microcode), T <= recall;
--- directByte = '.', outChar(from_microcode), T <= recall;
-448 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_2E_27",
-
--- L1055@01C1 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
--- printDecR(R_fromT);
-449 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
-
--- L1056@01C2 6572725F646F6E653A206F757443524C.err_done:  outCRLF();
--- err_done: outCRLF();
-450 => X"65_72_72_5F_64_6F_6E_65_3A_20_6F_75_74_43_52_4C",
-
--- L1057@01C3 74726163652863726C66293B20202020.  trace(crlf);
--- trace(crlf);
-451 => X"74_72_61_63_65_28_63_72_6C_66_29_3B_20_20_20_20",
-
--- L1058@01C4 444247494E444558203C3D207A65726F.  DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0, if false then continue else WarmStart2;
--- DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0, if false then continue else WarmStart2;
-452 => X"44_42_47_49_4E_44_45_58_20_3C_3D_20_7A_65_72_6F",
-
--- L1060@01C5 66696E644E65787443523A2072656164.findNextCR:  readCore(T);
--- findNextCR: readCore(T);
-453 => X"66_69_6E_64_4E_65_78_74_43_52_3A_20_72_65_61_64",
-
--- L1061@01C6 64697265637442797465203D20307830.  directByte = 0x0D, if MDR_MATCHES_DB then return;
--- directByte = 0x0D, if MDR_MATCHES_DB then return;
-454 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
-
--- L1062@01C7 54203C3D20696E632C20646972656374.  T <= inc, directByte = 0x00, if MDR_MATCHES_DB then INTERNAL_ERR else findNextCR;
--- T <= inc, directByte = 0x00, if MDR_MATCHES_DB then INTERNAL_ERR else findNextCR;
-455 => X"54_20_3C_3D_20_69_6E_63_2C_20_64_69_72_65_63_74",
-
--- L1064@01C8 72656164436F726531363A2072656164.readCore16:  readCore(T);
--- readCore16: readCore(T);
-456 => X"72_65_61_64_43_6F_72_65_31_36_3A_20_72_65_61_64",
-
--- L1065@01C9 616C75203C3D2052783235365F706C75.  alu <= Rx256_plus_MDR, T <= inc;
--- alu <= Rx256_plus_MDR, T <= inc;
-457 => X"61_6C_75_20_3C_3D_20_52_78_32_35_36_5F_70_6C_75",
-
--- L1066@01CA 72656164436F72652854293B20202020.  readCore(T);
--- readCore(T);
-458 => X"72_65_61_64_43_6F_72_65_28_54_29_3B_20_20_20_20",
-
--- L1067@01CB 616C75203C3D2052783235365F706C75.  alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
--- alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
-459 => X"61_6C_75_20_3C_3D_20_52_78_32_35_36_5F_70_6C_75",
-
--- L1069@01CC 7772697465324E756C6C733A20777269.write2Nulls:  writeCore(T, zero), T <= inc;
--- write2Nulls: writeCore(T, zero), T <= inc;
-460 => X"77_72_69_74_65_32_4E_75_6C_6C_73_3A_20_77_72_69",
-
--- L1070@01CD 4D4152203C3D20542C204D4452203C3D.  MAR <= T, MDR <= zero, if false then continue else writeCore;
--- MAR <= T, MDR <= zero, if false then continue else writeCore;
-461 => X"4D_41_52_20_3C_3D_20_54_2C_20_4D_44_52_20_3C_3D",
-
--- L1073@01CE 70756C6C52533A20696620535441434B.pullRS:  if STACK_IS_EMPTY then ESTACK_ERR;
--- pullRS: if STACK_IS_EMPTY then ESTACK_ERR;
-462 => X"70_75_6C_6C_52_53_3A_20_69_66_20_53_54_41_43_4B",
-
--- L1074@01CF 616C75203C3D20525F66726F6D537461.  alu <= R_fromStack, ExpStack <= pop2;
--- alu <= R_fromStack, ExpStack <= pop2;
-463 => X"61_6C_75_20_3C_3D_20_52_5F_66_72_6F_6D_53_74_61",
-
--- L1075@01D0 696620535441434B5F49535F454D5054.  if STACK_IS_EMPTY then ESTACK_ERR;
--- if STACK_IS_EMPTY then ESTACK_ERR;
-464 => X"69_66_20_53_54_41_43_4B_5F_49_53_5F_45_4D_50_54",
-
--- L1076@01D1 616C75203C3D20535F66726F6D537461.  alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
--- alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
-465 => X"61_6C_75_20_3C_3D_20_53_5F_66_72_6F_6D_53_74_61",
-
--- L1079@01D2 7072696E744465633A20616C75203C3D.printDec:  alu <= R_fromStack, ExpStack <= pop2;
--- printDec: alu <= R_fromStack, ExpStack <= pop2;
-466 => X"70_72_69_6E_74_44_65_63_3A_20_61_6C_75_20_3C_3D",
-
--- L1081@01D3 7072696E74446563523A20616C75203C.printDecR:  alu <= bcd_start;
--- printDecR: alu <= bcd_start;
-467 => X"70_72_69_6E_74_44_65_63_52_3A_20_61_6C_75_20_3C",
-
--- L1082@01D4 616C75203C3D206263645F6E6578742C.  alu <= bcd_next, if ALU_READY then next else repeat;
--- alu <= bcd_next, if ALU_READY then next else repeat;
-468 => X"61_6C_75_20_3C_3D_20_62_63_64_5F_6E_65_78_74_2C",
-
--- L1083@01D5 696620414C555F5349474E207468656E.  if ALU_SIGN then next else printY;
--- if ALU_SIGN then next else printY;
-469 => X"69_66_20_41_4C_55_5F_53_49_47_4E_20_74_68_65_6E",
-
--- L1084@01D6 64697265637442797465203D20272D27.  directByte = '-', outChar(from_microcode);
--- directByte = '-', outChar(from_microcode);
-470 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_2D_27",
-
--- L1085@01D7 7072696E74593A206469726563744279.printY:  directByte = 6, T <= from_microcode, if IS_CPU32 then next else printY1;
--- printY: directByte = 6, T <= from_microcode, if IS_CPU32 then next else printY1;
-471 => X"70_72_69_6E_74_59_3A_20_64_69_72_65_63_74_42_79",
-
--- L1086@01D8 64697265637442797465203D2031342C.  directByte = 14, T <= from_microcode;
--- directByte = 14, T <= from_microcode;
-472 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_31_34_2C",
-
--- L1087@01D9 7072696E7459313A206F75744E5A4368.printY1:  outNZChar(from_YtoAlphaZ);
--- printY1: outNZChar(from_YtoAlphaZ);
-473 => X"70_72_69_6E_74_59_31_3A_20_6F_75_74_4E_5A_43_68",
-
--- L1088@01DA 7072696E74596C703A206F75744E5A43.printYlp:  outNZChar(from_YtoAlphaZ), T <= dec;
--- printYlp: outNZChar(from_YtoAlphaZ), T <= dec;
-474 => X"70_72_69_6E_74_59_6C_70_3A_20_6F_75_74_4E_5A_43",
-
--- L1089@01DB 616C75203C3D20525F66726F6D543B20.  alu <= R_fromT;
--- alu <= R_fromT;
-475 => X"61_6C_75_20_3C_3D_20_52_5F_66_72_6F_6D_54_3B_20",
-
--- L1090@01DC 696620525F49535F5A45524F20746865.  if R_IS_ZERO then next else printYlp;
--- if R_IS_ZERO then next else printYlp;
-476 => X"69_66_20_52_5F_49_53_5F_5A_45_52_4F_20_74_68_65",
-
--- L1091@01DD 434841524F5554203C3D2066726F6D5F.  CHAROUT <= from_YtoAlpha, if false then continue else outChar;
--- CHAROUT <= from_YtoAlpha, if false then continue else outChar;
-477 => X"43_48_41_52_4F_55_54_20_3C_3D_20_66_72_6F_6D_5F",
-
--- L1093@01DE 6F75744E5A436861723A206F75744368.outNZChar:  outChar(from_YtoAlphaZ);
--- outNZChar: outChar(from_YtoAlphaZ);
-478 => X"6F_75_74_4E_5A_43_68_61_72_3A_20_6F_75_74_43_68",
-
--- L1094@01DF 616C75203C3D20597831362C20696620.  alu <= Yx16, if true then return else continue;
--- alu <= Yx16, if true then return else continue;
-479 => X"61_6C_75_20_3C_3D_20_59_78_31_36_2C_20_69_66_20",
-
--- L1096@01E0 736B69705370616365733A2072656164.skipSpaces:  readCore(BP);
--- skipSpaces: readCore(BP);
-480 => X"73_6B_69_70_53_70_61_63_65_73_3A_20_72_65_61_64",
-
--- L1097@01E1 64697265637442797465203D20272027.  directByte = ' ', if MDR_MATCHES_DB then skipSp;
--- directByte = ' ', if MDR_MATCHES_DB then skipSp;
-481 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_20_27",
-
--- L1098@01E2 64697265637442797465203D20307830.  directByte = 0x09, if MDR_MATCHES_DB then skipSp else return;
--- directByte = 0x09, if MDR_MATCHES_DB then skipSp else return;
-482 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
-
--- L1099@01E3 736B697053703A204250203C3D20696E.skipSp:  BP <= inc, if false then continue else skipSpaces;
--- skipSp: BP <= inc, if false then continue else skipSpaces;
-483 => X"73_6B_69_70_53_70_3A_20_42_50_20_3C_3D_20_69_6E",
-
--- L1101@01E4 6F7574426565703A206F757443524C46.outBeep:  outCRLF();
--- outBeep: outCRLF();
-484 => X"6F_75_74_42_65_65_70_3A_20_6F_75_74_43_52_4C_46",
-
--- L1102@01E5 74726163652863726C66293B20202020.  trace(crlf);
--- trace(crlf);
-485 => X"74_72_61_63_65_28_63_72_6C_66_29_3B_20_20_20_20",
-
--- L1103@01E6 64697265637442797465203D20307830.  directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
--- directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
-486 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
-
--- L1105@01E7 6F757443524C463A2064697265637442.outCRLF:  directByte = 0x0D, outChar(from_microcode);
--- outCRLF: directByte = 0x0D, outChar(from_microcode);
-487 => X"6F_75_74_43_52_4C_46_3A_20_64_69_72_65_63_74_42",
-
--- L1106@01E8 64697265637442797465203D20307830.  directByte = 0x0A, CHAROUT <= from_microcode;
--- directByte = 0x0A, CHAROUT <= from_microcode;
-488 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
-
--- L1107@01E9 6F7574436861723A2069662043484152.outChar:  if CHAROUT_READY then next else repeat;
--- outChar: if CHAROUT_READY then next else repeat;
-489 => X"6F_75_74_43_68_61_72_3A_20_69_66_20_43_48_41_52",
-
--- L1108@01EA 696620434841524F55545F5245414459.  if CHAROUT_READY then return else repeat;
--- if CHAROUT_READY then return else repeat;
-490 => X"69_66_20_43_48_41_52_4F_55_54_5F_52_45_41_44_59",
-
--- L1110@01EB 77726974655331363A20777269746543.writeS16:  writeCore(T, from_SLo), T <= dec;
--- writeS16: writeCore(T, from_SLo), T <= dec;
-491 => X"77_72_69_74_65_53_31_36_3A_20_77_72_69_74_65_43",
-
--- L1111@01EC 4D4152203C3D20542C204D4452203C3D.  MAR <= T, MDR <= from_SHi, T <= dec;
--- MAR <= T, MDR <= from_SHi, T <= dec;
-492 => X"4D_41_52_20_3C_3D_20_54_2C_20_4D_44_52_20_3C_3D",
-
--- L1112@01ED 7772697465436F72653A206E5752203D.writeCore:  nWR = 0;
--- writeCore: nWR = 0;
-493 => X"77_72_69_74_65_43_6F_72_65_3A_20_6E_57_52_20_3D",
-
--- L1113@01EE 6E5752203D20302C206966206E425553.  nWR = 0, if nBUSACK then repeat else return;
--- nWR = 0, if nBUSACK then repeat else return;
-494 => X"6E_57_52_20_3D_20_30_2C_20_69_66_20_6E_42_55_53",
-
--- L1115@01EF 72656164436F72653A206E5244203D20.readCore:  nRD = 0;
--- readCore: nRD = 0;
-495 => X"72_65_61_64_43_6F_72_65_3A_20_6E_52_44_20_3D_20",
-
--- L1116@01F0 6E5244203D20302C204D4452203C3D20.  nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
--- nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
-496 => X"6E_52_44_20_3D_20_30_2C_20_4D_44_52_20_3C_3D_20",
-
--- L1128@01F1 747261636542503A2045787053746163.traceBP:  ExpStack <= push_TWord, T <= BP, trace(from_microcode), directByte = 33;
--- traceBP: ExpStack <= push_TWord, T <= BP, trace(from_microcode), directByte = 33;
-497 => X"74_72_61_63_65_42_50_3A_20_45_78_70_53_74_61_63",
-
--- L1129@01F2 54203C3D20457870537461636B2C2045.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
--- T <= ExpStack, ExpStack <= pop2, if true then return else continue;
-498 => X"54_20_3C_3D_20_45_78_70_53_74_61_63_6B_2C_20_45",
-
--- L1131@01F3 7472616365593A20457870537461636B.traceY:  ExpStack <= push_TWord, T <= from_YLo, trace(from_microcode), directByte = 32;
--- traceY: ExpStack <= push_TWord, T <= from_YLo, trace(from_microcode), directByte = 32;
-499 => X"74_72_61_63_65_59_3A_20_45_78_70_53_74_61_63_6B",
-
--- L1132@01F4 54203C3D20457870537461636B2C2045.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
--- T <= ExpStack, ExpStack <= pop2, if true then return else continue;
-500 => X"54_20_3C_3D_20_45_78_70_53_74_61_63_6B_2C_20_45",
-
--- L1134@01F5 7472616365414C553A20747261636528.traceALU:  trace(crlf);
--- traceALU: trace(crlf);
-501 => X"74_72_61_63_65_41_4C_55_3A_20_74_72_61_63_65_28",
-
--- L1135@01F6 54203C3D20736176652C207472616365.  T <= save, trace(from_microcode), directByte = 52;
--- T <= save, trace(from_microcode), directByte = 52;
-502 => X"54_20_3C_3D_20_73_61_76_65_2C_20_74_72_61_63_65",
-
--- L1136@01F7 54203C3D2066726F6D5F532C20747261.  T <= from_S, trace(from_microcode), directByte = 52;
--- T <= from_S, trace(from_microcode), directByte = 52;
-503 => X"54_20_3C_3D_20_66_72_6F_6D_5F_53_2C_20_74_72_61",
-
--- L1137@01F8 54203C3D2066726F6D5F522C20747261.  T <= from_R, trace(from_microcode), directByte = 52;
--- T <= from_R, trace(from_microcode), directByte = 52;
-504 => X"54_20_3C_3D_20_66_72_6F_6D_5F_52_2C_20_74_72_61",
-
--- L1138@01F9 54203C3D2066726F6D5F5948692C2074.  T <= from_YHi, trace(from_microcode), directByte = 53;
--- T <= from_YHi, trace(from_microcode), directByte = 53;
-505 => X"54_20_3C_3D_20_66_72_6F_6D_5F_59_48_69_2C_20_74",
-
--- L1139@01FA 54203C3D2066726F6D5F594C6F2C2074.  T <= from_YLo, trace(from_microcode), directByte = 52;
--- T <= from_YLo, trace(from_microcode), directByte = 52;
-506 => X"54_20_3C_3D_20_66_72_6F_6D_5F_59_4C_6F_2C_20_74",
-
--- L1140@01FB 54203C3D20726563616C6C2C20444247.  T <= recall, DBGINDEX <= crlf;
--- T <= recall, DBGINDEX <= crlf;
-507 => X"54_20_3C_3D_20_72_65_63_61_6C_6C_2C_20_44_42_47",
-
--- L1141@01FC 74726163653A206966204442475F5245.trace:  if DBG_READY then next else repeat;
--- trace: if DBG_READY then next else repeat;
-508 => X"74_72_61_63_65_3A_20_69_66_20_44_42_47_5F_52_45",
-
--- L1142@01FD 6966204442475F524541445920746865.  if DBG_READY then next else repeat;
+-- L1024@01A2 4E4F50524F475F4552523A2064697265.NOPROG_ERR:  directByte = 50, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- NOPROG_ERR: directByte = 50, DBGINDEX <= from_microcode, if false then continue else traceError;
+418 => X"4E_4F_50_52_4F_47_5F_45_52_52_3A_20_64_69_72_65",
+
+-- L1025@01A3 4449564259305F4552523A2064697265.DIVBY0_ERR:  directByte = 57, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- DIVBY0_ERR: directByte = 57, DBGINDEX <= from_microcode, if false then continue else traceError;
+419 => X"44_49_56_42_59_30_5F_45_52_52_3A_20_64_69_72_65",
+
+-- L1026@01A4 4F564552464C4F575F4552523A206469.OVERFLOW_ERR:  directByte = 58, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- OVERFLOW_ERR: directByte = 58, DBGINDEX <= from_microcode, if false then continue else traceError;
+420 => X"4F_56_45_52_46_4C_4F_57_5F_45_52_52_3A_20_64_69",
+
+-- L1027@01A5 53594E5441585F4552523A2064697265.SYNTAX_ERR:  directByte = 61, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- SYNTAX_ERR: directByte = 61, DBGINDEX <= from_microcode, if false then continue else traceError;
+421 => X"53_59_4E_54_41_58_5F_45_52_52_3A_20_64_69_72_65",
+
+-- L1028@01A6 494E5445524E414C5F4552523A206469.INTERNAL_ERR:  directByte = 62, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- INTERNAL_ERR: directByte = 62, DBGINDEX <= from_microcode, if false then continue else traceError;
+422 => X"49_4E_54_45_52_4E_41_4C_5F_45_52_52_3A_20_64_69",
+
+-- L1029@01A7 45535441434B5F4552523A2064697265.ESTACK_ERR:  directByte = 60, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- ESTACK_ERR: directByte = 60, DBGINDEX <= from_microcode, if false then continue else traceError;
+423 => X"45_53_54_41_43_4B_5F_45_52_52_3A_20_64_69_72_65",
+
+-- L1030@01A8 52535441434B5F4552523A2064697265.RSTACK_ERR:  directByte = 59, DBGINDEX <= from_microcode, if false then continue else traceError;
+-- RSTACK_ERR: directByte = 59, DBGINDEX <= from_microcode, if false then continue else traceError;
+424 => X"52_53_54_41_43_4B_5F_45_52_52_3A_20_64_69_72_65",
+
+-- L1031@01A9 42535441434B5F4552523A2064697265.BSTACK_ERR:  directByte = 54, DBGINDEX <= from_microcode;
+-- BSTACK_ERR: directByte = 54, DBGINDEX <= from_microcode;
+425 => X"42_53_54_41_43_4B_5F_45_52_52_3A_20_64_69_72_65",
+
+-- L1032@01AA 74726163654572726F723A2069662044.traceError:  if DBG_READY then next else repeat;
+-- traceError: if DBG_READY then next else repeat;
+426 => X"74_72_61_63_65_45_72_72_6F_72_3A_20_69_66_20_44",
+
+-- L1033@01AB 6966204442475F524541445920746865.  if DBG_READY then next else repeat;
 -- if DBG_READY then next else repeat;
-509 => X"69_66_20_44_42_47_5F_52_45_41_44_59_20_74_68_65",
+427 => X"69_66_20_44_42_47_5F_52_45_41_44_59_20_74_68_65",
 
--- L1143@01FE 444247494E444558203C3D207A65726F.  DBGINDEX <= zero, if true then return else continue;
+-- L1034@01AC 444247494E444558203C3D207A65726F.  DBGINDEX <= zero, outBeep();
+-- DBGINDEX <= zero, outBeep();
+428 => X"44_42_47_49_4E_44_45_58_20_3C_3D_20_7A_65_72_6F",
+
+-- L1035@01AD 64697265637442797465203D20274527.  directByte = 'E', outChar(from_microcode);
+-- directByte = 'E', outChar(from_microcode);
+429 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_45_27",
+
+-- L1036@01AE 64697265637442797465203D20275227.  directByte = 'R', outChar(from_microcode);
+-- directByte = 'R', outChar(from_microcode);
+430 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_52_27",
+
+-- L1037@01AF 64697265637442797465203D20275227.  directByte = 'R', outChar(from_microcode);
+-- directByte = 'R', outChar(from_microcode);
+431 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_52_27",
+
+-- L1038@01B0 747261636544657461696C733A206469.traceDetails:  directByte = '#', outChar(from_microcode), T <= IL_PC;
+-- traceDetails: directByte = '#', outChar(from_microcode), T <= IL_PC;
+432 => X"74_72_61_63_65_44_65_74_61_69_6C_73_3A_20_64_69",
+
+-- L1039@01B1 54203C3D206465633B20202020202020.  T <= dec;
+-- T <= dec;
+433 => X"54_20_3C_3D_20_64_65_63_3B_20_20_20_20_20_20_20",
+
+-- L1040@01B2 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
+-- printDecR(R_fromT);
+434 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
+
+-- L1041@01B3 69662049535F52554E4D4F4445207468.  if IS_RUNMODE then next else err_done;
+-- if IS_RUNMODE then next else err_done;
+435 => X"69_66_20_49_53_5F_52_55_4E_4D_4F_44_45_20_74_68",
+
+-- L1042@01B4 7072696E745F6C696E6F3A2064697265.print_lino:  directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
+-- print_lino: directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
+436 => X"70_72_69_6E_74_5F_6C_69_6E_6F_3A_20_64_69_72_65",
+
+-- L1043@01B5 64697265637442797465203D20274127.  directByte = 'A', outChar(from_microcode), T <= from_S;
+-- directByte = 'A', outChar(from_microcode), T <= from_S;
+437 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_41_27",
+
+-- L1044@01B6 64697265637442797465203D20275427.  directByte = 'T', outChar(from_microcode), LS <= T;
+-- directByte = 'T', outChar(from_microcode), LS <= T;
+438 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_54_27",
+
+-- L1045@01B7 64697265637442797465203D20272027.  directByte = ' ', outChar(from_microcode), T <= LS;
+-- directByte = ' ', outChar(from_microcode), T <= LS;
+439 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_20_27",
+
+-- L1046@01B8 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
+-- printDecR(R_fromT);
+440 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
+
+-- L1047@01B9 64697265637442797465203D20272027.  directByte = ' ', outChar(from_microcode), T <= fromTicks;
+-- directByte = ' ', outChar(from_microcode), T <= fromTicks;
+441 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_20_27",
+
+-- L1048@01BA 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
+-- printDecR(R_fromT);
+442 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
+
+-- L1049@01BB 64697265637442797465203D20272E27.  directByte = ' 64697265637442797465203D20272E27.', outChar(from_microcode), T <= recall;
+-- directByte = '.', outChar(from_microcode), T <= recall;
+443 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_2E_27",
+
+-- L1050@01BC 7072696E744465635228525F66726F6D.  printDecR(R_fromT);
+-- printDecR(R_fromT);
+444 => X"70_72_69_6E_74_44_65_63_52_28_52_5F_66_72_6F_6D",
+
+-- L1051@01BD 6572725F646F6E653A206F757443524C.err_done:  outCRLF();
+-- err_done: outCRLF();
+445 => X"65_72_72_5F_64_6F_6E_65_3A_20_6F_75_74_43_52_4C",
+
+-- L1052@01BE 74726163652863726C66293B20202020.  trace(crlf);
+-- trace(crlf);
+446 => X"74_72_61_63_65_28_63_72_6C_66_29_3B_20_20_20_20",
+
+-- L1053@01BF 444247494E444558203C3D207A65726F.  DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0, if false then continue else WarmStart2;
+-- DBGINDEX <= zero, ExpStack <= clear, RetStack <= clear, BasStack <= clear, T <= zero, alu <= reset0, if false then continue else WarmStart2;
+447 => X"44_42_47_49_4E_44_45_58_20_3C_3D_20_7A_65_72_6F",
+
+-- L1055@01C0 66696E644E65787443523A2072656164.findNextCR:  readCore(T);
+-- findNextCR: readCore(T);
+448 => X"66_69_6E_64_4E_65_78_74_43_52_3A_20_72_65_61_64",
+
+-- L1056@01C1 64697265637442797465203D20307830.  directByte = 0x0D, if MDR_MATCHES_DB then return;
+-- directByte = 0x0D, if MDR_MATCHES_DB then return;
+449 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
+
+-- L1057@01C2 54203C3D20696E632C20646972656374.  T <= inc, directByte = 0x00, if MDR_MATCHES_DB then INTERNAL_ERR else findNextCR;
+-- T <= inc, directByte = 0x00, if MDR_MATCHES_DB then INTERNAL_ERR else findNextCR;
+450 => X"54_20_3C_3D_20_69_6E_63_2C_20_64_69_72_65_63_74",
+
+-- L1059@01C3 72656164436F726531363A2072656164.readCore16:  readCore(T);
+-- readCore16: readCore(T);
+451 => X"72_65_61_64_43_6F_72_65_31_36_3A_20_72_65_61_64",
+
+-- L1060@01C4 616C75203C3D2052783235365F706C75.  alu <= Rx256_plus_MDR, T <= inc;
+-- alu <= Rx256_plus_MDR, T <= inc;
+452 => X"61_6C_75_20_3C_3D_20_52_78_32_35_36_5F_70_6C_75",
+
+-- L1061@01C5 72656164436F72652854293B20202020.  readCore(T);
+-- readCore(T);
+453 => X"72_65_61_64_43_6F_72_65_28_54_29_3B_20_20_20_20",
+
+-- L1062@01C6 616C75203C3D2052783235365F706C75.  alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
+-- alu <= Rx256_plus_MDR, T <= inc, if true then return else continue;
+454 => X"61_6C_75_20_3C_3D_20_52_78_32_35_36_5F_70_6C_75",
+
+-- L1064@01C7 7772697465324E756C6C733A20777269.write2Nulls:  writeCore(T, zero), T <= inc;
+-- write2Nulls: writeCore(T, zero), T <= inc;
+455 => X"77_72_69_74_65_32_4E_75_6C_6C_73_3A_20_77_72_69",
+
+-- L1065@01C8 4D4152203C3D20542C204D4452203C3D.  MAR <= T, MDR <= zero, if false then continue else writeCore;
+-- MAR <= T, MDR <= zero, if false then continue else writeCore;
+456 => X"4D_41_52_20_3C_3D_20_54_2C_20_4D_44_52_20_3C_3D",
+
+-- L1068@01C9 70756C6C52533A20696620535441434B.pullRS:  if STACK_IS_EMPTY then ESTACK_ERR;
+-- pullRS: if STACK_IS_EMPTY then ESTACK_ERR;
+457 => X"70_75_6C_6C_52_53_3A_20_69_66_20_53_54_41_43_4B",
+
+-- L1069@01CA 616C75203C3D20525F66726F6D537461.  alu <= R_fromStack, ExpStack <= pop2;
+-- alu <= R_fromStack, ExpStack <= pop2;
+458 => X"61_6C_75_20_3C_3D_20_52_5F_66_72_6F_6D_53_74_61",
+
+-- L1070@01CB 696620535441434B5F49535F454D5054.  if STACK_IS_EMPTY then ESTACK_ERR;
+-- if STACK_IS_EMPTY then ESTACK_ERR;
+459 => X"69_66_20_53_54_41_43_4B_5F_49_53_5F_45_4D_50_54",
+
+-- L1071@01CC 616C75203C3D20535F66726F6D537461.  alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
+-- alu <= S_fromStack, ExpStack <= pop2, if true then return else continue;
+460 => X"61_6C_75_20_3C_3D_20_53_5F_66_72_6F_6D_53_74_61",
+
+-- L1074@01CD 7072696E744465633A20616C75203C3D.printDec:  alu <= R_fromStack, ExpStack <= pop2;
+-- printDec: alu <= R_fromStack, ExpStack <= pop2;
+461 => X"70_72_69_6E_74_44_65_63_3A_20_61_6C_75_20_3C_3D",
+
+-- L1076@01CE 7072696E74446563523A20616C75203C.printDecR:  alu <= bcd_start;
+-- printDecR: alu <= bcd_start;
+462 => X"70_72_69_6E_74_44_65_63_52_3A_20_61_6C_75_20_3C",
+
+-- L1077@01CF 616C75203C3D206263645F6E6578742C.  alu <= bcd_next, if ALU_READY then next else repeat;
+-- alu <= bcd_next, if ALU_READY then next else repeat;
+463 => X"61_6C_75_20_3C_3D_20_62_63_64_5F_6E_65_78_74_2C",
+
+-- L1078@01D0 696620414C555F5349474E207468656E.  if ALU_SIGN then next else printY;
+-- if ALU_SIGN then next else printY;
+464 => X"69_66_20_41_4C_55_5F_53_49_47_4E_20_74_68_65_6E",
+
+-- L1079@01D1 64697265637442797465203D20272D27.  directByte = '-', outChar(from_microcode);
+-- directByte = '-', outChar(from_microcode);
+465 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_2D_27",
+
+-- L1080@01D2 7072696E74593A206469726563744279.printY:  directByte = 6, T <= from_microcode, if IS_CPU32 then next else printY1;
+-- printY: directByte = 6, T <= from_microcode, if IS_CPU32 then next else printY1;
+466 => X"70_72_69_6E_74_59_3A_20_64_69_72_65_63_74_42_79",
+
+-- L1081@01D3 64697265637442797465203D2031342C.  directByte = 14, T <= from_microcode;
+-- directByte = 14, T <= from_microcode;
+467 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_31_34_2C",
+
+-- L1082@01D4 7072696E7459313A206F75744E5A4368.printY1:  outNZChar(from_YtoAlphaZ);
+-- printY1: outNZChar(from_YtoAlphaZ);
+468 => X"70_72_69_6E_74_59_31_3A_20_6F_75_74_4E_5A_43_68",
+
+-- L1083@01D5 7072696E74596C703A206F75744E5A43.printYlp:  outNZChar(from_YtoAlphaZ), T <= dec;
+-- printYlp: outNZChar(from_YtoAlphaZ), T <= dec;
+469 => X"70_72_69_6E_74_59_6C_70_3A_20_6F_75_74_4E_5A_43",
+
+-- L1084@01D6 616C75203C3D20525F66726F6D543B20.  alu <= R_fromT;
+-- alu <= R_fromT;
+470 => X"61_6C_75_20_3C_3D_20_52_5F_66_72_6F_6D_54_3B_20",
+
+-- L1085@01D7 696620525F49535F5A45524F20746865.  if R_IS_ZERO then next else printYlp;
+-- if R_IS_ZERO then next else printYlp;
+471 => X"69_66_20_52_5F_49_53_5F_5A_45_52_4F_20_74_68_65",
+
+-- L1086@01D8 434841524F5554203C3D2066726F6D5F.  CHAROUT <= from_YtoAlpha, if false then continue else outChar;
+-- CHAROUT <= from_YtoAlpha, if false then continue else outChar;
+472 => X"43_48_41_52_4F_55_54_20_3C_3D_20_66_72_6F_6D_5F",
+
+-- L1088@01D9 6F75744E5A436861723A206F75744368.outNZChar:  outChar(from_YtoAlphaZ);
+-- outNZChar: outChar(from_YtoAlphaZ);
+473 => X"6F_75_74_4E_5A_43_68_61_72_3A_20_6F_75_74_43_68",
+
+-- L1089@01DA 616C75203C3D20597831362C20696620.  alu <= Yx16, if true then return else continue;
+-- alu <= Yx16, if true then return else continue;
+474 => X"61_6C_75_20_3C_3D_20_59_78_31_36_2C_20_69_66_20",
+
+-- L1091@01DB 736B69705370616365733A2072656164.skipSpaces:  readCore(BP);
+-- skipSpaces: readCore(BP);
+475 => X"73_6B_69_70_53_70_61_63_65_73_3A_20_72_65_61_64",
+
+-- L1092@01DC 64697265637442797465203D20272027.  directByte = ' ', if MDR_MATCHES_DB then skipSp;
+-- directByte = ' ', if MDR_MATCHES_DB then skipSp;
+476 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_27_20_27",
+
+-- L1093@01DD 64697265637442797465203D20307830.  directByte = 0x09, if MDR_MATCHES_DB then skipSp else return;
+-- directByte = 0x09, if MDR_MATCHES_DB then skipSp else return;
+477 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
+
+-- L1094@01DE 736B697053703A204250203C3D20696E.skipSp:  BP <= inc, if false then continue else skipSpaces;
+-- skipSp: BP <= inc, if false then continue else skipSpaces;
+478 => X"73_6B_69_70_53_70_3A_20_42_50_20_3C_3D_20_69_6E",
+
+-- L1096@01DF 6F7574426565703A206F757443524C46.outBeep:  outCRLF();
+-- outBeep: outCRLF();
+479 => X"6F_75_74_42_65_65_70_3A_20_6F_75_74_43_52_4C_46",
+
+-- L1097@01E0 74726163652863726C66293B20202020.  trace(crlf);
+-- trace(crlf);
+480 => X"74_72_61_63_65_28_63_72_6C_66_29_3B_20_20_20_20",
+
+-- L1098@01E1 64697265637442797465203D20307830.  directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
+-- directByte = 0x07, CHAROUT <= from_microcode, if false then continue else outChar;
+481 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
+
+-- L1100@01E2 6F757443524C463A2064697265637442.outCRLF:  directByte = 0x0D, outChar(from_microcode);
+-- outCRLF: directByte = 0x0D, outChar(from_microcode);
+482 => X"6F_75_74_43_52_4C_46_3A_20_64_69_72_65_63_74_42",
+
+-- L1101@01E3 64697265637442797465203D20307830.  directByte = 0x0A, CHAROUT <= from_microcode;
+-- directByte = 0x0A, CHAROUT <= from_microcode;
+483 => X"64_69_72_65_63_74_42_79_74_65_20_3D_20_30_78_30",
+
+-- L1102@01E4 6F7574436861723A2069662043484152.outChar:  if CHAROUT_READY then next else repeat;
+-- outChar: if CHAROUT_READY then next else repeat;
+484 => X"6F_75_74_43_68_61_72_3A_20_69_66_20_43_48_41_52",
+
+-- L1103@01E5 696620434841524F55545F5245414459.  if CHAROUT_READY then return else repeat;
+-- if CHAROUT_READY then return else repeat;
+485 => X"69_66_20_43_48_41_52_4F_55_54_5F_52_45_41_44_59",
+
+-- L1105@01E6 77726974655331363A20777269746543.writeS16:  writeCore(T, from_SLo), T <= dec;
+-- writeS16: writeCore(T, from_SLo), T <= dec;
+486 => X"77_72_69_74_65_53_31_36_3A_20_77_72_69_74_65_43",
+
+-- L1106@01E7 4D4152203C3D20542C204D4452203C3D.  MAR <= T, MDR <= from_SHi, T <= dec;
+-- MAR <= T, MDR <= from_SHi, T <= dec;
+487 => X"4D_41_52_20_3C_3D_20_54_2C_20_4D_44_52_20_3C_3D",
+
+-- L1107@01E8 7772697465436F72653A206E5752203D.writeCore:  nWR = 0;
+-- writeCore: nWR = 0;
+488 => X"77_72_69_74_65_43_6F_72_65_3A_20_6E_57_52_20_3D",
+
+-- L1108@01E9 6E5752203D20302C206966206E425553.  nWR = 0, if nBUSACK then repeat else return;
+-- nWR = 0, if nBUSACK then repeat else return;
+489 => X"6E_57_52_20_3D_20_30_2C_20_69_66_20_6E_42_55_53",
+
+-- L1110@01EA 72656164436F72653A206E5244203D20.readCore:  nRD = 0;
+-- readCore: nRD = 0;
+490 => X"72_65_61_64_43_6F_72_65_3A_20_6E_52_44_20_3D_20",
+
+-- L1111@01EB 6E5244203D20302C204D4452203C3D20.  nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
+-- nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
+491 => X"6E_52_44_20_3D_20_30_2C_20_4D_44_52_20_3C_3D_20",
+
+-- L1123@01EC 747261636542503A2045787053746163.traceBP:  ExpStack <= push_TWord, T <= BP, trace(from_microcode), directByte = 33;
+-- traceBP: ExpStack <= push_TWord, T <= BP, trace(from_microcode), directByte = 33;
+492 => X"74_72_61_63_65_42_50_3A_20_45_78_70_53_74_61_63",
+
+-- L1124@01ED 54203C3D20457870537461636B2C2045.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+-- T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+493 => X"54_20_3C_3D_20_45_78_70_53_74_61_63_6B_2C_20_45",
+
+-- L1126@01EE 7472616365593A20457870537461636B.traceY:  ExpStack <= push_TWord, T <= from_YLo, trace(from_microcode), directByte = 32;
+-- traceY: ExpStack <= push_TWord, T <= from_YLo, trace(from_microcode), directByte = 32;
+494 => X"74_72_61_63_65_59_3A_20_45_78_70_53_74_61_63_6B",
+
+-- L1127@01EF 54203C3D20457870537461636B2C2045.  T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+-- T <= ExpStack, ExpStack <= pop2, if true then return else continue;
+495 => X"54_20_3C_3D_20_45_78_70_53_74_61_63_6B_2C_20_45",
+
+-- L1129@01F0 7472616365414C553A20747261636528.traceALU:  trace(crlf);
+-- traceALU: trace(crlf);
+496 => X"74_72_61_63_65_41_4C_55_3A_20_74_72_61_63_65_28",
+
+-- L1130@01F1 54203C3D20736176652C207472616365.  T <= save, trace(from_microcode), directByte = 52;
+-- T <= save, trace(from_microcode), directByte = 52;
+497 => X"54_20_3C_3D_20_73_61_76_65_2C_20_74_72_61_63_65",
+
+-- L1131@01F2 54203C3D2066726F6D5F532C20747261.  T <= from_S, trace(from_microcode), directByte = 52;
+-- T <= from_S, trace(from_microcode), directByte = 52;
+498 => X"54_20_3C_3D_20_66_72_6F_6D_5F_53_2C_20_74_72_61",
+
+-- L1132@01F3 54203C3D2066726F6D5F522C20747261.  T <= from_R, trace(from_microcode), directByte = 52;
+-- T <= from_R, trace(from_microcode), directByte = 52;
+499 => X"54_20_3C_3D_20_66_72_6F_6D_5F_52_2C_20_74_72_61",
+
+-- L1133@01F4 54203C3D2066726F6D5F5948692C2074.  T <= from_YHi, trace(from_microcode), directByte = 53;
+-- T <= from_YHi, trace(from_microcode), directByte = 53;
+500 => X"54_20_3C_3D_20_66_72_6F_6D_5F_59_48_69_2C_20_74",
+
+-- L1134@01F5 54203C3D2066726F6D5F594C6F2C2074.  T <= from_YLo, trace(from_microcode), directByte = 52;
+-- T <= from_YLo, trace(from_microcode), directByte = 52;
+501 => X"54_20_3C_3D_20_66_72_6F_6D_5F_59_4C_6F_2C_20_74",
+
+-- L1135@01F6 54203C3D20726563616C6C2C20444247.  T <= recall, DBGINDEX <= crlf;
+-- T <= recall, DBGINDEX <= crlf;
+502 => X"54_20_3C_3D_20_72_65_63_61_6C_6C_2C_20_44_42_47",
+
+-- L1136@01F7 74726163653A206966204442475F5245.trace:  if DBG_READY then next else repeat;
+-- trace: if DBG_READY then next else repeat;
+503 => X"74_72_61_63_65_3A_20_69_66_20_44_42_47_5F_52_45",
+
+-- L1137@01F8 6966204442475F524541445920746865.  if DBG_READY then next else repeat;
+-- if DBG_READY then next else repeat;
+504 => X"69_66_20_44_42_47_5F_52_45_41_44_59_20_74_68_65",
+
+-- L1138@01F9 444247494E444558203C3D207A65726F.  DBGINDEX <= zero, if true then return else continue;
 -- DBGINDEX <= zero, if true then return else continue;
-510 => X"44_42_47_49_4E_44_45_58_20_3C_3D_20_7A_65_72_6F",
+505 => X"44_42_47_49_4E_44_45_58_20_3C_3D_20_7A_65_72_6F",
+
+506 => X"20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
+
+507 => X"20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
+
+508 => X"20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
+
+509 => X"20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
+
+510 => X"20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20",
 
 511 => X"20_20_20_20_20_20_20_20_20_20_20_20_20_20_20_20");
 

@@ -167,7 +167,6 @@ alias FPU_CLK: std_logic is BB9;		-- yellow
 alias FPU_RESET: std_logic is BB10;	-- purple
 -- Am9511A FPU signals
 signal FPU_DB: std_logic_vector(7 downto 0);
-signal cnt_end, cnt_pause: std_logic_vector(11 downto 0);
 
 -- debug
 signal T, freqcnt_value: std_logic_vector(31 downto 0);
@@ -189,8 +188,9 @@ alias freq19200: std_logic is cnt307200(4);
 
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
-signal cpu_clk, sys_clk, sysclk_sel: std_logic;
+signal cpu_clk, sys_clk, clk_sel1, clk_sel0: std_logic;
 signal freq1kHz: std_logic;
+signal sys_sel: std_logic_vector(1 downto 0);
 
 -- single char UART output
 signal cpu_outchar_ready, cpu_outchar_send: std_logic;
@@ -237,6 +237,7 @@ begin
 	else
 		if (rising_edge(Am9511_clk)) then
 			reset_delay <= reset_delay(6 downto 0) & '1';
+			clk_sel1 <= clk_sel0;
 			FPU_nRD <= nRD;
 			FPU_nWR <= nWR;
 		end if;
@@ -261,7 +262,7 @@ BB1 <= FPU_DB(0);
 
 LDT1R <= not nWR;
 LDT1G <= not nRD;
-LDT1Y <= sysclk_sel;
+LDT1Y <= not nSel_FFFX;
 LDT2R <= cpu_cache_full;
 LDT2G <= cpu_cache_empty;
 LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
@@ -279,6 +280,20 @@ begin
 --		cnt4096 <= (others => '0');
 --	else
 		if (rising_edge(CLK)) then
+			-- FPU logic
+			nSel_FFFX_delayed <= nSel_FFFX;
+			if (nSel_FFFX = '0') then
+				if (nSel_FFFX_delayed = '1') then
+					-- switch system to use Am9511 clk for FPU operation
+					clk_sel0 <= '1';
+				end if;
+			else
+				if (nSel_FFFX_delayed = '0') then
+					-- switch system to use user selected clock frequency
+					clk_sel0 <= '0';
+				end if;
+			end if;
+			-- counters
 			cnt50MHz <= std_logic_vector(unsigned(cnt50MHz) + 1);
 			-- baudrate clock generation
 			if (prescale_baud = 0) then
@@ -301,21 +316,6 @@ begin
 			else
 				prescale_ms <= prescale_ms - 1;
 			end if;
-		end if;
-		if (falling_edge(CLK)) then
-			nSel_FFFX_delayed <= nSel_FFFX;
-			if (nSel_FFFX = '0') then
-				if (nSel_FFFX_delayed = '1') then
-					-- switch system to use Am9511 clk for FPU operation
-					sysclk_sel <= '1';
-				end if;
-			else
-				if (nSel_FFFX_delayed = '0') then
-					-- switch system to use user selected clock frequency
-					sysclk_sel <= '0';
-				end if;
-			end if;
-			--Am9511_nAccess <= nSel_FFFX or (not nSel_FFFX_delayed);
 		end if;
 --	end if;
 end process;
@@ -350,35 +350,14 @@ end process;
 		signal_debounced => dip
 	);
 
-on_FPU_nPause: process(FPU_nPause, reset)
-begin
-	if (reset = '1') then
-		cnt_pause <= (others => '0');
-	else
-		if (rising_edge(FPU_nPause)) then
-			cnt_pause <= std_logic_vector(unsigned(cnt_pause) + 1);
-		end if;
-	end if;
-end process;
-
-on_FPU_nEnd: process(FPU_nEnd, reset)
-begin
-	if (reset = '1') then
-		cnt_end <= (others => '0');
-	else
-		if (rising_edge(FPU_nEnd)) then
-			cnt_end <= std_logic_vector(unsigned(cnt_end) + 1);
-		end if;
-	end if;
-end process;
-
---Am9511_wait <= not (nSel_FFFX and Am9511_nWait);
---Am9511_nWait <= not (FPU_nPause and Am9511_wait);
-	
 --nBUSACK <= Am9511_wait when (nSel_FFFX = '0') else '0';
 nBUSACK <= (not FPU_nPause) when (nSel_FFFX = '0') else '0';
-sys_clk <= Am9511_clk when (sysclk_sel = '1') else cpu_clk;
---
+sys_sel <= clk_sel1 & clk_sel0;
+
+with sys_sel select sys_clk <=
+	cpu_clk when "00",
+	Am9511_clk when "11",
+	'1' when others;
 
 cpu: entity work.MicroBasic 
 		Generic map (

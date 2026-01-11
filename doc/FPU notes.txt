@@ -1,0 +1,115 @@
+rem https://hackaday.io/project/204482-cpu-running-basic
+rem ----------------------------------------------------
+
+rem Am9511 memory-mapped I/O access 
+rem -------------------------------
+rem 0xFFF0 ... 65520 ... read / write data
+rem 0xFFF4 ... 65524 ... read status / write command
+
+rem Basic statements for interfacing with Am9511 in Tiny Basic (extended)
+rem ---------------------------------------------------------------------
+rem let v=usr(22, 65520) ... read 32-bit value from FPU top of stack (4 bytes read in big endian order) into var v
+rem let v=usr(21, 65520) ... read 16-bit value from FPU top of stack (2 bytes read in big endian order) into var v
+rem let v=usr(26, 65520, v) ... write 32-bit value of var v to FPU top of stack (4 bytes write in big endian order)
+rem let v=usr(25, 65520, v) ... write 16-bit value of var v to FPU top of stack (2 bytes write in big endian order)
+rem poke 65524, <command>	... write 8-bit command
+rem let c=usr(24, 65524, c)	... write 8-bit command
+rem let s=peek(65524)		... read 8-bit status register
+rem let s=usr(20, 65524)	... read 8-bit status register
+rem if usr(3, s, 128) <> 0 then ... check for BUSY status bit 7
+rem if usr(3, s, 64) <> 0 then ... check for SIGN status bit 6
+rem if usr(3, s, 32) <> 0 then ... check for ZERO status bit 5
+rem if usr(3, s, 30) <> 0 then ... check for ERROR CODE status bits 4..1 
+rem if usr(3, s, 1) <> 0 then ... check for CARRY status bit 0 
+rem note: let v=usr(3, a, b) is equivalent to v = a & b (bitwise AND)
+ 
+rem 2^-1 to 2^9
+rem -----------------
+rem 0.500000000000000
+rem 0.250000000000000
+rem 0.125000000000000
+rem 0.062500000000000
+rem 0.031250000000000
+rem 0.015625000000000
+rem 0.007812500000000
+rem 0.003906250000000
+rem 0.001953125000000
+
+rem Some constants and their representation
+rem ---------------------------------------
+rem pi = 	02 C9 0F DA = 46731226
+rem 1.0 = 	01 80 00 00 = 25165824
+rem -1.0 = 	81 80 00 00 = -2122317824
+rem e =		02 AD F8 55 = 44995733
+rem 10.0 =	04 A0 00 00 = 77594624
+rem 0.1 = 	7D CC CC CC = 2110573772
+rem 2.0 = 	02 80 00 00 = 41943040
+rem log(2.0) = 	7F 9A 20 99 = 2140807321
+
+rem Detailed documentation:
+rem --------------------------------------
+rem https://github.com/z88dk/techdocs/tree/master/amd/am9511a
+
+rem AM9511 APU — COMMAND SUMMARY HEX(DECIMAL), execution time range in clock cycles
+rem ------------------------------------------------------------
+rem 16‑BIT FIXED‑POINT OPERATIONS
+rem ------------------------------------------------------------
+rem SADD   EC (236) / 6C (108)      16–18     Add TOS to NOS → NOS; pop stack
+rem SSUB   ED (237) / 6D (109)      30–32     Subtract TOS from NOS → NOS; pop stack
+rem SMUL   EE (238) / 6E (110)      84–94     Multiply NOS by TOS (lower) → NOS; pop stack
+rem SMUU   F6 (246) / 76 (118)      80–98     Multiply NOS by TOS (upper) → NOS; pop stack
+rem SDIV   EF (239) / 6F (111)      84–94     Divide NOS by TOS → NOS; pop stack
+
+rem ------------------------------------------------------------
+rem 32‑BIT FIXED‑POINT OPERATIONS
+rem ------------------------------------------------------------
+rem DADD   AC (172) / 2C (44)       20–22     Add TOS to NOS → NOS; pop stack
+rem DSUB   AD (173) / 2D (45)       38–40     Subtract TOS from NOS → NOS; pop stack
+rem DMUL   AE (174) / 2E (46)       194–210   Multiply NOS by TOS (lower) → NOS; pop stack
+rem DMUU   B6 (182) / 36 (54)       182–218   Multiply NOS by TOS (upper) → NOS; pop stack
+rem DDIV   AF (175) / 2F (47)       196–210   Divide NOS by TOS → NOS; pop stack
+
+rem ------------------------------------------------------------
+rem 32‑BIT FLOATING‑POINT PRIMARY OPERATIONS
+rem ------------------------------------------------------------
+rem FADD   90 (144) / 10 (16)       54–368    Add TOS to NOS → NOS; pop stack
+rem FSUB   91 (145) / 11 (17)       70–370    Subtract TOS from NOS → NOS; pop stack
+rem FMUL   92 (146) / 12 (18)       146–168   Multiply NOS by TOS → NOS; pop stack
+rem FDIV   93 (147) / 13 (19)       154–184   Divide NOS by TOS → NOS; pop stack
+
+rem ------------------------------------------------------------
+rem 32‑BIT FLOATING‑POINT DERIVED OPERATIONS
+rem ------------------------------------------------------------
+rem SQRT   81 (129) / 01 (1)        782–870       Square root of TOS → TOS
+rem SIN    82 (130) / 02 (2)        3796–4808     Sine(TOS) → TOS
+rem COS    83 (131) / 03 (3)        3840–4878     Cosine(TOS) → TOS
+rem TAN    84 (132) / 04 (4)        4894–5886     Tangent(TOS) → TOS
+rem ASIN   85 (133) / 05 (5)        6230–7938     Arcsine(TOS) → TOS
+rem ACOS   86 (134) / 06 (6)        6304–8284     Arccosine(TOS) → TOS
+rem ATAN   87 (135) / 07 (7)        4992–6536     Arctangent(TOS) → TOS
+rem LOG    88 (136) / 08 (8)        4474–7132     Common log(TOS) → TOS
+rem LN     89 (137) / 09 (9)        4298–6956     Natural log(TOS) → TOS
+rem EXP    8A (138) / 0A (10)       3794–4878     e^(TOS) → TOS
+rem PWR    8B (139) / 0B (11)       8290–12032    NOS^(TOS) → NOS; pop stack
+
+rem ------------------------------------------------------------
+rem DATA & STACK MANIPULATION OPERATIONS
+rem ------------------------------------------------
+rem NOP    80 (128) / 00 (0)        4            No operation; sets/clears SVREQ
+rem FIXS   9F (159) / 1F (31)       90–214       Float → 16‑bit fixed
+rem FIXD   9E (158) / 1E (30)       90–336       Float → 32‑bit fixed
+rem FLTS   9D (157) / 1D (29)       62–156       16‑bit fixed → float
+rem FLTD   9C (156) / 1C (28)       56–342       32‑bit fixed → float
+rem CHSS   F4 (244) / 74 (116)      22–24        Change sign (16‑bit fixed)
+rem CHSD   B4 (180) / 34 (52)       26–28        Change sign (32‑bit fixed)
+rem CHSF   95 (149) / 15 (21)       16–20        Change sign (float)
+rem PTOS   F7 (247) / 77 (119)      16           Push; duplicate NOS → TOS (16‑bit)
+rem PTOD   B7 (183) / 37 (55)       20           Push; duplicate NOS → TOS (32‑bit)
+rem PTOF   97 (151) / 17 (23)       20           Push; duplicate NOS → TOS (float)
+rem POPS   F8 (248) / 78 (120)      10           Pop stack (16‑bit)
+rem POPD   B8 (184) / 38 (56)       12           Pop stack (32‑bit)
+rem POPF   98 (152) / 18 (24)       12           Pop stack (float)
+rem XCHS   F9 (249) / 79 (121)      18           Exchange TOS/NOS (16‑bit)
+rem XCHD   B9 (185) / 39 (57)       26           Exchange TOS/NOS (32‑bit)
+rem XCHF   99 (153) / 19 (25)       26           Exchange TOS/NOS (float)
+rem PUPI   9A (154) / 1A (26)       16           Push floating constant 0x77 → TOS

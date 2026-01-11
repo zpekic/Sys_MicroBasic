@@ -1,5 +1,6 @@
 //ORIGINAL TINY BASIC INTERMEDIATE INTERPRETER
-// 
+// See: https://hackaday.io/project/204482-cpu-running-basic
+// Compile with: https://tiny-basic-online-utilities.lovable.app/
 // EXECUTIVE INITIALIZATION
 
 		.ORG 0			//reset sets IL_PC to 0

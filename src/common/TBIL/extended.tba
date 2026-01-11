@@ -1,5 +1,6 @@
 // EXTENDED TINY BASIC INTERMEDIATE INTERPRETER
 // See: https://hackaday.io/project/204482-cpu-running-basic
+// Compile with: https://tiny-basic-online-utilities.lovable.app/
 // EXECUTIVE INITIALIZATION
 
 	.ORG 0		//reset sets IL_PC to 0
@@ -52,14 +53,14 @@
 	JS EXPR			// yes, push it to stack
 	BR FORCHK
 :STEP1	LN 1			// push default step value 1
-:FORCHK	FS				// do FOR magic, FS will leave on stack Lino of next statement, which is either one after NEXT or one after FOR
+:FORCHK	FS			// do FOR magic, FS will leave on stack Lino of next statement, which is either one after NEXT or one after FOR
 	GO
 
 // next
 :NEXT	BC GOTO, "NEXT"
 	BV *			// enforce variable name that must follow NEXT
-	FE				// do NEXT magic
-	GO				// FE will leave line number of its FOR statement on stack, so go there for next iteration 
+	FE			// do NEXT magic
+	GO			// FE will leave line number of its FOR statement on stack, so go there for next iteration 
 	
 // GOTO/GOSUB
 :GOTO 	BC PRNT, "GO"
