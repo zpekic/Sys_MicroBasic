@@ -26,7 +26,7 @@ clear
 1020 next d
 1025 for d=0 to 7
 1030 	if @(d)>9 then goto 1040+(2*@(d))
-1040 	print d;
+1040 	print @(d);
 1045 	goto 1090
 1050 	end
 1060 	print "A";
