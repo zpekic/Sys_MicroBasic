@@ -221,6 +221,7 @@ signal cache_hit_alt_next_set, cache_valid_alt_for_set: std_logic;
 
 -- other
 signal T, T_saved: std_logic_vector(MSB downto 0);
+signal lfsr: std_logic_vector(15 downto 0) := X"FFFF";
 signal T_offset: std_logic_vector(15 downto 0);
 signal S0, S1, S2: std_logic_vector(MSB downto 0);
 signal tab_cnt: std_logic_vector(7 downto 0) := X"00";
@@ -633,12 +634,15 @@ begin
 			when T_index2address =>
 				T(MSB downto 16) <= (others => '0');
 				T(15 downto 0) <= std_logic_vector(unsigned(PrgEnd) + unsigned(T_offset));
-			when T_fromSize =>
+			when T_Core_End =>
 				-- TODO: CoreEnd should not be a constant!
 				T(MSB downto 16) <= (others => '0');
-				T(15 downto 0) <= std_logic_vector(unsigned(Core_End) - unsigned(PrgEnd));		
+				T(15 downto 0) <= Core_End;		
 			when T_from_microcode =>
 				T <= ZERO(MSB downto 7) & mb_directByte;
+			when T_from_lfsr =>
+				T(MSB downto 16) <= (others => '0');
+				T(15 downto 0) <= lfsr and X"7FFF";
 			when others =>
 				null;
 		end case;
@@ -942,6 +946,21 @@ end process;
 		lino_alu <= Lino;
 		if ((is_runmode = '1') and (lino_alu = X"0000")) then
 			cache_v <= (others => '0');
+			-- pseudo-random number seed
+			if (PrgEnd = X"0000") then
+				lfsr <= X"FFFF"; 
+			else
+				lfsr <= PrgEnd;	-- PrgEnd value changes at each Basic program edit 
+			end if;
+		else
+			-- generate another pseudo-random 16-bit value
+			lfsr(15) <= lfsr(0);
+			lfsr(14) <= lfsr(15);
+			lfsr(13) <= lfsr(14) xor lfsr(0);
+			lfsr(12) <= lfsr(13) xor lfsr(0);
+			lfsr(11) <= lfsr(12);
+			lfsr(10) <= lfsr(11) xor lfsr(0);
+			lfsr(9 downto 0) <= lfsr(10 downto 1);
 		end if;
 		case mb_alu is
 --			when alu_nop =>

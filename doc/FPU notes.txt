@@ -113,3 +113,4 @@ rem XCHS   F9 (249) / 79 (121)      18           Exchange TOS/NOS (16‑bit)
 rem XCHD   B9 (185) / 39 (57)       26           Exchange TOS/NOS (32‑bit)
 rem XCHF   99 (153) / 19 (25)       26           Exchange TOS/NOS (float)
 rem PUPI   9A (154) / 1A (26)       16           Push floating constant 0x77 → TOS
+rem ---------------------------------------------------------

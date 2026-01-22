@@ -34,13 +34,11 @@
 	US			//execute assignment
 	SP			//assigment was done so remove stack top to prevent stack overflow
 	BC LETEX, ","	//more assignments?
-	BR LETLP		//yes, back to loop	
-:LETDN	BE *            //IF STATEMENT END,
-	SV              //STORE RESULT
-	NX
+	BR LETLP	//yes, back to loop	
+:LETDN	SV            	//IF STATEMENT END, store result
+	NC              //and check if another statement after
 :FORI	BR FOR			//island to overcome branch extent limit
-:LETEX	BE *			//no, ensure we are at end of statement
-	NX
+:LETEX	NC			//check if another statement after
 
 // for
 :FOR	BC NEXT, "FOR"
@@ -83,7 +81,7 @@
 	BR P6           //IF DONE, GO TO END
 :P1   	BC P4, ";"
 :P2   	BE P3
-	NX              //NO CRLF IF ENDED BY ; OR ,
+	NX	        //NO CRLF IF ENDED BY ; OR ,
 :P3   	BC P7, '"'
 	PQ              //QUOTE MARKS STRING
 	BR P1           //GO CHECK DELIMITER
@@ -107,13 +105,13 @@
 	JS EXPR
 	BC I1, "THEN"   //OPTIONAL NOISEWORD
 :I1	CP              //COMPARE SKIPS NEXT IF TRUE
-	NX              //FALSE// 
+	NX	        //FALSE// 
 	BN THEN		//decimal number after THEN? 
 	SB		//yes, it is shortcut for GOTO
 	RB
 	GO 
 :THEN	J STMT          //TRUE// GO PROCESS STATEMENT
-		
+
 // INPUT
 :INPT 	BC POKE, "INPUT"
 	BC I2, '"'	//any prompt to print out first?
@@ -130,10 +128,9 @@
 :I5   	JS EXPR         //READ A NUMBER
 	SV              //STORE INTO VARIABLE
 	RB              //SWAP BACK
-	BC I6, ","      //ANOTHER?
+	BC I6, ","   	//ANOTHER?
 	BR I2           //YES IF COMMA
-:I6   	BE *            //OTHERWISE QUIT
-	NX
+:I6	NC		//OTHERWISE QUIT
 
 // POKE
 :POKE	BC RETN, "POKE"
@@ -143,7 +140,7 @@
 	JS EXPR		//byte value
 	US
 	SP		//drop usr() return value
-	NX
+	NC
 		
 // RETURN
 :RETN 	BC END, "RETURN"
@@ -238,35 +235,11 @@
 :T3   	RT
 
 //
-:FACT 		BC F0, "RND"    //*RND FUNCTION*
-		LN 257*128      //STACK POINTER FOR STORE
-		FV              //THEN GET RNDM
-		LN 2345         //R:=R*2345+6789
-		MP
-		LN 6789
-		AD
-		SV
-		LB 128          //GET IT AGAIN
-		FV
-		DS
-		JS FUNC         //GET ARGUMENT
-		BR F1
-:F0   		BR F2           //(SKIPPING)
-:F1   		DS
-		SX 2            //PUSH TOP INTO STACK
-		SX 4
-		SX 2
-		SX 3
-		SX 5
-		SX 3
-		DV              //PERFORM MOD FUNCTION
-		MP
-		SU
-:ABS		DS              //PERFORM ABS FUNCTION
-		LB 6		// magic binary number 110 means >=
-		LN 0
-		CP              //(SKIP IF + OR 0)
-		NE
+:FACT 		BC F2, "RND"    //*RND FUNCTION*
+		LN 18		//usr function that evaluated lfsr (linear feedback shift register)
+		LN 0 	        //dummy parameter
+		JS FUNC		//max value allowed
+		US
 		RT
 		
 :F2   		BC F2ABS, "PEEK"	// peek function
@@ -275,8 +248,13 @@
 		BR F2CONT
 
 :F2ABS		BC F2ARR, "ABS"
-		JS FUNC			//one parameter function
-		BR ABS			//go to ABS above
+		JS FUNC		//one parameter function
+		DS              //PERFORM ABS FUNCTION
+		LB 6		// magic binary number 110 means >=
+		LN 0
+		CP              //(SKIP IF + OR 0)
+		NE
+		RT
 		
 :F2ARR		BC F2SIZE, "@"	//get from @() array?
 		LN 30			//PEEK16 or PEEK32, but with address = (2 or 4) * index + PrgEnd + 1
@@ -285,9 +263,12 @@
 		BR F2EXE
 
 :F2SIZE		BC F2USR, "SIZE"	//size function with no params?
-		LN 29			//yes,function index
-		LN 0			//dummy parameter
-		BR F2CONT		//push another dummy and execute
+		LN 19			//RAM ("core") end address
+		JS USR00		//execute with dummy params
+		LN 29			//Basic program end address
+		JS USR00
+		SU			//Difference is the number of free bytes
+		RT
 		
 :F2USR		BC F3, "USR"    //*USR FUNCTION*
 		BC *, "("       //3 ARGUMENTS POSSIBLE
@@ -297,7 +278,11 @@
 		BC *, ")"
 :F2EXE		US              //GO DO IT
 		RT
-		
+
+:USR00		LN 0
+		LN 0
+		BR F2EXE
+
 :F3   	BV F4           //VARIABLE?
 	FV              //YES//  GET IT
 	RT

@@ -299,6 +299,7 @@ begin
 			if (prescale_baud = 0) then
 				cnt307200 <= std_logic_vector(unsigned(cnt307200) + 1);
 				prescale_baud <= (50000000 / 307200) - 1;
+--				prescale_baud <= (50000000 / 921600) - 1;
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
