@@ -144,10 +144,10 @@ signal inlend_max_alt_basline_found, inlend_min_alt_impline_empty, basline_found
 -- TODO: find the actual end of RAM instead of hard coding it here 
 signal Core_End: std_logic_vector(15 downto 0) := X"0FFF";			-- hard code to 4k (but can go up to 64k)
 
--- expression stack, 16 bytes == 8 words
+-- expression stack, 32 half-words / 16 words
 signal ExpStack: ram16xHalf;
-signal ExpSP: std_logic_vector(3 downto 0);			-- stack pointer points to free byte
-signal ExpSwapR, ExpSwapS: std_logic_vector(3 downto 0);	-- pointers used in SX IL instruction
+signal ExpSP: std_logic_vector(4 downto 0);			-- stack pointer points to free byte
+signal ExpSwapR, ExpSwapS: std_logic_vector(4 downto 0);	-- pointers used in SX IL instruction
 signal estack_is_full, estack_is_empty: std_logic;
 signal SwapR, SwapS: std_logic_vector(MSB_HALF downto 0);
 signal ExpSTHi, ExpSTLo: std_logic_vector(MSB_HALF downto 0);
@@ -426,8 +426,8 @@ r_is_zero_16 <=		'1' when (R(15 downto 0) = X"0000") else '0';
 
 -- stack error conditions. Stack pointers point to first empty position. So if SP is 0 can't be pulled from, 
 -- and if full (7 or 15) then can't be pushed onto. 
-estack_is_full <= 	'1' when (ExpSP = X"F") else '0';
-estack_is_empty <=	'1' when (ExpSP = X"0") else '0';
+estack_is_full <= 	'1' when (ExpSP = "11111") else '0';
+estack_is_empty <=	'1' when (ExpSP = "00000") else '0';
 rstack_is_full	<=		'1' when (RetSP = X"F") else '0';
 rstack_is_empty <=	'1' when (RetSP = X"0") else '0';
 bstack_is_full	<=		'1' when (BasSP = X"F") else '0';

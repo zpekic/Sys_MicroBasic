@@ -143,10 +143,26 @@
 	NC
 		
 // RETURN
-:RETN 	BC END, "RETURN"
+:RETN 	BC PUSH, "RETURN"
 	BE *
 	RS              //RECOVER SAVED LINE
 	NX
+
+// PUSH
+:PUSH	BC POP, "PUSH"
+:PUSHNX	JS EXPR	
+	BC PPEND, ","	//more assignments?
+	BR PUSHNX	//yes, back to loop	
+:PPEND	NC
+
+// POP
+:POP	BC END, "POP"
+:POPNX	BV *		//at least one variable name
+	SX 2
+	SX 1		//variable name under the value on stack
+	SV		//pick value to variable
+	BC PPEND, ","	//more to pop?
+	BR POPNX
 
 // END
 :END  	BC LIST, "END"
