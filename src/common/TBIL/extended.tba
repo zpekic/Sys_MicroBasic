@@ -151,9 +151,9 @@
 // PUSH
 :PUSH	BC POP, "PUSH"
 :PUSHNX	JS EXPR	
-	BC PPEND, ","	//more assignments?
+	BC PHEND, ","	//more assignments?
 	BR PUSHNX	//yes, back to loop	
-:PPEND	NC
+:PHEND	NC
 
 // POP
 :POP	BC END, "POP"
@@ -163,6 +163,7 @@
 	SV		//pick value to variable
 	BC PPEND, ","	//more to pop?
 	BR POPNX
+:PPEND	NC
 
 // END
 :END  	BC LIST, "END"

@@ -362,8 +362,8 @@ with sys_sel select sys_clk <=
 
 cpu: entity work.MicroBasic 
 		Generic map (
-		 MSB => 15	-- 16-bit vars / arithmetic
-		 --MSB => 31	-- 32-bit vars / arithmetic
+		 --MSB => 15	-- 16-bit vars / arithmetic
+		 MSB => 31	-- 32-bit vars / arithmetic
 		)
 		Port map (
 		reset => RESET,

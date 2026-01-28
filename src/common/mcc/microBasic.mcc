@@ -1035,7 +1035,6 @@ bn_loop:	alu <= Yx10_plus_MDR, BP <= inc;
 			IL_PC <= pc_plus_off5, if OFF_IS_ZERO then SYNTAX_ERR else br_exit;		// jump destination (+ 31 locations)
 			
 BREAK:		gotChar = 1, traceString 55;
-			outBeep();
 			directByte = 'B', outChar(from_microcode);
 			directByte = 'R', outChar(from_microcode);
 			directByte = 'K', outChar(from_microcode);
@@ -1051,8 +1050,7 @@ RSTACK_ERR:		directByte = 59, DBGINDEX <= from_microcode, goto traceError;
 BSTACK_ERR:		directByte = 54, DBGINDEX <= from_microcode;
 traceError:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
 				if DBG_READY then next else repeat;
-				DBGINDEX <= zero, outBeep();
-				directByte = 'E', outChar(from_microcode);
+				DBGINDEX <= zero, directByte = 'E', outChar(from_microcode);
 				directByte = 'R', outChar(from_microcode);
 				directByte = 'R', outChar(from_microcode);
 traceDetails:	directByte = '#', outChar(from_microcode), T <= IL_PC;
@@ -1068,8 +1066,7 @@ print_lino:		directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
 				printDecR(R_fromT);
 				directByte = '.', outChar(from_microcode), T <= recall;		// T shadow was loaded with ms count of ticks
 				printDecR(R_fromT);
-err_done:		outCRLF();
-				trace(crlf);
+err_done:		outBeep();
 				clear, goto WarmStart2;
 
 findNextCR: readCore(T);
