@@ -200,6 +200,7 @@ signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul
 
 -- Basic line number
 signal Lino: std_logic_vector(15 downto 0) := X"0000";
+signal Lino_bcd: std_logic_vector(19 downto 0) := X"00000"; -- converted to BCD for tracer only
 signal is_runmode: std_logic;		-- 0 for commands, 1 for RUN
 -- GOTO cache lookup convenience
 alias Lino_index: std_logic_vector(4 downto 0) is Lino(4 downto 0);
@@ -1291,6 +1292,12 @@ debug_uipc <= ui_address;		-- output microinstruction program counter to show mi
 
 	debug_bus(31 downto 24) <= (traceEnable & is_runmode & "010000"); -- indicate "name.value" on LEDs
 
+-- 
+lino2bcd: entity work.bin2bcd_lut Port map ( 
+		bin => Lino,
+      bcd => Lino_bcd
+		);
+
 -- serial debug port
 tracer: entity work.serialtracer2 Port map (
 		reset => reset,
@@ -1317,7 +1324,7 @@ tracer: entity work.serialtracer2 Port map (
 		--X"87"
 		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
 		--X"88"..X"89"
-		data(47 downto 32) => Lino,
+		data(47 downto 32) => Lino_bcd(15 downto 0),
 		data(63 downto 48) => T(15 downto 0),
 		txd => debug_txd,
 		ready => DBG_READY
