@@ -868,7 +868,17 @@ stop_run:	directByte = 'S', outChar(from_microcode);
 			directByte = 'T', outChar(from_microcode);
 			directByte = 'O', outChar(from_microcode);
 			directByte = 'P', outChar(from_microcode);
-			goto print_lino;									
+print_lino:	directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
+			directByte = 'A', outChar(from_microcode), T <= from_S;
+			directByte = 'T', outChar(from_microcode), LS <= T;
+			directByte = ' ', outChar(from_microcode), T <= LS;
+			printDecR(R_fromT);
+			directByte = ' ', outChar(from_microcode), T <= fromTicks;	// load count of ticks (s) while Basic program was running
+			printDecR(R_fromT);
+			directByte = '.', outChar(from_microcode), T <= recall;		// T shadow was loaded with ms count of ticks
+			printDecR(R_fromT);
+err_done:	outBeep();
+			clear, goto WarmStart2;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2E;									// US (USR function call)
@@ -1056,18 +1066,7 @@ traceError:		if DBG_READY then next else repeat;	// sync with baudrate clock tha
 traceDetails:	directByte = '#', outChar(from_microcode), T <= IL_PC;
 				T <= dec;				// IL_PC is already on next instruction, so go back one for correctness
 				printDecR(R_fromT);
-				if IS_RUNMODE then next else err_done;
-print_lino:		directByte = ' ', outChar(from_microcode), alu <= S_fromLino;
-				directByte = 'A', outChar(from_microcode), T <= from_S;
-				directByte = 'T', outChar(from_microcode), LS <= T;
-				directByte = ' ', outChar(from_microcode), T <= LS;
-				printDecR(R_fromT);
-				directByte = ' ', outChar(from_microcode), T <= fromTicks;	// load count of ticks (s) while Basic program was running
-				printDecR(R_fromT);
-				directByte = '.', outChar(from_microcode), T <= recall;		// T shadow was loaded with ms count of ticks
-				printDecR(R_fromT);
-err_done:		outBeep();
-				clear, goto WarmStart2;
+				if IS_RUNMODE then print_lino else err_done;
 
 findNextCR: readCore(T);
 			directByte = CR, if MDR_MATCHES_DB then return;										// return with T pointing to CR

@@ -55,6 +55,36 @@ constant hex2ascii: rom16x8 := (
 	c('F')
 );
 
+constant bcd2bin: rom256x8 := (
+-- 00..09
+	X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 10..19
+	X"0A", X"0B", X"0C", X"0D", X"0E", X"0F", X"10", X"11", X"12", X"13", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 20..29
+	X"14", X"15", X"16", X"17", X"18", X"19", X"1A", X"1B", X"1C", X"1D", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 30..39
+	X"1E", X"1F", X"20", X"21", X"22", X"23", X"24", X"25", X"26", X"27", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 40..49
+	X"28", X"29", X"2A", X"2B", X"2C", X"2D", X"2E", X"2F", X"30", X"31", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 50..59
+	X"32", X"33", X"34", X"35", X"36", X"37", X"38", X"39", X"3A", X"3B", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 60..69
+	X"3C", X"3D", X"3E", X"3F", X"40", X"41", X"42", X"43", X"44", X"45", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 70..79
+	X"46", X"47", X"48", X"49", X"4A", X"4B", X"4C", X"4D", X"4E", X"4F", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 80..89
+	X"50", X"51", X"52", X"53", X"54", X"55", X"56", X"57", X"58", X"59", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- 90..99
+	X"5A", X"5B", X"5C", X"5D", X"5E", X"5F", X"60", X"61", X"62", X"63", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+-- invalid
+	X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+	X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+	X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+	X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+	X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF",
+	X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF", X"FF"
+);
+
 constant bin2bcd: rom256x8 := (
 -- 000..099
 	X"00", X"01", X"02", X"03", X"04", X"05", X"06", X"07", X"08", X"09",

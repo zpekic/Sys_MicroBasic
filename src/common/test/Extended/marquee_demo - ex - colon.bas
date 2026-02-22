@@ -19,11 +19,10 @@ clear
 
 3000 rem paint screen for character c and mask m/2
 3010 for y= 7 to 0 step -1
-3015 	let b=a+(64*y), p=peek(8*z+y-4096)
+3015 	let b=a+(64*y), p=peek(8*z+y-32768)
 3020 	let x=0
 3030 	if x<63 then goto 3040
-3031 	let d=z
-3032 	if usr(3, p, m)=0 then let d=32
+3032 	let d=z : if usr(3, p, m)=0 then let d=32
 3035 	poke b+63, d : goto 3065
 3040 	poke b+x, peek(b+x+1)
 3050 	let x=x+1 : goto 3030

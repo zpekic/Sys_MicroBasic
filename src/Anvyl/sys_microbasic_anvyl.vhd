@@ -63,15 +63,16 @@ entity sys_microbasic_anvyl is
 				JB4: out std_logic;
 				JB7: in std_logic;
 				JB8: in std_logic;
-				-- not used
-				JD1: in std_logic;
-				JD2: in std_logic;
+				-- DS1302
+				JD1: out std_logic;
+				JD2: out std_logic;
 				JD3: in std_logic;
-				JD4: in std_logic;
-				JD7: in std_logic;
-				JD8: in std_logic;
-				JD9: in std_logic;
-				JD10: in std_logic;
+				JD4: inout std_logic;
+				-- PropScope
+				JD7: out std_logic;
+				JD8: out std_logic;
+				JD9: out std_logic;
+				JD10: out std_logic;
 				--PMOD interface (Aux UART)
 				JE1: inout std_logic;
 				JE2: inout std_logic;
@@ -140,9 +141,9 @@ signal ram: memory;
 signal nBUSREQ, nBUSACK, nRD, nWR, RESET: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
-signal pattern, memData, data: std_logic_vector(7 downto 0); 
+signal pattern, data: std_logic_vector(7 downto 0); 
 signal reset_delay: std_logic_vector(7 downto 0) := X"00"; 
-signal nSel_0XXX, nSel_FFFX, nSel_FFFX_delayed: std_logic;
+signal nSel_FFFX, nSel_FFFX_delayed: std_logic;
 signal nSel_FFFX_sel: std_logic_vector(1 downto 0);
 
 -- Connect to PmodUSBUART 
@@ -168,6 +169,12 @@ alias FPU_RESET: std_logic is BB10;	-- purple
 -- Am9511A FPU signals
 signal FPU_DB: std_logic_vector(7 downto 0);
 
+-- DS1302 Real Time Clock (serial)
+signal ds1302_nSel: std_logic := '1';
+signal ds1302_busy: std_logic := '0';
+signal ds1302_data: std_logic_vector(7 downto 0);
+signal RTC_CE, RTC_SCLK, RTC_IO: std_logic;
+
 -- debug
 signal T, freqcnt_value: std_logic_vector(31 downto 0);
 signal cpu_debug: std_logic_vector(31 downto 0);
@@ -182,7 +189,8 @@ signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
 signal cnt50MHz: std_logic_vector(11 downto 0); -- 12 bit counter driven by 100MHz
 alias vga_clk: std_logic is cnt50MHz(1);
-alias Am9511_clk: std_logic is cnt50MHz(5);
+alias Am9511_clk: std_logic is cnt50MHz(5);		-- 1.5625MHz
+alias ds1302_clk: std_logic is cnt50MHz(10);		-- 48.8kHz
 signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
 alias freq19200: std_logic is cnt307200(4);
 
@@ -258,11 +266,21 @@ BB4 <= FPU_DB(3);
 BB3 <= FPU_DB(2);
 BB2 <= FPU_DB(1);
 BB1 <= FPU_DB(0);
---
+
+-- DS1302 connections
+JD1 <= RTC_CE;
+JD2 <= RTC_SCLK;
+JD4 <= RTC_IO;
+
+-- PropScope connections
+JD7 <= RTC_CE;
+JD8 <= RTC_SCLK;
+JD9 <= JD4;
+JD10 <= ds1302_busy;
 
 LDT1R <= not nWR;
 LDT1G <= not nRD;
-LDT1Y <= not nSel_FFFX;
+LDT1Y <= not nBUSACK;
 LDT2R <= cpu_cache_full;
 LDT2G <= cpu_cache_empty;
 LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
@@ -351,8 +369,8 @@ end process;
 		signal_debounced => dip
 	);
 
---nBUSACK <= Am9511_wait when (nSel_FFFX = '0') else '0';
-nBUSACK <= (not FPU_nPause) when (nSel_FFFX = '0') else '0';
+--nBUSACK <= (not FPU_nPause) when (nSel_FFFX = '0') else '0';
+--nBUSACK <= ((not FPU_nPause) and (not nSel_FFFX)) or ((not ds1302_ready) and (nSel_RTC));
 sys_sel <= clk_sel1 & clk_sel0;
 
 with sys_sel select sys_clk <=
@@ -401,6 +419,24 @@ cpu: entity work.MicroBasic
 		debug_bus => cpu_debug			
 	);
 
+-- Real time clock based on DS1302 chip
+rtc: entity work.ds1302 port map (
+		-- processor bus
+		reset => RESET,
+		clk => ds1302_clk,
+		nCE => ds1302_nSel,
+		nRD => nRD,
+		nWR => nWR,
+		DI => D,
+		DO => ds1302_data,
+		A => A(5 downto 0),
+		BUSY => ds1302_busy,
+		-- module connections
+		CE => RTC_CE,
+		SCLK => RTC_SCLK,
+		IO => RTC_IO
+	);
+	
 -- ROM containing the IL language instructions (2 versions of Tiny Basic interpreter)
 il_rom: entity work.tbil port map ( 
 		extended => dip_extended,
@@ -412,18 +448,30 @@ il_rom: entity work.tbil port map (
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nBUSACK or nWR or nSel_0XXX) = '0') then 
+		if ((nBUSACK or nWR or A(15)) = '0') then 
 			ram(to_integer(unsigned(A(11 downto 0)))) <= D;
 		end if;
 	end if;
 end process;
 
--- Data bus input MUX
-nSel_0XXX <= '0' when (A(15 downto 12) = X"0") else '1';
 nSel_FFFX <= '0' when (A(15 downto 4) = X"FFF") else '1';
-memData <= ram(to_integer(unsigned(A(11 downto 0)))) when (nSel_0XXX = '0') else pattern;
-data <= (BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1) when (nSel_FFFX = '0') else memData;
+ds1302_nsel <= '0' when (A(15 downto 13) = "110") else '1';
+
+-- Data bus input MUX
+with A(15 downto 13) select data <=
+	pattern when "100",													-- CHARGEN
+	pattern when "101",													-- CHARGEN
+	ds1302_data when "110",												-- RTC
+	BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1 when "111",-- FPU
+	ram(to_integer(unsigned(A(11 downto 0)))) when others;	-- RAM 0XX
+
 D <= data when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
+
+--nBUSACK <= ((not FPU_nPause) and (not nSel_FFFX)) or ((not ds1302_ready) and (nSel_RTC));
+with A(15 downto 13) select nBUSACK <=
+	ds1302_busy			when "110",										-- RTC
+	not FPU_nPause		when "111",										-- FPU
+	'0'					when others;									-- RAM/CHARGEN 
 
 -- Character generator ROM handy for the marquee demo
 chargen: entity work.chargen_rom port map (
