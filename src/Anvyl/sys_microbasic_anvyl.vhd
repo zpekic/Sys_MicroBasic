@@ -69,10 +69,10 @@ entity sys_microbasic_anvyl is
 				JD3: in std_logic;
 				JD4: inout std_logic;
 				-- PropScope
-				JD7: out std_logic;
-				JD8: out std_logic;
-				JD9: out std_logic;
-				JD10: out std_logic;
+				--JD7: out std_logic;
+				--JD8: out std_logic;
+				--JD9: out std_logic;
+				--JD10: out std_logic;
 				--PMOD interface (Aux UART)
 				JE1: inout std_logic;
 				JE2: inout std_logic;
@@ -273,10 +273,10 @@ JD2 <= RTC_SCLK;
 JD4 <= RTC_IO;
 
 -- PropScope connections
-JD7 <= RTC_CE;
-JD8 <= RTC_SCLK;
-JD9 <= JD4;
-JD10 <= ds1302_busy;
+--JD7 <= RTC_CE;
+--JD8 <= RTC_SCLK;
+--JD9 <= JD4;
+--JD10 <= ds1302_busy;
 
 LDT1R <= not nWR;
 LDT1G <= not nRD;
