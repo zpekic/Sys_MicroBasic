@@ -184,6 +184,7 @@ signal debug_txd: std_logic;
 signal cpu_t: std_logic_vector(15 downto 0);
 signal cpu_cache_full, cpu_cache_empty: std_logic;
 signal cpu_uipc: std_logic_vector(8 downto 0);		-- microcode program counter value
+signal fill_count: integer range 255 downto 0;		-- match RAM_DEPTH for FIFO
 
 signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
@@ -369,8 +370,6 @@ end process;
 		signal_debounced => dip
 	);
 
---nBUSACK <= (not FPU_nPause) when (nSel_FFFX = '0') else '0';
---nBUSACK <= ((not FPU_nPause) and (not nSel_FFFX)) or ((not ds1302_ready) and (nSel_RTC));
 sys_sel <= clk_sel1 & clk_sel0;
 
 with sys_sel select sys_clk <=
@@ -455,22 +454,21 @@ begin
 end process;
 
 nSel_FFFX <= '0' when (A(15 downto 4) = X"FFF") else '1';
-ds1302_nsel <= '0' when (A(15 downto 13) = "110") else '1';
+ds1302_nsel <= '0' when (A(15 downto 12) = X"E") else '1';
 
--- Data bus input MUX
-with A(15 downto 13) select data <=
-	pattern when "100",													-- CHARGEN
-	pattern when "101",													-- CHARGEN
-	ds1302_data when "110",												-- RTC
-	BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1 when "111",-- FPU
-	ram(to_integer(unsigned(A(11 downto 0)))) when others;	-- RAM 0XX
+-- Data bus input MUX, memory map in 4k increments
+with A(15 downto 12) select data <=
+	ram(to_integer(unsigned(A(11 downto 0)))) when X"0",		-- Dual-port RAM
+	pattern when X"D",													-- CHARGEN
+	ds1302_data when X"E",												-- RTC
+	BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1 when X"F",	-- FPU
+	X"FF" when others;													-- future expansion
 
 D <= data when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 
---nBUSACK <= ((not FPU_nPause) and (not nSel_FFFX)) or ((not ds1302_ready) and (nSel_RTC));
-with A(15 downto 13) select nBUSACK <=
-	ds1302_busy			when "110",										-- RTC
-	not FPU_nPause		when "111",										-- FPU
+with A(15 downto 12) select nBUSACK <=
+	ds1302_busy			when X"E",										-- RTC
+	not FPU_nPause		when X"F",										-- FPU
 	'0'					when others;									-- RAM/CHARGEN 
 
 -- Character generator ROM handy for the marquee demo
@@ -495,7 +493,7 @@ with sw_cpuclk select cpu_clk <=
 leds: entity work.sixdigitsevensegled port map ( 
 			  -- inputs
 			  data => cpu_debug(23 downto 0),
---			  data => (cnt_pause & cnt_end),
+--			  data => (X"0000" & std_logic_vector(to_unsigned(fill_count, 8))),
 			  digsel => cnt4096(6 downto 4),
            showdigit => "111111",
 			  showdot => cpu_debug(29 downto 24),
@@ -516,9 +514,27 @@ begin
 		end if;
 	end if;
 end process;
-	
+	 
 -- UART connection to the host
-txdout: entity work.uart_par2ser Port map (
+--txdout: entity work.uart_par2ser_fifo
+--		generic map (
+--			FIFO_DEPTH => 256
+--		)
+--		Port map (
+--			reset => reset,
+--			clk => CLK,
+--			txd_clk => baudrate_x1,
+--			send => cpu_outchar_send,
+--			mode => "000", -- no parity, extra stop bit
+--			data => cpu_outchar,
+--			ready => cpu_outchar_ready,
+--			txd => PMOD_RXD0,
+--			-- debug
+--			fill_count => open
+--		);
+
+txdout: entity work.uart_par2ser
+			Port map (
 			reset => reset,
 			txd_clk => baudrate_x1,
 			send => cpu_outchar_send,
@@ -526,8 +542,8 @@ txdout: entity work.uart_par2ser Port map (
 			data => cpu_outchar,
          ready => cpu_outchar_ready,
          txd => PMOD_RXD0
-		);
-
+			);
+		
 rxdinp: entity work.uart_ser2par Port map (
 			reset => reset,
 			rxd_clk => baudrate_x4,

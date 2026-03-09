@@ -25,7 +25,7 @@ clear
 3000 rem paint screen for character c and mask m/2
 3010 let y=7
 3015 let b=a+(64*y)
-3016 let p=usr(e, 8*z+y-4096)
+3016 let p=usr(e, 8*z+y+53248)
 3020 let x=0
 3030 if x<63 then goto 3040
 3031 let d=z

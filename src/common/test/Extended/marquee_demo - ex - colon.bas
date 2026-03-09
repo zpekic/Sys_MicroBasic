@@ -6,8 +6,7 @@ clear
 160 print "Found marquee string at ";f;", press CTRL/C to end demo"
 165 let a=1536 
 170 let c=f+1
-175 let z=peek(c)
-177 if z = 93 then 170
+175 let z=peek(c) : if z = 93 then 170
 180 gosub 2000
 190 let c=c+1 : goto 175
 
@@ -19,7 +18,7 @@ clear
 
 3000 rem paint screen for character c and mask m/2
 3010 for y= 7 to 0 step -1
-3015 	let b=a+(64*y), p=peek(8*z+y-32768)
+3015 	let b=a+(64*y), p=peek(8*z+y+53248): rem chargen at 0xD000 
 3020 	let x=0
 3030 	if x<63 then goto 3040
 3032 	let d=z : if usr(3, p, m)=0 then let d=32

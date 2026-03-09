@@ -42,7 +42,7 @@ end uart_par2ser;
 
 architecture Behavioral of uart_par2ser is
 
-signal bitSel: std_logic_vector(3 downto 0);
+signal bitSel, lastBit: std_logic_vector(3 downto 0);
 signal bitClk, p_bit, parity: std_logic;
 signal char: std_logic_vector(7 downto 0);
 
@@ -91,6 +91,9 @@ begin
 	--end if;
 end process;
 
+-- small optimization: wrap around at 12 when no parity, 13 when parity is used
+lastBit <= X"D";-- when (mode(2) = '1') else X"C";
+
 -- note that when going from 1111 to 0000 this counter shuts itself off, waits for send pulse
 on_bitclk: process(reset, bitClk)
 begin
@@ -98,7 +101,7 @@ begin
 		bitSel <= (others => '0');
 	else
 		if (rising_edge(bitClk)) then
-			if (bitSel = X"D") then
+			if (bitSel = lastBit) then
 				bitSel <= (others => '0');
 			else
 				bitSel <= std_logic_vector(unsigned(bitSel) + 1);
