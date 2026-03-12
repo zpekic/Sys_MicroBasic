@@ -20,6 +20,7 @@ constant BS: std_logic_vector(7 downto 0) := X"08";
 constant CR: std_logic_vector(7 downto 0) := X"0D";
 constant LF: std_logic_vector(7 downto 0) := X"0A";
 constant CARET: std_logic_vector(7 downto 0) := X"5E"; -- ^, used for escaping control characters
+constant SQBR_OPEN: std_logic_vector(7 downto 0) := X"5B"; -- [, ^[ is "escape" useful for VT-100 etc
 
 impure function c(char: in character) return std_logic_vector;
 

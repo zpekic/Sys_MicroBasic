@@ -21,6 +21,14 @@ clear
 205 	let v= usr(22, 65520) : gosub 9400
 210 next i
 220 end
+300 rem ---------------------------------
+301 rem CPU clock (MHz) Time (s, one-way GOTO cache)
+302 rem ---------------------------------
+303 rem	6.25	4.869
+304 rem 12.5	2.728
+305 rem 25.0	1.646
+306 rem 100.0	0.837
+309 rem ---------------------------------
 
 9000 rem print var v as 8-digit hex value
 9001 push d, v, h

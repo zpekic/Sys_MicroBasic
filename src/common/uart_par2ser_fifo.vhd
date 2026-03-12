@@ -52,8 +52,9 @@ architecture Behavioral of uart_par2ser_fifo is
 signal bitSel: std_logic_vector(3 downto 0);
 signal p_bit, parity: std_logic;
 -- FIFO signals
-signal char: std_logic_vector(7 downto 0);
+signal char, data_out: std_logic_vector(7 downto 0);
 signal rd_en, rd_valid, disable, full, full_next: std_logic;
+signal rd_cnt: std_logic_vector(15 downto 0);	-- lame way to generate a single pulse
 
 begin
 
@@ -74,7 +75,7 @@ fifo: entity work.ring_buffer
     -- Read port
     rd_en => rd_en,
     rd_valid => rd_valid,
-    rd_data => char,
+    rd_data => data_out,
   
     -- Flags
     empty => open,
@@ -86,9 +87,35 @@ fifo: entity work.ring_buffer
     fill_count => fill_count
   );
 
-disable <= not rd_valid;				-- if not valid, force "mark" level
+on_clk: process(clk, bitSel)
+begin
+	if (bitSel /= X"1") then
+		rd_cnt <= (others => '0');		-- count only during txd bit 1
+	else
+		if (rising_edge(clk)) then 
+			rd_cnt <= std_logic_vector(unsigned(rd_cnt) + 1);
+			if (rd_cnt = X"0000") then
+				rd_en <= '1';
+			else
+				rd_en <= '0';
+			end if;
+		end if;
+	end if;
+end process;
+
+on_rd_valid: process(data_out, rd_valid, bitSel)
+begin
+	if (bitSel = X"0") then
+		char <= (others => '0');	-- reset during txd bit 0
+	else
+		if (rising_edge(rd_valid)) then 
+			char <= data_out;
+		end if;
+	end if;
+end process;
+
+disable <= '1' when (char = X"00") else '0';			-- if not valid, force "mark" level
 ready <= not (full or full_next);
-rd_en <= '0' when (bitSel = X"0") else '1';	-- generate read pulse for the FIFO
 
 --
 parity <= char(7) xor (char(6) xor (char(5) xor (char(4) xor (char(3) xor (char(2) xor (char(1) xor (char(0) xor mode(0))))))));

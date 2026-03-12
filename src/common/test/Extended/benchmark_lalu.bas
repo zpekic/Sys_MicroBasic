@@ -1,3 +1,4 @@
+clear
 100 REM	-------------------------------------
 101 REM	Simple benchmark - find primes < 1000
 102 REM See http://www.mtmscientific.com/lalu.html

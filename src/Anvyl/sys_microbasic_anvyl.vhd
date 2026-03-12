@@ -380,7 +380,8 @@ with sys_sel select sys_clk <=
 cpu: entity work.MicroBasic 
 		Generic map (
 		 --MSB => 15	-- 16-bit vars / arithmetic
-		 MSB => 31	-- 32-bit vars / arithmetic
+		 MSB => 31,		-- 32-bit vars / arithmetic
+		 Core_End => X"0FFF"	-- 4k, can be up to 64k
 		)
 		Port map (
 		reset => RESET,
@@ -518,7 +519,7 @@ end process;
 -- UART connection to the host
 --txdout: entity work.uart_par2ser_fifo
 --		generic map (
---			FIFO_DEPTH => 256
+--			FIFO_DEPTH => 16
 --		)
 --		Port map (
 --			reset => reset,

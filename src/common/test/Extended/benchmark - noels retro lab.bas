@@ -1,3 +1,4 @@
+clear
 10 for i=1 to 10
 20 let s=0
 30 for j=1 to 1000
