@@ -3,11 +3,15 @@ new
 2 REM Mandelbrot - Q8 fixed point, Enhanced Micro-Basic 2.2
 3 REM Q8: 1.0=256  2.0=512  -2.5=-640
 4 REM Escape: |z|^2 > 4  =>  P+Q > 1024
-5 REM =========================================================================================================
+5 REM == CPU f (MHz)	Single-cache time (s)	Double-cache time (s)	==
+6 REM == 6.25		1266.929		??			==
+7 REM == 12.5		639.929			??			==
+8 REM == 25.0		326.430			??			==
+9 REM == 100.0		91.305			??			==
+10 REM ===================================================================
 20 let W=79, H=79, M=20
 30 let A=-640, B=256, E=-275, F=275
-40 let U=(B-A)/W
-50 let V=(F-E)/H
+40 let U=(B-A)/W, V=(F-E)/H
 60 FOR K=0 TO H
 70   let D=F-(K*V)
 80   FOR J=0 TO W
@@ -21,9 +25,7 @@ new
 140    	IF (P+Q)>1024 THEN 210      :REM WHILE... DO loop  B
 150    	let T=P-Q+C
 160    	let G=X, N=Y:GOSUB 1000
-170    	let Y=R+R+D
-180    	let X=T
-190    	let I=I+1 : GOTO 110
+170    	let Y=R+R+D, X=T, I=I+1 : GOTO 110
 210    	let O=USR(3, I, 7): REM O=I&7 END BOTH WHILE... Loops
 215    	REM *** This is similar to a switch() case
 220	goto O*10+300
@@ -54,14 +56,10 @@ new
 470 REM Uses: S (sign), L (|G|), Z (|N|), R (temp al*bl)
 480 REM Does NOT touch: A B C D E F I J K M O P Q T U V W X Y
 490 REM =====================================================
-1000 rem S=(G<0)<>(N<0)  :REM After here we look at numbers as unsigned, we just need to know the sign for the end result
+1000 REM After here we look at numbers as unsigned, we just need to know the sign for the end result
 1001 let S=1: if G<0 then let S=-1
 1002 if N<0 then let S=-S
-1010 L=ABS(G)
-1020 Z=ABS(N)
-1030 rem R=(L&255)*(Z&255)
+1010 let L=ABS(G), Z=ABS(N)
 1031 let R=usr(3, L, 255)*usr(3, Z, 255)
-1040 rem R=(L>>8)*(Z>>8)*256+(L>>8)*(Z&255)+(L&255)*(Z>>8)+(R>>8)
-1041 let r=((L/256)*(Z/256)*256)+((L/256)*usr(3, Z, 255))+(usr(3, L, 255)*(Z/256))+(R/256)
-1050 let R=S*R
-1060 RETURN
+1041 let R=((L/256)*(Z/256)*256)+((L/256)*usr(3, Z, 255))+(usr(3, L, 255)*(Z/256))+(R/256)
+1050 let R=S*R : RETURN

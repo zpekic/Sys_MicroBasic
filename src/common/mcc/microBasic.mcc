@@ -483,17 +483,11 @@ push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack, go to 2r
 			// traceLino;
 			T <= Cache_Data, if CACHE_VALID then go_cvalid;		// load T with assumed "good" cached data
 			// INVALID: the cache entry is free, find target and store in cache (and stay there until end of run)
-			findLino(Prog_start);
+go_cmiss:	findLino(Prog_start);
 			alu <= cache_store, goto fetch;	// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
 			
 go_cvalid:	BP <= T, if CACHE_HIT then fetch else go_cmiss;
-			// VALID HIT: pick it up and use it
-			//BP <= T, goto fetch;
-
-			// VALID MISS: other GOTO already used the entry, no attempt to kick it out, take the perf penalty
-go_cmiss:	findLino(Prog_start);			
-			goto fetch;
-			
+		
 findLino:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
 			alu <= S_fromLino, readCore(T);

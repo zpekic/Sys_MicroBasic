@@ -211,15 +211,19 @@ alias Lino_tag: std_logic_vector(10 downto 0) is Lino(15 downto 5);
 signal cnt_tick, cnt_tick1000: std_logic_vector(15 downto 0);
 signal lino_tick: std_logic_vector(15 downto 0);
 
--- GOTO cache
-signal cache: ram32x32;
-signal cache_v: std_logic_vector(31 downto 0) := (others => '0');
+-- GOTO cache - 2-way, 32 entries
+signal cache_0, cache_1: ram32x32;
+signal cache_v0, cache_v1: std_logic_vector(31 downto 0) := (others => '0');
 signal lino_alu: std_logic_vector(15 downto 0);
-signal cache_entry: std_logic_vector(31 downto 0);
-alias cache_tag: std_logic_vector(10 downto 0) is cache_entry(15 downto 5); 
-alias cache_data: std_logic_vector(15 downto 0) is cache_entry(31 downto 16);
-signal cache_hit, cache_valid: std_logic;
+signal cache_entry0, cache_entry1: std_logic_vector(31 downto 0);
+alias cache_tag0: std_logic_vector(10 downto 0) is cache_entry0(15 downto 5); 
+alias cache_data0: std_logic_vector(15 downto 0) is cache_entry0(31 downto 16);
+alias cache_tag1: std_logic_vector(10 downto 0) is cache_entry1(15 downto 5); 
+alias cache_data1: std_logic_vector(15 downto 0) is cache_entry1(31 downto 16);
+signal cache_hit0, cache_valid0: std_logic;
+signal cache_hit1, cache_valid1: std_logic;
 signal cache_hit_alt_next_set, cache_valid_alt_for_set: std_logic;
+signal cache_empty0, cache_empty1, cache_full0, cache_full1: std_logic;
 
 -- other
 signal T, T_saved: std_logic_vector(MSB downto 0);
@@ -236,12 +240,23 @@ signal s_equ_db_mod32: std_logic;
 
 begin
 
--- GOTO cache
-cache_empty <= '1' when (cache_v = X"00000000") else '0';	-- all 32 entries free
-cache_full <= '1' when (cache_v = X"FFFFFFFF") else '0';		-- all 32 entries used
-cache_entry <= cache(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
-cache_hit <= '1' when (cache_tag = Lino_tag) else '0';
-cache_valid <= cache_v(to_integer(unsigned(Lino_index)));
+-- GOTO cache, way 0
+cache_empty0 <= '1' when (cache_v0 = X"00000000") else '0';		-- all 32 entries free
+cache_full0 <= '1' when (cache_v0 = X"FFFFFFFF") else '0';		-- all 32 entries used
+cache_entry0 <= cache_0(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
+cache_valid0 <= cache_v0(to_integer(unsigned(Lino_index)));
+cache_hit0 <= '1' when (cache_tag0 = Lino_tag) else '0';
+
+-- GOTO cache, way 1
+cache_empty1 <= '1' when (cache_v1 = X"00000000") else '0';		-- all 32 entries free
+cache_full1 <= '1' when (cache_v1 = X"FFFFFFFF") else '0';		-- all 32 entries used
+cache_entry1 <= cache_1(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
+cache_valid1 <= cache_v1(to_integer(unsigned(Lino_index)));
+cache_hit1 <= '1' when (cache_tag1 = Lino_tag) else '0';
+
+-- GOTO cache outputs for fun
+cache_empty <= cache_empty0 and cache_empty1;
+cache_full <= cache_full0 and cache_full1;
 
 -- Basic variable store
 var_name <= X"7F" and std_logic_vector(unsigned(vars_index) + X"40");
@@ -395,8 +410,8 @@ cp_skip <= (T(CP_OFF + 2) and s_gt_r) or (T(CP_OFF + 1) and s_equ_r) or (T(CP_OF
 y_zero_alt_cp_skip <= cp_skip when (IL_OP = OP_CP) else y_zero;
 
 -- GOTO cache and FOR/NEXT
-cache_valid_alt_for_set <= cache_valid when (IL_OP = OP_GO) else for_set;
-cache_hit_alt_next_set <= cache_hit when (IL_OP = OP_GO) else next_set;
+cache_valid_alt_for_set <= (cache_valid0 or cache_valid1) when (IL_OP = OP_GO) else for_set;
+cache_hit_alt_next_set <= ((cache_hit0 and cache_valid0) or (cache_hit1 and cache_valid1)) when (IL_OP = OP_GO) else next_set;
 
 -- other conditional codes
 mdr_matches_ilcodebyte_alt_varname <= mdr_matches_varname when (IL_OP = OP_FS) else mdr_matches_ilcodebyte;
@@ -424,7 +439,6 @@ s_equ_db_mod32 <=		'1' when (S(4 downto 0) = mb_directByte(4 downto 0)) else '0'
 -- for divide instruction check full R to prevent divide by 0, for other operations R is memory address or line number (16 bit)
 r_is_zero_full <= 	'1' when (R = ZERO) else '0';
 r_is_zero_16 <=		'1' when (R(15 downto 0) = X"0000") else '0';					
-
 
 -- stack error conditions. Stack pointers point to first empty position. So if SP is 0 can't be pulled from, 
 -- and if full (7 or 15) then can't be pushed onto. 
@@ -606,7 +620,18 @@ begin
 				T(15 downto 0) <= BasStack(to_integer(unsigned(BasSP) - 1))(15 downto 0);
 			when T_Cache_Data =>
 				T(MSB downto 16) <= (others => '0');
-				T(15 downto 0) <= cache_data;
+				if ((cache_valid0 and cache_hit0) = '1') then
+					-- HIT in way 0
+					T(15 downto 0) <= cache_data0;
+				else
+					if ((cache_valid1 and cache_hit1) = '1') then
+						-- HIT in way 1
+						T(15 downto 0) <= cache_data1;
+					else
+						-- MISS
+						T(15 downto 0) <= (others => '0');
+					end if;
+				end if;
 			when T_LS =>
 				T(MSB downto 16) <= (others => '0');
 				T(15 downto 0) <= LS;
@@ -947,7 +972,8 @@ end process;
 		-- clear cache valid bits at start of run (when Lino goes from 0 to some valid Basic line number)
 		lino_alu <= Lino;
 		if ((is_runmode = '1') and (lino_alu = X"0000")) then
-			cache_v <= (others => '0');
+			cache_v0 <= (others => '0');
+			cache_v1 <= (others => '0');
 			-- pseudo-random number seed
 			if (PrgEnd = X"0000") then
 				lfsr <= X"FFFF"; 
@@ -1170,8 +1196,17 @@ end process;
 			when alu_Y_recall => 
 				Y <= Y_saved;
 			when alu_cache_store =>
-				cache(to_integer(unsigned(Lino_index))) <= BP & Lino;
-				cache_v(to_integer(unsigned(Lino_index))) <= '1';
+				if (cache_valid0 = '0') then
+					-- first try to store to way 0
+					cache_0(to_integer(unsigned(Lino_index))) <= BP & Lino;
+					cache_v0(to_integer(unsigned(Lino_index))) <= '1';
+				else
+					if (cache_valid1 = '0') then
+						-- and then to way 1
+						cache_1(to_integer(unsigned(Lino_index))) <= BP & Lino;
+						cache_v1(to_integer(unsigned(Lino_index))) <= '1';
+					end if;
+				end if;
 			when alu_for_check =>
 				if (t_minus_s = ZERO) then
 					alu_ready <= '1';
