@@ -398,8 +398,8 @@ badop:		goto INTERNAL_ERR;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 28;
 lb_push:	traceString 3, T <= codeByte;
-			ExpStack <= push_TByte;
-			IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else fetch;
+			ExpStack <= push_TByte, traceString 51;
+			IL_PC <= inc, if STACK_IS_FULL then ESTACK_ERR else fetch1;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0A;									// LN (Push literal word onto stack)
@@ -451,9 +451,9 @@ push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack, go to 2r
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 37;								// trace mnemonic
 			if STACK_IS_EMPTY then ESTACK_ERR;
-			T <= ExpStack, ExpStack <= pop2;			// pop T from stack
+			T <= ExpStack, ExpStack <= pop2, traceString 51;	// pop T from stack
 			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR;
-			ExpStack <= pop1, Vars <= T, goto fetch;	// Vars(index) <= T and remove used stack entry
+			ExpStack <= pop1, Vars <= T, goto fetch1;			// Vars(index) <= T and remove used stack entry
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x14;									// GS (GoSub - save Basic line for RETURN later)

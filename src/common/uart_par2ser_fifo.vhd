@@ -32,7 +32,7 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity uart_par2ser_fifo is
   generic (
-    FIFO_DEPTH : natural
+    ADDR_WIDTH : natural
   );
     Port ( reset : in  STD_LOGIC;
 			  clk: in STD_LOGIC;
@@ -41,81 +41,56 @@ entity uart_par2ser_fifo is
 			  mode: in STD_LOGIC_VECTOR(2 downto 0);
 			  data: in STD_LOGIC_VECTOR(7 downto 0);
            ready : out STD_LOGIC;
-           txd : out  STD_LOGIC;
-			  -- debug
-			  fill_count: out integer range FIFO_DEPTH - 1 downto 0
+           txd : out  STD_LOGIC
 			  );
 end uart_par2ser_fifo;
 
 architecture Behavioral of uart_par2ser_fifo is
 
 signal bitSel: std_logic_vector(3 downto 0);
-signal p_bit, parity: std_logic;
+signal p_bit, parity, disable: std_logic;
+signal char: std_logic_vector(7 downto 0);
 -- FIFO signals
-signal char, data_out: std_logic_vector(7 downto 0);
-signal rd_en, rd_valid, disable, full, full_next: std_logic;
-signal rd_cnt: std_logic_vector(15 downto 0);	-- lame way to generate a single pulse
+signal rdata: std_logic_vector(7 downto 0);
+signal rd, rempty, full: std_logic;
 
 begin
 
--- Output FIFO (from https://vhdlwhiz.com/ring-buffer-fifo/)
-fifo: entity work.ring_buffer
-  generic map(
-    RAM_WIDTH => 8,
-    RAM_DEPTH => FIFO_DEPTH
-  )
-  port map(
-    clk => clk,
-    rst => reset,
-  
-    -- Write port
-    wr_en =>  send,
-    wr_data =>  data,
-  
-    -- Read port
-    rd_en => rd_en,
-    rd_valid => rd_valid,
-    rd_data => data_out,
-  
-    -- Flags
-    empty => open,
-    empty_next => open,
-    full => full,
-    full_next => full_next,
-  
-    -- The number of elements in the FIFO
-    fill_count => fill_count
-  );
+-- Output FIFO (from https://github.com/surangamh/asynchronous-fifo/blob/master/README.md)
+fifo: entity work.asynchronous_fifo
+		generic map (
+			AWIDTH => ADDR_WIDTH,
+			DWIDTH => 8
+		)
+		port map (
+        wclk => clk,
+        wrst_n => (not reset),
+        wdata => data,
+        winc => send,
+        wfull => full,
+        rclk => txd_clk,
+        rrst_n => (not reset),
+        rdata => rdata,
+        rinc => rd,
+        rempty => rempty,
+        waddr => open,
+        raddr => open
+    );
 
-on_clk: process(clk, bitSel)
+rd <= '1' when (bitSel(3 downto 1) = X"1") else '0';	
+ready <= not full;
+
+on_rd: process(reset, rdata, txd_clk, rd)
 begin
-	if (bitSel /= X"1") then
-		rd_cnt <= (others => '0');		-- count only during txd bit 1
+	if (reset = '1') then
+		disable <= '1';
 	else
-		if (rising_edge(clk)) then 
-			rd_cnt <= std_logic_vector(unsigned(rd_cnt) + 1);
-			if (rd_cnt = X"0000") then
-				rd_en <= '1';
-			else
-				rd_en <= '0';
-			end if;
+		if (falling_edge(txd_clk) and (rd = '1')) then
+			disable <= rempty;
+			char <= rdata;
 		end if;
 	end if;
 end process;
-
-on_rd_valid: process(data_out, rd_valid, bitSel)
-begin
-	if (bitSel = X"0") then
-		char <= (others => '0');	-- reset during txd bit 0
-	else
-		if (rising_edge(rd_valid)) then 
-			char <= data_out;
-		end if;
-	end if;
-end process;
-
-disable <= '1' when (char = X"00") else '0';			-- if not valid, force "mark" level
-ready <= not (full or full_next);
 
 --
 parity <= char(7) xor (char(6) xor (char(5) xor (char(4) xor (char(3) xor (char(2) xor (char(1) xor (char(0) xor mode(0))))))));

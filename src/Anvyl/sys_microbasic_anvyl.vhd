@@ -504,34 +504,33 @@ leds: entity work.sixdigitsevensegled port map (
 			  segment(7) => DP,
 			  segment(6 downto 0) => SEG
 			 );	 			 
+			 
 -- simple character echo / loopback
-on_rxd_ready: process(RXD_READY, RXD_CHAR, reset)
-begin
-	if (reset = '1') then
-		T <= (others => '0');
-	else
-		if (rising_edge(RXD_READY)) then
-			T <= T(23 downto 0) & RXD_CHAR; 
-		end if;
-	end if;
-end process;
-	 
+--on_rxd_ready: process(RXD_READY, RXD_CHAR, reset)
+--begin
+--	if (reset = '1') then
+--		T <= (others => '0');
+--	else
+--		if (rising_edge(RXD_READY)) then
+--			T <= T(23 downto 0) & RXD_CHAR; 
+--		end if;
+--	end if;
+--end process;
+
 -- UART connection to the host
 --txdout: entity work.uart_par2ser_fifo
 --		generic map (
---			FIFO_DEPTH => 16
+--			ADDR_WIDTH => 4	-- 16 entry deep FIFO
 --		)
 --		Port map (
 --			reset => reset,
---			clk => CLK,
+--			clk => sys_clk,
 --			txd_clk => baudrate_x1,
 --			send => cpu_outchar_send,
 --			mode => "000", -- no parity, extra stop bit
 --			data => cpu_outchar,
 --			ready => cpu_outchar_ready,
---			txd => PMOD_RXD0,
---			-- debug
---			fill_count => open
+--			txd => PMOD_RXD0
 --		);
 
 txdout: entity work.uart_par2ser
