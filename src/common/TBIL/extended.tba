@@ -173,7 +173,7 @@
 // LIST
 :LIST 	BC RUN, "LIST"
 	BE L2
-:L1   	PC "@^@^@^@^J^@^" 	//PUNCH LEADER
+:L1   	PC "@^J^@^"	 	//PUNCH LEADER
 	LS              	//LIST
 	PC "S^"         	//PUNCH X-OFF
 	NL
@@ -252,19 +252,27 @@
 :T3   	RT
 
 //
-:FACT 		BC F2, "RND"    //*RND FUNCTION*
+:FACT		BC FPEEK, "USR"	//*USR FUNCTION*
+		BC *, "("       //3 ARGUMENTS POSSIBLE
+		JS EXPR         //ONE REQUIRED
+		JS ARG
+		JS ARG
+		BC *, ")"
+		US              //GO DO IT
+		RT
+
+:FPEEK   	BC FRND, "PEEK"	// peek function
+		LN 20		// peek is usr(20, param, param), always PEEK8
+		JS FUNC
+		J F2CONT
+
+:FRND 		BC FABS, "RND"  //*RND FUNCTION*
 		LN 18		//usr function that evaluated lfsr (linear feedback shift register)
 		LN 0 	        //dummy parameter
 		JS FUNC		//max value allowed
-		US
-		RT
-		
-:F2   		BC F2ABS, "PEEK"	// peek function
-		LN 20			// peek is usr(20, param, param), always PEEK8
-		JS FUNC
-		BR F2CONT
+		BR F2EXE
 
-:F2ABS		BC F2ARR, "ABS"
+:FABS		BC FARR, "ABS"
 		JS FUNC		//one parameter function
 		DS              //PERFORM ABS FUNCTION
 		LB 6		// magic binary number 110 means >=
@@ -272,33 +280,24 @@
 		CP              //(SKIP IF + OR 0)
 		NE
 		RT
-		
-:F2ARR		BC F2SIZE, "@"	//get from @() array?
-		LN 30			//PEEK16 or PEEK32, but with address = (2 or 4) * index + PrgEnd + 1
-		JS FUNC			//array index
-:F2CONT		LN 0			//dummy
-		BR F2EXE
-
-:F2SIZE		BC F2USR, "SIZE"	//size function with no params?
-		LN 19			//RAM ("core") end address
-		JS USR00		//execute with dummy params
-		LN 29			//Basic program end address
-		JS USR00
-		SU			//Difference is the number of free bytes
-		RT
-		
-:F2USR		BC F3, "USR"    //*USR FUNCTION*
-		BC *, "("       //3 ARGUMENTS POSSIBLE
-		JS EXPR         //ONE REQUIRED
-		JS ARG
-		JS ARG
-		BC *, ")"
-:F2EXE		US              //GO DO IT
-		RT
 
 :USR00		LN 0
-		LN 0
-		BR F2EXE
+		BR F2CONT
+		
+:FARR		BC FFREE, "@"	//get from @() array?
+		LN 30		//PEEK16 or PEEK32, but with address = (2 or 4) * index + PrgEnd + 1
+		JS FUNC		//array index
+:F2CONT		LN 0		//dummy
+:F2EXE		US
+		RT
+
+:FFREE		BC F3, "FREE"	//size function with no params?
+		LN 19		//RAM ("core") end address
+		JS USR00	//execute with dummy params
+		LN 29		//Basic program end address
+		JS USR00
+		SU		//Difference is the number of free bytes
+		RT
 
 :F3   	BV F4           //VARIABLE?
 	FV              //YES//  GET IT

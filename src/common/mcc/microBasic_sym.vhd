@@ -1999,16 +1999,16 @@ constant mb_symbol_entry: t_mb_symbol_entry := (
 -- writeCore: nWR = 0;
 487 => X"77_72_69_74_65_43_6F_72_65_3A_20_6E_57_52_20_3D",
 
--- L1116@01E8 6E5752203D20302C206966206E425553.  nWR = 0, if nBUSACK then repeat else return;
--- nWR = 0, if nBUSACK then repeat else return;
-488 => X"6E_57_52_20_3D_20_30_2C_20_69_66_20_6E_42_55_53",
+-- L1116@01E8 6E5752203D20302C206966206E524541.  nWR = 0, if nREADY then repeat else return;
+-- nWR = 0, if nREADY then repeat else return;
+488 => X"6E_57_52_20_3D_20_30_2C_20_69_66_20_6E_52_45_41",
 
 -- L1118@01E9 72656164436F72653A206E5244203D20.readCore:  nRD = 0;
 -- readCore: nRD = 0;
 489 => X"72_65_61_64_43_6F_72_65_3A_20_6E_52_44_20_3D_20",
 
--- L1119@01EA 6E5244203D20302C204D4452203C3D20.  nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
--- nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
+-- L1119@01EA 6E5244203D20302C204D4452203C3D20.  nRD = 0, MDR <= from_Bus, if nREADY then repeat else return;
+-- nRD = 0, MDR <= from_Bus, if nREADY then repeat else return;
 490 => X"6E_52_44_20_3D_20_30_2C_20_4D_44_52_20_3C_3D_20",
 
 -- L1131@01EB 747261636542503A2045787053746163.traceBP:  ExpStack <= push_TWord, T <= BP, trace(from_microcode), directByte = 33;

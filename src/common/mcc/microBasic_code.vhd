@@ -41,7 +41,7 @@ alias mb_nRD: 	std_logic is mb_uinstruction(78);
 ---- End boilerplate code
 
 --
--- L0017.seq_cond: .if 5 values true, ILCODEBYTE_BIT7, CHAROUT_READY, IS_CPU32, DBG_READY | KBD_BREAK, MDR_MATCHES_DB, nBUSACK, INLEND_MAX | BASLINE_FOUND, INLEND_MIN | IMPLINE_EMPTY, CHARIN_PRINTABLE, CHARIN_EQU_DB, CHARIN_READY, BP_IN_INPLINE, SVP_IN_INPLINE, MDR_IS_NUM, MDR_IS_ALPHA, STACK_IS_FULL, STACK_IS_EMPTY, MDR_MATCHES_ILCODEBYTE | MDR_MATCHES_VARNAME, R_IS_ZERO, Y_ZERO   | CP_SKIP, Y_SIGN, ALU_READY  | LS_PARAMS_OK, ALU_OVERFLOW  | LS_PASSED_END, ALU_SIGN  | LS_IN_RANGE, AT_TAB, OFF_IS_ZERO, IS_RUNMODE, S_EQU_DB_MOD32, CACHE_VALID  | FOR_SET, CACHE_HIT  | NEXT_SET, false default true;
+-- L0017.seq_cond: .if 5 values true, ILCODEBYTE_BIT7, CHAROUT_READY, IS_CPU32, DBG_READY | KBD_BREAK, MDR_MATCHES_DB, nREADY, INLEND_MAX | BASLINE_FOUND, INLEND_MIN | IMPLINE_EMPTY, CHARIN_PRINTABLE, CHARIN_EQU_DB, CHARIN_READY, BP_IN_INPLINE, SVP_IN_INPLINE, MDR_IS_NUM, MDR_IS_ALPHA, STACK_IS_FULL, STACK_IS_EMPTY, MDR_MATCHES_ILCODEBYTE | MDR_MATCHES_VARNAME, R_IS_ZERO, Y_ZERO   | CP_SKIP, Y_SIGN, ALU_READY  | LS_PARAMS_OK, ALU_OVERFLOW  | LS_PASSED_END, ALU_SIGN  | LS_IN_RANGE, AT_TAB, OFF_IS_ZERO, IS_RUNMODE, S_EQU_DB_MOD32, CACHE_VALID  | FOR_SET, CACHE_HIT  | NEXT_SET, false default true;
 --
 alias mb_seq_cond: 	std_logic_vector(4 downto 0) is mb_uinstruction(77 downto 73);
 constant seq_cond_true: 	integer := 0;
@@ -51,7 +51,7 @@ constant seq_cond_IS_CPU32: 	integer := 3;
 constant seq_cond_DBG_READY: 	integer := 4;
 constant seq_cond_KBD_BREAK: 	integer := 4;
 constant seq_cond_MDR_MATCHES_DB: 	integer := 5;
-constant seq_cond_nBUSACK: 	integer := 6;
+constant seq_cond_nREADY: 	integer := 6;
 constant seq_cond_INLEND_MAX: 	integer := 7;
 constant seq_cond_BASLINE_FOUND: 	integer := 7;
 constant seq_cond_INLEND_MIN: 	integer := 8;
@@ -94,7 +94,7 @@ constant seq_cond_false: 	integer := 31;
 --  cond(seq_cond_IS_CPU32) => IS_CPU32,
 --  cond(seq_cond_DBG_READY | KBD_BREAK) => DBG_READY | KBD_BREAK,
 --  cond(seq_cond_MDR_MATCHES_DB) => MDR_MATCHES_DB,
---  cond(seq_cond_nBUSACK) => nBUSACK,
+--  cond(seq_cond_nREADY) => nREADY,
 --  cond(seq_cond_INLEND_MAX | BASLINE_FOUND) => INLEND_MAX | BASLINE_FOUND,
 --  cond(seq_cond_INLEND_MIN | IMPLINE_EMPTY) => INLEND_MIN | IMPLINE_EMPTY,
 --  cond(seq_cond_CHARIN_PRINTABLE) => CHARIN_PRINTABLE,
@@ -3349,8 +3349,8 @@ constant mb_microcode: mb_code_memory := (
 --  nWR = 0, nRD = 1, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 000, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0;
 487 => '0' & '1' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & O"0" & "00000" & '0' & '0' & '0' & '0' & '0',
 
--- nWR = 0, if nBUSACK then repeat else return;
--- L1116@01E8 4C01017F000000000000.  nWR = 0, if nBUSACK then repeat else return;
+-- nWR = 0, if nREADY then repeat else return;
+-- L1116@01E8 4C01017F000000000000.  nWR = 0, if nREADY then repeat else return;
 --  nWR = 0, nRD = 1, if (00110) then 000000001 else 000000010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 000, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0;
 488 => '0' & '1' & "00110" & O"001" & O"002" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & O"0" & "00000" & '0' & '0' & '0' & '0' & '0',
 
@@ -3359,8 +3359,8 @@ constant mb_microcode: mb_code_memory := (
 --  nWR = 1, nRD = 0, if (00000) then 000000000 else 000000000, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 000, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 000, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0;
 489 => '1' & '0' & "00000" & O"000" & O"000" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"0" & "00" & O"0" & "00" & '0' & O"0" & "00000" & '0' & '0' & '0' & '0' & '0',
 
--- nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
--- L1119@01EA 8C01017F000000200000.  nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
+-- nRD = 0, MDR <= from_Bus, if nREADY then repeat else return;
+-- L1119@01EA 8C01017F000000200000.  nRD = 0, MDR <= from_Bus, if nREADY then repeat else return;
 --  nWR = 1, nRD = 0, if (00110) then 000000001 else 000000010, directByte = 1111111, T <= 00000, DBGINDEX <= 00, IL_PC <= 000, XQhere <= 0, IL_OP <= 0, RetStack <= 00, BasStack <= 00, ExpStack <= 000, CHAROUT <= 000, MAR <= 00, MDR <= 001, InlEnd <= 00, BP <= 000, SvPt <= 00, gotChar = 0, Vars <= 000, alu <= 00000, Lino <= 0, BE <= 0, LS <= 0, LE <= 0, PrgEnd <= 0;
 490 => '1' & '0' & "00110" & O"001" & O"002" & "1111111" & "00000" & "00" & O"0" & '0' & '0' & "00" & "00" & O"0" & O"0" & "00" & O"1" & "00" & O"0" & "00" & '0' & O"0" & "00000" & '0' & '0' & '0' & '0' & '0',
 

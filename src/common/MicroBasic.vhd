@@ -49,10 +49,11 @@ entity MicroBasic is
 			-- Intermediate language (IL) read-only memory
 			IL_A: out STD_LOGIC_VECTOR(10 downto 0);
 			IL_D: in STD_LOGIC_VECTOR(7 downto 0);
-			TB_EXTENDED: in STD_LOGIC;
+			--TB_EXTENDED: in STD_LOGIC;
 			-- Input line and Basic program memory (up to 64k)
-			nBUSREQ : out STD_LOGIC;
-			nBUSACK : in STD_LOGIC;
+			nBUSREQ : in STD_LOGIC;
+			nBUSACK : buffer STD_LOGIC;
+			nREADY: in STD_LOGIC;
 			nRD : out STD_LOGIC;
 			nWR : out STD_LOGIC;
 			ABUS: out STD_LOGIC_VECTOR(15 downto 0);
@@ -93,6 +94,8 @@ type ram32xFull is array (0 to 31) of std_logic_vector(MSB downto 0);
 -- control unit
 signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
 signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
+-- must match the location of the label of same name in the microcode for BUSREQ/BUSACK to work 
+constant CHKBUSREQ: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0) := "000001011";
 
 -- Intermediate language
 signal IL_PC, XQhere: std_logic_vector(10 downto 0);	-- 9 bits enough, but keep it compatible with other implementations
@@ -100,6 +103,7 @@ signal IL_OP: std_logic_vector(7 downto 0);				-- CPU instruction register
 alias IL_OFF5: std_logic_vector(4 downto 0) is IL_OP(4 downto 0);
 alias il_codeByte: std_logic_vector(7 downto 0) is IL_D;
 signal off_is_zero: std_logic;
+
 -- some IL opcodes that are useful to be known to hardware, not just the microcode
 constant OP_GS: std_logic_vector(7 downto 0) := X"14";	-- Go Subroutine (push to Basic return stack)
 constant OP_RS: std_logic_vector(7 downto 0) := X"15";	-- ReStore (pop from Basic return stack)
@@ -144,6 +148,7 @@ signal bp_in_inpline, svp_in_inpline: std_logic;
 signal InlEnd, LS, LE, PrgEnd: std_logic_vector(15 downto 0);
 signal inlend_max, inlend_min: std_logic;
 signal inlend_max_alt_basline_found, inlend_min_alt_impline_empty, basline_found, impline_empty: std_logic;
+signal nbusreq_alt_nready: std_logic;
 
 -- expression stack, 32 half-words / 16 words
 signal ExpStack: ram16xHalf;
@@ -236,7 +241,7 @@ signal ready_alt_break: std_logic;
 signal last3Chars: std_logic_vector(23 downto 0);
 signal is_notRnd: std_logic;
 signal s_equ_db_mod32: std_logic;
---signal cpu_freq: std_logic_vector(31 downto 0);
+signal busack_clk: std_logic;
 
 begin
 
@@ -268,12 +273,23 @@ for_set <= '0' when (BasicFor = X"0000") else for_v(var_address);
 next_set <= '0' when (BasicNext = X"0000") else next_v(var_address);
 
 -- Tristate system bus (64k address, bidirectional 8-bit data to Basic RAM "core")
-nRD <= mb_nRD;-- when (nBUSACK = '0') else 'Z';
-nWR <= mb_nWR;-- when (nBUSACK = '0') else 'Z';
--- if read or write request, pull nBUSREQ low, but wait until nBUSACK goes low to proceed
-nBUSREQ <= mb_nRD and mb_nWR;
+DBUS <= MDR when ((nBUSACK = '1') and (mb_nWR = '0')) else "ZZZZZZZZ";
+nRD <= mb_nRD when (nBUSACK = '1') else 'Z';
+nWR <= mb_nWR when (nBUSACK = '1') else 'Z';
+ABUS <= MAR when (nBUSACK = '1') else "ZZZZZZZZZZZZZZZZ";
 
-ABUS <= MAR;-- when (nBUSACK = '0') else "ZZZZZZZZZZZZZZZZ";
+busack_clk <= mb_nRD and mb_nWR and (not nBUSREQ);
+on_busackclk: process(reset, busack_clk)
+begin
+	if ((reset = '1') or (nBUSREQ = '1')) then
+		nBUSACK <= '1';
+	else
+		if (rising_edge(busack_clk)) then
+			nBUSACK <= '0';
+		end if;
+	end if;
+end process;
+
 update_MAR: process(clk, mb_MAR)
 begin
 	if (rising_edge(clk)) then
@@ -294,8 +310,6 @@ end process;
 
 is_notRnd <= '0' when (last3Chars = X"524E44") else '1';	-- magic number is ASCII for RND
  
---DBUS <= MDR when ((mb_nWR or nBUSACK) = '0') else "ZZZZZZZZ";
-DBUS <= MDR when (mb_nWR = '0') else "ZZZZZZZZ";
 update_MDR: process(clk, mb_MDR)
 begin
 	if (rising_edge(clk)) then
@@ -333,7 +347,7 @@ begin
 end process;
 
 -- IL program memory bus (2k address, 8-bit ready only input)
-IL_A <= IL_PC;
+	IL_A <= IL_PC;
 -- note that il_op is any data returned by this bus, at instruction fetch this is loaded to IL_OP
 -- which is the CPU 8-bit instruction register
 
@@ -363,7 +377,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_IS_CPU32) => IS_CPU32,
 			cond(seq_cond_DBG_READY) => ready_alt_break,
 			cond(seq_cond_MDR_MATCHES_DB) => mdr_matches_db,
-			cond(seq_cond_nBUSACK) => nBUSACK,
+			cond(seq_cond_NREADY) => (nREADY or (not nBUSACK)),
 			cond(seq_cond_INLEND_MAX) => inlend_max_alt_basline_found,
 			cond(seq_cond_INLEND_MIN) => inlend_min_alt_impline_empty,
 			cond(seq_cond_CHARIN_PRINTABLE) => charin_printable,
@@ -395,6 +409,7 @@ cu_mb: entity work.microbasic_control_unit
 		);
 
 -- few condition codes come from two very different sources, but we can always (?) differentiate
+
 -- simply ignore CTRL/C while the trace output is ongoing
 ready_alt_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
 

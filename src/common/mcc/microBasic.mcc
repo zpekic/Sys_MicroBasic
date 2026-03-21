@@ -21,7 +21,7 @@ seq_cond:		.if 5 values
 				IS_CPU32,				// 1 if Tiny Basic CPU uses 32-bit data
 				DBG_READY | KBD_BREAK,	// high if tracer has processed the trace character, or presence of CTRL/C in charin if not tracing
 				MDR_MATCHES_DB,		
-				nBUSACK,				   // low if memory is ready for read/write		
+				nREADY,				
 				INLEND_MAX	| BASLINE_FOUND,		
 				INLEND_MIN	| IMPLINE_EMPTY,		
 				CHARIN_PRINTABLE,		// ASCII code in range 0x20 .. 0x7E		
@@ -368,10 +368,10 @@ WarmStart:	clear, findPrgEnd();															// correct PrgEnd is needed for @(
 WarmStart2:	BP <= InLine_start, SvPt <= InLine_start, InlEnd <= InLine_start, T <= zero; 
 			Lino <= T, IL_PC <= T, write2Nulls(BP);											// kills input line
 			
-fetch:		traceString 51;											// CR, LF, then trace Basic line number (in hex, for speed)
+fetch:		traceString 51;											// CR, LF, then trace Basic line number
 fetch1:		traceString 2; 											// trace IL_PC and future opcode
 			IL_OP <= from_interpreter, IL_PC <= inc, traceSDepth;	// load opcode, advance IL_PC, indent by stack depth IL code if tracing is on
-			T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;	// jump to entry point implementing the opcode
+			T <= zero, alu <= reset0, if true then fork else INTERNAL_ERR;		// jump to entry point implementing the opcode
 			
 			.map 0b????????;							// opcode sink of last resort
 badop:		goto INTERNAL_ERR;
@@ -444,7 +444,7 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			traceString 36;								// trace mnemonic
 			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR; 	// get index (variable name A-Z)
 			T <= from_vars, ExpStack <= pop1;								// T <= Vars(index)
-push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack, go to 2rd fetch entry point as we overlapped 1 cycle
+push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x13;									// SV (Store Variable)
@@ -1113,10 +1113,10 @@ outChar:	if CHAROUT_READY then next else repeat;			// sync with baudrate clock
 writeS16:	writeCore(T, from_SLo), T <= dec;
 			MAR <= T, MDR <= from_SHi, T <= dec;
 writeCore:	nWR = 0;
-			nWR = 0, if nBUSACK then repeat else return;
+			nWR = 0, if nREADY then repeat else return;
 
 readCore:	nRD = 0;
-			nRD = 0, MDR <= from_Bus, if nBUSACK then repeat else return;
+			nRD = 0, MDR <= from_Bus, if nREADY then repeat else return;
 
 // 	Debug related subroutines
 //	---------------------------------------------------------------------------		

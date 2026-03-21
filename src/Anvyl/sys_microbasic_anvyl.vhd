@@ -134,11 +134,12 @@ architecture Structural of sys_microbasic_anvyl is
 -- IL Code
 signal il_a: std_logic_vector(10 downto 0); -- up to 2k supported
 signal il_d: std_logic_vector(7 downto 0);
+signal nIL: std_logic;
 
 -- stores Basic program and input line, everything else is custom registers inside CPU!
 type memory is array (0 to 4095) of std_logic_vector(7 downto 0);
 signal ram: memory;
-signal nBUSREQ, nBUSACK, nRD, nWR, RESET: std_logic;
+signal nREADY, nBUSACK, nRD, nWR, RESET: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
 signal pattern, data: std_logic_vector(7 downto 0); 
@@ -393,10 +394,12 @@ cpu: entity work.MicroBasic
 		-- Intermediate language (IL) read-only memory
 		IL_A => il_a,
 		IL_D => il_d,
-		TB_EXTENDED => dip_extended,
+		--nIL => nIL,
+		--TB_EXTENDED => dip_extended,
 		-- Basic code and command line memory
-		nBUSREQ => nBUSREQ,
+		nBUSREQ => (not button(1)),
 		nBUSACK => nBUSACK,
+		nREADY => nREADY,
 		nRD => nRD,
 		nWR => nWR,
 		ABUS => A,
@@ -441,14 +444,14 @@ rtc: entity work.ds1302 port map (
 il_rom: entity work.tbil port map ( 
 		extended => dip_extended,
 		a => il_a,
-		d => il_d 
+		d => il_d
 	);
 
 -- infer simple 4k RAM
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nBUSACK or nWR or A(15)) = '0') then 
+		if ((nREADY or nWR or A(15)) = '0') then 
 			ram(to_integer(unsigned(A(11 downto 0)))) <= D;
 		end if;
 	end if;
@@ -465,9 +468,9 @@ with A(15 downto 12) select data <=
 	BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1 when X"F",	-- FPU
 	X"FF" when others;													-- future expansion
 
-D <= data when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
+D <= data when ((nREADY or nRD) = '0') else "ZZZZZZZZ";
 
-with A(15 downto 12) select nBUSACK <=
+with A(15 downto 12) select nREADY <=
 	ds1302_busy			when X"E",										-- RTC
 	not FPU_nPause		when X"F",										-- FPU
 	'0'					when others;									-- RAM/CHARGEN 
