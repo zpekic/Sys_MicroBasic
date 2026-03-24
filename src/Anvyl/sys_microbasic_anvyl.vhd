@@ -139,7 +139,7 @@ signal nIL: std_logic;
 -- stores Basic program and input line, everything else is custom registers inside CPU!
 type memory is array (0 to 4095) of std_logic_vector(7 downto 0);
 signal ram: memory;
-signal nREADY, nBUSACK, nRD, nWR, RESET: std_logic;
+signal nREADY, nBUSACK, nRD, nWR, RESET, INTACK: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
 signal pattern, data: std_logic_vector(7 downto 0); 
@@ -280,12 +280,13 @@ JD4 <= RTC_IO;
 --JD9 <= JD4;
 --JD10 <= ds1302_busy;
 
-LDT1R <= not nWR;
-LDT1G <= not nRD;
-LDT1Y <= not nBUSACK;
-LDT2R <= cpu_cache_full;
-LDT2G <= cpu_cache_empty;
-LDT2Y <= not (cpu_cache_empty or cpu_cache_full);
+-- flash all lights when acknowledging interrupt
+LDT1R <= INTACK or (not nWR);
+LDT1G <= INTACK or (not nRD);
+LDT1Y <= INTACK or (not nBUSACK);
+LDT2R <= INTACK or (cpu_cache_full);
+LDT2G <= INTACK or (cpu_cache_empty);
+LDT2Y <= INTACK or (not (cpu_cache_empty or cpu_cache_full));
 
 PMOD_RXD1 <= debug_txd;
 LED <= RXD_CHAR when (button(2) = '0') else switch;
@@ -397,13 +398,15 @@ cpu: entity work.MicroBasic
 		--nIL => nIL,
 		--TB_EXTENDED => dip_extended,
 		-- Basic code and command line memory
-		nBUSREQ => (not button(1)),
+		nBUSREQ => '1',
 		nBUSACK => nBUSACK,
 		nREADY => nREADY,
 		nRD => nRD,
 		nWR => nWR,
 		ABUS => A,
 		DBUS => D,		
+		INT => button(1),
+		INTACK => INTACK,
 		-- output char
 		outchar => cpu_outchar,
 		outchar_send => cpu_outchar_send,

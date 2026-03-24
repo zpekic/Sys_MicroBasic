@@ -36,7 +36,7 @@ seq_cond:		.if 5 values
 				MDR_MATCHES_ILCODEBYTE | MDR_MATCHES_VARNAME,
 				R_IS_ZERO,
 				Y_ZERO			| CP_SKIP,
-				Y_SIGN,
+				Y_SIGN			| INTREQ,
 				ALU_READY		| LS_PARAMS_OK,
 				ALU_OVERFLOW 	| LS_PASSED_END,
 				ALU_SIGN		| LS_IN_RANGE,
@@ -144,7 +144,7 @@ ExpStack		.regfield 3 values
 				clear,
 				startSwap,
 				endSwap,
-				push_TWord,
+				push_TWord | push_intLino,
 				push_TByte,
 				pop2,
 				pop1
@@ -476,7 +476,7 @@ push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack
 			.map 0x16;									// GO (GOTO)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 45;								// Trace mnemonic
-			IL_PC <= XQhere, if STACK_IS_EMPTY then ESTACK_ERR;	// IL_PC <= XQhere, check stack
+go:			IL_PC <= XQhere, if STACK_IS_EMPTY then ESTACK_ERR;	// IL_PC <= XQhere, check stack
 			alu <= R_fromStack, ExpStack <= pop2;
 			T <= from_R;
 			Lino <= T, if R_IS_ZERO then NOPROG_ERR;			// once Lino is set, CACHE_HIT and CACHE_VALID are meaningful
@@ -563,7 +563,11 @@ nx_start:	IL_PC <= T, if IS_RUNMODE then next else fetch; // if in command mode,
 			Lino <= T, IL_PC <= XQhere;						// new current executing statement line number, and IL_PC at :XEC +2 
 			//traceLino;
 nx_cont:	traceBP();
-			if KBD_BREAK then BREAK else fetch;
+			//check for external interrupt
+			if INTREQ then next else nx_end; 
+nx_intack:	ExpStack <= push_intLino, BasStack <= push_Lino_and_BP, goto go;
+			//check for keyboard break
+nx_end:		if KBD_BREAK then BREAK else fetch;
 
 findNx:		findNextCR(BP);
 			T <= inc;

@@ -58,6 +58,8 @@ entity MicroBasic is
 			nWR : out STD_LOGIC;
 			ABUS: out STD_LOGIC_VECTOR(15 downto 0);
 			DBUS: inout STD_LOGIC_VECTOR(7 downto 0);
+			INT: in STD_LOGIC;
+			INTACK: out STD_LOGIC;
 			-- output char
 			outchar: out STD_LOGIC_VECTOR(7 downto 0);
 			outchar_send: buffer STD_LOGIC;
@@ -88,6 +90,7 @@ alias IS_CPU32: std_logic is BITCNT(4);																		-- '0' / '1'
 constant STEPCNT: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(MSB + 1, 8)); -- X"10" / X"20"
 constant BCDDIGITS: positive := (MSB + 9) / 4; 	-- 6 / 10
 constant CP_OFF: positive := MSB_HALF + 1;		-- 8 / 16
+constant LINO_INT: std_logic_vector(MSB downto 0) := std_logic_vector(to_unsigned(32512, MSB + 1));
 type ram16xHalf is array (0 to 15) of std_logic_vector(MSB_HALF downto 0);
 type ram32xFull is array (0 to 31) of std_logic_vector(MSB downto 0);
 
@@ -110,6 +113,8 @@ constant OP_RS: std_logic_vector(7 downto 0) := X"15";	-- ReStore (pop from Basi
 constant OP_GO: std_logic_vector(7 downto 0) := X"16";	-- GO (to)
 constant OP_DV: std_logic_vector(7 downto 0) := X"1B";	-- DiVide
 constant OP_CP: std_logic_vector(7 downto 0) := X"1C";	-- ComPare
+constant OP_NX: std_logic_vector(7 downto 0) := X"1D";	-- NeXt statement
+constant OP_NC: std_logic_vector(7 downto 0) := X"1E";	-- Next statement after Colon
 constant OP_PQ: std_logic_vector(7 downto 0) := X"21";	-- Print basic string (from RAM to output)
 constant OP_GL: std_logic_vector(7 downto 0) := X"27";	-- Get Line
 constant OP_RT: std_logic_vector(7 downto 0) := X"2F";	-- ReTurn (pop from IL return stack)
@@ -207,14 +212,18 @@ signal plus_overflow, minus_overflow, neg_overflow, mul_overflow, mul_pos16, mul
 -- Basic line number
 signal Lino: std_logic_vector(15 downto 0) := X"0000";
 signal Lino_bcd: std_logic_vector(19 downto 0) := X"00000"; -- converted to BCD for tracer only
-signal is_runmode: std_logic;		-- 0 for commands, 1 for RUN
+signal is_runmode, is_runmode_perf: std_logic;		-- 0 for commands, 1 for RUN
+
 -- GOTO cache lookup convenience
 alias Lino_index: std_logic_vector(4 downto 0) is Lino(4 downto 0);
 alias Lino_tag: std_logic_vector(10 downto 0) is Lino(15 downto 5);
 
--- built in counter, counts in "ticks" while Basic program is running
-signal cnt_tick, cnt_tick1000: std_logic_vector(15 downto 0);
-signal lino_tick: std_logic_vector(15 downto 0);
+-- built in performance counters while Basic program is running
+signal cnt_perf, cnt_perf1000: std_logic_vector(15 downto 0);
+signal clk_perf, pulse_fetch, executing_nx, executing_nc: std_logic;
+
+-- interrupts 
+signal intreq, y_sign_alt_intreq: std_logic;
 
 -- GOTO cache - 2-way, 32 entries
 signal cache_0, cache_1: ram32x32;
@@ -392,7 +401,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_MDR_MATCHES_ILCODEBYTE) => mdr_matches_ilcodebyte_alt_varname,
 			cond(seq_cond_R_IS_ZERO) => r_is_zero,
 			cond(seq_cond_Y_ZERO) => y_zero_alt_cp_skip,
-			cond(seq_cond_Y_SIGN) => Y(MSB),
+			cond(seq_cond_Y_SIGN) => y_sign_alt_intreq,
 			cond(seq_cond_ALU_READY) => alu_ready,
 			cond(seq_cond_ALU_OVERFLOW) => (overflowEnable and is_notRnd and alu_overflow),
 			cond(seq_cond_ALU_SIGN) => alu_sign,
@@ -408,7 +417,22 @@ cu_mb: entity work.microbasic_control_unit
 			ui_address => ui_address
 		);
 
+-- rudimentary interrupt reqest is only granted if not executing line numbers 32512 .. 32767
+on_int: process(reset, Lino, INT)
+begin
+	if ((reset = '1') or (Lino(15 downto 8) = X"7F")) then
+		intreq <= '0';
+	else
+		if (rising_edge(INT)) then
+			intreq <= is_runmode;
+		end if;
+	end if;
+end process;
+
+INTACK <= '1' when (Lino = LINO_INT(15 downto 0)) else '0';
+
 -- few condition codes come from two very different sources, but we can always (?) differentiate
+y_sign_alt_intreq <= intreq when (executing_nx = '1') else Y(MSB);
 
 -- simply ignore CTRL/C while the trace output is ongoing
 ready_alt_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
@@ -663,10 +687,10 @@ begin
 				T <= S2 xor ((S1 xor T) nor (S0 xor R));
 			when T_fromTicks =>
 				T(MSB downto 16) <= (others => '0');
-				T(15 downto 0) <= cnt_tick1000;
+				T(15 downto 0) <= cnt_perf1000;
 
 				T_saved(MSB downto 16) <= (others => '0');
-				T_saved(15 downto 0) <= cnt_tick;
+				T_saved(15 downto 0) <= cnt_perf;
 			when T_from_var_For =>
 				T(MSB downto 16) <= (others => '0');
 				T(15 downto 0) <= BasicFor;
@@ -779,9 +803,15 @@ S2 <= (others => S(2));
 				ExpStack(0) <= (others => '0');
 				ExpSP <= (others => '0');
 			when ExpStack_push_TWord =>
-				-- T to next 2 free locations, MSB first
-				ExpStack(to_integer(unsigned(ExpSP) + 0)) <= T(MSB downto (MSB_HALF + 1));
-				ExpStack(to_integer(unsigned(ExpSP) + 1)) <= T(MSB_HALF downto 0);
+				if (executing_nx = '1') then
+					-- HACKHACK to push interrupt service Basic line number onto stack, to be picked up by GO
+					ExpStack(to_integer(unsigned(ExpSP) + 0)) <= LINO_INT(MSB downto (MSB_HALF + 1));
+					ExpStack(to_integer(unsigned(ExpSP) + 1)) <= LINO_INT(MSB_HALF downto 0);
+				else
+					-- T to next 2 free locations, MSB first
+					ExpStack(to_integer(unsigned(ExpSP) + 0)) <= T(MSB downto (MSB_HALF + 1));
+					ExpStack(to_integer(unsigned(ExpSP) + 1)) <= T(MSB_HALF downto 0);
+				end if;
 				ExpSP <= std_logic_vector(unsigned(ExpSP) + 2);
 			when ExpStack_push_TByte =>
 				-- T.LSB to next free location
@@ -942,8 +972,10 @@ begin
 					tab_cnt <= std_logic_vector(unsigned(tab_cnt) - 1);
 				when NUL => -- NULL does nothing
 					null;
-				when others => -- all other characters advance
-					tab_cnt <= std_logic_vector(unsigned(tab_cnt) + 1);
+				when others => -- all other (non-control) characters advance
+					if (CHAROUT(7 downto 5) /= "000") then 
+						tab_cnt <= std_logic_vector(unsigned(tab_cnt) + 1);
+					end if;
 			end case;
 		end if;
 	end if;
@@ -1402,28 +1434,38 @@ tracer: entity work.serialtracer2 Port map (
  end if;
  end process;
 		
--- counting ticks (typically 1ms) while the program is running (to be displayed at the end of execution
-on_clk_tick: process(clk_tick, reset)
+-- perf counter while the program is running (to be displayed at the end of execution for performance evaluation)
+pulse_fetch <= '1' when (mb_IL_OP = IL_OP_from_interpreter) else '0';
+executing_nx <= '1' when (IL_OP = OP_NX) else '0';
+executing_nc <= '1' when (IL_OP = OP_NC) else '0';
+
+with debug_sel select clk_perf <= 
+		clk_tick when "00",						-- count seconds.milliseconds of Basic program run time 
+		outchar_send when "01",					-- count how many characters were output
+		pulse_fetch when "10",					-- count IL instructions executed
+		(executing_nx or executing_nc) when others;	-- count Basic statements executed
+
+on_clk_perf: process(clk_perf, reset)
 begin
 	if (reset = '1') then
-		cnt_tick <= (others => '0');
-		cnt_tick1000 <= (others => '0');
-		lino_tick <= (others => '0');
+		cnt_perf <= (others => '0');
+		cnt_perf1000 <= (others => '0');
+		is_runmode_perf <= '0';		-- previous run mode
 	else
-		if (rising_edge(clk_tick)) then
-			lino_tick <= Lino;
+		if (rising_edge(clk_perf)) then
+			is_runmode_perf <= is_runmode;
 			if (is_runmode = '1') then
-				if (lino_tick = X"0000") then
+				if (is_runmode_perf = '0') then
 					-- going from stopped to running, reset counters
-					cnt_tick <= (others => '0');
-					cnt_tick1000 <= (others => '0');
+					cnt_perf <= (others => '0');
+					cnt_perf1000 <= (others => '0');
 				else
 					-- when running, load increment counters
-					if (cnt_tick = X"03E7") then		-- wrap around at 1000
-						cnt_tick <= (others => '0');
-						cnt_tick1000 <= std_logic_vector(unsigned(cnt_tick1000) + 1);
+					if (cnt_perf = X"03E7") then		-- wrap around at 1000
+						cnt_perf <= (others => '0');
+						cnt_perf1000 <= std_logic_vector(unsigned(cnt_perf1000) + 1);
 					else
-						cnt_tick <= std_logic_vector(unsigned(cnt_tick) + 1);
+						cnt_perf <= std_logic_vector(unsigned(cnt_perf) + 1);
 					end if;
 				end if;
 			end if;
