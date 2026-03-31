@@ -405,6 +405,7 @@ cpu: entity work.MicroBasic
 		nWR => nWR,
 		ABUS => A,
 		DBUS => D,		
+		NMI => button(0),
 		INT => button(1),
 		INTACK => INTACK,
 		-- output char

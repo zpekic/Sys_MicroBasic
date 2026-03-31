@@ -1,4 +1,4 @@
-// EXTENDED TINY BASIC INTERMEDIATE INTERPRETER - FAST SWITCH VERSION
+// EXTENDED TINY BASIC INTERMEDIATE INTERPRETER
 // See: https://hackaday.io/project/204482-cpu-running-basic
 // Compile with: https://tiny-basic-online-utilities.lovable.app/
 // EXECUTIVE INITIALIZATION
@@ -17,40 +17,9 @@
         XQ
  
 //STATEMENT EXECUTOR
-:STMT	SA TRYQ		//switch on alpha char, or go to TRYQ label if not
-	J LETLP		//a
-	J LETLP		//b
-	J C_BEG		//clear
-	J LETLP		//d
-	J E_BEG		//end
-	J F_BEG		//for
-	J G_BEG		//goto, gosub
-	J LETLP		//h
-	J I_BEG		//if, input
-	J LETLP		//j
-	J LETLP		//k
-	J L_BEG		//let, list
-	J LETLP		//m
-	J N_BEG		//next, new
-	J LETLP		//o
-	J P_BEG		//print, poke, push, pop
-	J LETLP		//q
-	J R_BEG		//return
-	J LETLP		//s
-	J LETLP	 	//t
-	J LETLP		//u
-	J LETLP		//v
-	J LETLP		//w
-	J LETLP		//x
-	J LETLP		//y
-	J LETLP		//z
 
-:TRYQ	BC TRYARR, "?"		//? is short form of PRINT in many Basic dialects
-	J P0			//yes, continue with PRINT statement
-:TRYARR J ARRAY
-
-// LET, LIST ---------------------------------------- 
-:L_BEG	BC LISTI, "LET"
+// LET 
+:STMT	BC FORI, "LET"
 :LETLP	BV ARRAY
 :LET	BC *, "="
 	JS EXPR         //GO GET EXPRESSION
@@ -68,25 +37,11 @@
 	BR LETLP	//yes, back to loop	
 :LETDN	SV            	//IF STATEMENT END, store result
 	NC              //and check if another statement after
-:LISTI	BR LIST			//island to overcome branch extent limit
+:FORI	BR FOR			//island to overcome branch extent limit
 :LETEX	NC			//check if another statement after
 
-:LIST 	BC L_END, "LIST"
-	BE L2
-:L1   	PC "@^J^@^"	 	//PUNCH LEADER
-	LS              	//LIST
-	PC "S^"         	//PUNCH X-OFF
-	NL
-	NX
-:L2   	JS EXPR         	//GET A LINE NUMBER
-	BE L3
-	BR L1
-:L3   	BC *, ","        	//SEPARATED BY COMMAS
-	BR L2
-:L_END	J LETLP
-
-// FOR ----------------------------------------
-:F_BEG	BC F_END, "FOR"
+// for
+:FOR	BC NEXT, "FOR"
 	BV *			// pick up variable name
 	BC *, "="		// followed by =
 	JS EXPR			// start value
@@ -98,20 +53,15 @@
 :STEP1	LN 1			// push default step value 1
 :FORCHK	FS			// do FOR magic, FS will leave on stack Lino of next statement, which is either one after NEXT or one after FOR
 	GO
-:F_END 	J LETLP
 
-// NEXT, NEW ----------------------------------
-:N_BEG	BC NEW, "NEXT"
+// next
+:NEXT	BC GOTO, "NEXT"
 	BV *			// enforce variable name that must follow NEXT
 	FE			// do NEXT magic
 	GO			// FE will leave line number of its FOR statement on stack, so go there for next iteration 
-
-:NEW	BC N_END, "NEW"	// new is same as clear but many Basic dialects have it
-	MT
-:N_END	J LETLP
 	
-// GOTO, GOSUB --------------------------------
-:G_BEG 	BC G_END, "GO"
+// GOTO/GOSUB
+:GOTO 	BC PRNT, "GO"
 	BC GOSB, "TO"
 	JS EXPR         //GET LINE NUMBER
 	BE *
@@ -123,10 +73,33 @@
 	BE *
 	GS
 	GO
-:G_END	J LETLP
 
-// IF <cond> THEN, INPUT ---------------------
-:I_BEG  BC INPT, "IF"
+// PRINT 
+:PRNT 	BC SKIP, "PR"
+	BC P0, "INT"    //OPTIONALLY OMIT "INT"
+:P0   	BE P3
+	BR P6           //IF DONE, GO TO END
+:P1   	BC P4, ";"
+:P2   	BE P3
+	NX	        //NO CRLF IF ENDED BY ; OR ,
+:P3   	BC P7, '"'
+	PQ              //QUOTE MARKS STRING
+	BR P1           //GO CHECK DELIMITER
+:SKIP 	BR IF           //(ON THE WAY THRU)
+:P4   	BC P5, ","
+	PT              //COMMA SPACING
+	BR P2
+:P5   	BC P6, ":"
+	PC "S^"         //OUTPUT X-OFF
+:P6   	BE *
+	NL              //THEN CRLF
+	NX
+:P7   	JS EXPR         //TRY FOR AN EXPRESSION
+	PN
+	BR P1
+
+// IF <cond> THEN
+:IF   	BC INPT, "IF"
 	JS EXPR
 	JS RELO
 	JS EXPR
@@ -139,7 +112,8 @@
 	GO 
 :THEN	J STMT          //TRUE// GO PROCESS STATEMENT
 
-:INPT 	BC I_END, "INPUT"
+// INPUT
+:INPT 	BC POKE, "INPUT"
 	BC I2, '"'	//any prompt to print out first?
 	PQ
 	BC *, ","	//expect comma after the prompt
@@ -157,33 +131,9 @@
 	BC I6, ","   	//ANOTHER?
 	BR I2           //YES IF COMMA
 :I6	NC		//OTHERWISE QUIT
-:I_END	J LETLP
 
-// PRINT, POKE, PUSH, POP -----------------------
-:P_BEG 	BC SKIP, "PR"
-	BC P0, "INT"    //OPTIONALLY OMIT "INT"
-:P0   	BE P3
-	BR P6           //IF DONE, GO TO END
-:P1   	BC P4, ";"
-:P2   	BE P3
-	NX	        //NO CRLF IF ENDED BY ; OR ,
-:P3   	BC P7, '"'
-	PQ              //QUOTE MARKS STRING
-	BR P1           //GO CHECK DELIMITER
-:SKIP 	BR POKE           //(ON THE WAY THRU)
-:P4   	BC P5, ","
-	PT              //COMMA SPACING
-	BR P2
-:P5   	BC P6, ":"
-	PC "S^"         //OUTPUT X-OFF
-:P6   	BE *
-	NL              //THEN CRLF
-	NX
-:P7   	JS EXPR         //TRY FOR AN EXPRESSION
-	PN
-	BR P1
-
-:POKE	BC PUSH, "POKE"
+// POKE
+:POKE	BC RETN, "POKE"
 	LN 24		//POKE = usr(24, address, byte)
 	JS EXPR		//address
 	BC *, ","	//expect comma
@@ -192,13 +142,21 @@
 	SP		//drop usr() return value
 	NC
 		
+// RETURN
+:RETN 	BC PUSH, "RETURN"
+	BE *
+	RS              //RECOVER SAVED LINE
+	NX
+
+// PUSH
 :PUSH	BC POP, "PUSH"
 :PUSHNX	JS EXPR	
 	BC PHEND, ","	//more assignments?
 	BR PUSHNX	//yes, back to loop	
 :PHEND	NC
 
-:POP	BC P_END, "POP"
+// POP
+:POP	BC END, "POP"
 :POPNX	BV *		//at least one variable name
 	SX 2
 	SX 1		//variable name under the value on stack
@@ -206,31 +164,48 @@
 	BC PPEND, ","	//more to pop?
 	BR POPNX
 :PPEND	NC
-:P_END	J LETLP
 
-// CLEAR ----------------------------------------------------
-:C_BEG 	BC C_END, "CLEAR"
-	MT
-:C_END	J LETLP
-
-// END ------------------------------------------------------
-:E_BEG  BC E_END, "END"
+// END
+:END  	BC LIST, "END"
 	BE *
 	WS
-:E_END	J LETLP
 
-// RETURN, RUN ----------------------------------------------
-:R_BEG 	BC RUN, "RETURN"
-	BE *
-	RS              //RECOVER SAVED LINE
+// LIST
+:LIST 	BC RUN, "LIST"
+	BE L2
+:L1   	PC "@^J^@^"	 	//PUNCH LEADER
+	LS              	//LIST
+	PC "S^"         	//PUNCH X-OFF
+	NL
 	NX
+:L2   	JS EXPR         	//GET A LINE NUMBER
+	BE L3
+	BR L1
+:L3   	BC *, ","        	//SEPARATED BY COMMAS
+	BR L2
 
-:RUN  	BC REM, "RUN"
+// RUN
+:RUN  	BC CLER, "RUN"
 	J XEC
+
+// CLEAR
+:CLER 	BC NEW, "CLEAR"
+	MT
+
+// NEW
+:NEW	BC REM, "NEW"	// new is same as clear but many Basic dialects have it
+	MT
+		
 // REM
-:REM  	BC R_END, "REM"
-	NX		// just skip to next CR 
-:R_END	J LETLP
+:REM  	BC DFLT, "REM"
+	NX			// just skip to next CR 
+
+// ASSUMED LET
+:DFLT 	BV TRYQ			//is it A..Z?
+	J LET			//yes, continue as LET statement
+:TRYQ	BC TRYARR, "?"		//? is short form of PRINT in many Basic dialects
+	J P0			//yes, continue with PRINT statement
+:TRYARR J ARRAY
 
 //
 //  SUBROUTINES
@@ -292,7 +267,7 @@
 		J F2CONT
 
 :FRND 		BC FABS, "RND"  //*RND FUNCTION*
-		LN 18		//usr function that gets value from LFSR (linear feedback shift register)
+		LN 18		//usr function that evaluated lfsr (linear feedback shift register)
 		LN 0 	        //dummy parameter
 		JS FUNC		//max value allowed
 		BR F2EXE

@@ -56,7 +56,7 @@ il_original: entity work.original_rom
 -- Extended version, : prompt
 il_extended: entity work.extended_rom
 		Generic map (
-			ADDR_DEPTH => 9
+			ADDR_DEPTH => 10
 		)
 		Port map ( 
 			a => a,

@@ -104,8 +104,8 @@ IL_PC:			.regfield 3 values
 				XQhere,
 				inc,
 				T,
-				pc_plus_off6,
-				pc_plus_off5,
+				pc_plus_off6 | pc_plus_off8,
+				pc_plus_off5 | pc_plus_off2alpha,
 				direct11,
 				RetStack
 				default same;
@@ -558,16 +558,15 @@ div_done:	alu <= div_end, back;						// quotient is in YLo, remainder in YHi
 			.map 0x1D;									// NX (Next Basic statement)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 39;									// Trace mnemonic
+			if INTREQ then next else nx_start;				 
+			ExpStack <= push_intLino, BasStack <= push_Lino_and_BP, goto go;
 nx_start:	IL_PC <= T, if IS_RUNMODE then next else fetch; // if in command mode, restart at reading the input buffer (T is zero at start of every instruction)		
 			findNx();
 			Lino <= T, IL_PC <= XQhere;						// new current executing statement line number, and IL_PC at :XEC +2 
 			//traceLino;
 nx_cont:	traceBP();
-			//check for external interrupt
-			if INTREQ then next else nx_end; 
-nx_intack:	ExpStack <= push_intLino, BasStack <= push_Lino_and_BP, goto go;
-			//check for keyboard break
-nx_end:		if KBD_BREAK then BREAK else fetch;
+			//check for keyboard break, NC jumps here
+			if KBD_BREAK then BREAK else fetch;
 
 findNx:		findNextCR(BP);
 			T <= inc;
@@ -578,7 +577,7 @@ findNx:		findNextCR(BP);
 nx_err:		directByte = BEEP, outChar(from_microcode);		// TODO - write some error that we ran out of code?
 			goto stop_run;
 
-			////////////////////////////////////////////////////////////////////////////////
+			///////////////////////////* EXTENDED INSTRUCTION */////////////////////////////
 			.map 0x1E;									// NC (Next Basic statement after colon)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 4;								// Trace mnemonic - TODO
@@ -665,7 +664,7 @@ pc_loop:	outChar(from_interpreter);
 			traceString 3;												// trace value of IL(IL_PC) (which was the char to be output)
 			IL_PC <= inc, if ILCODEBYTE_BIT7 then fetch else pc_loop;	// print until char with bit7 set
 
-			////////////////////////////////////////////////////////////////////////////////
+			///////////////////////////* EXTENDED INSTRUCTION */////////////////////////////
 			.map 0x25;									// FS (For loop Start)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 4;								// Trace mnemonic - TODO
@@ -710,7 +709,7 @@ for_done:	Vars <= next_clear, findNx();
 			//traceT;
 			ExpStack <=  push_TWord, goto fetch;				// push line number of next statement to be executed on expression stack				
 
-			////////////////////////////////////////////////////////////////////////////////
+			///////////////////////////* EXTENDED INSTRUCTION */////////////////////////////
 			.map 0x26;									// FE (For loop nExt)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 4;								// Trace mnemonic - TODO
@@ -759,6 +758,15 @@ gl_tabloop:	if AT_TAB then gl_write0;
 			directByte = ' ', outChar(from_microcode);			// replace tab with spaces (and update tab counter to make AT_TAB condition work)
 			directByte = ' ', writeCore(InlEnd, from_microcode), InlEnd <= inc;
 			goto gl_tabloop;
+
+			///////////////////////////* EXTENDED INSTRUCTION */////////////////////////////
+			.map 0x28;									// SA (Switch on Alpha character)
+			////////////////////////////////////////////////////////////////////////////////
+			traceString 4;								// Trace mnemonic - TODO
+			skipSpaces();
+			MDR <= ToUpper, if MDR_IS_ALPHA then next else sa_exit;	// test covers lowercase too, so can execute conversion and check in parallel	
+			IL_PC <= pc_plus_off2alpha, goto fetch;
+sa_exit:	IL_PC <= pc_plus_off8, goto fetch;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2A;									// IL (insert Basic line)
@@ -823,7 +831,7 @@ fpe_next:	findNextCR(same);
 scanProgram:T <= zero;
 			LS <= T, LE <= T, T <= Prog_start;
 			
-scan_loop:  LS <= T, readCore16(reset1, same);						// assume this will be LS (LE also needed to make it "found")
+scan_loop:  LS <= T, readCore16(reset1, same);				// assume this will be LS (LE also needed to make it "found")
 			alu <= S_fromLino, if R_IS_ZERO then return;	// found end of Basic program (2 NULLs)?
 scan_check:	alu <= S_minus_R;								// Lino - current line, T at first character of the Basic statement text
 			//traceALU();

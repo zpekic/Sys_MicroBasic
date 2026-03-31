@@ -33,6 +33,7 @@ type ram512x8 is array(0 to 511) of std_logic_vector(7 downto 0);
 type ram32x32 is array (0 to 31) of std_logic_vector(31 downto 0);
 type ram32x16 is array (0 to 31) of std_logic_vector(15 downto 0);
 type ram32x4 is array (0 to 31) of std_logic_vector(3 downto 0);
+type ram16x36 is array (0 to 15) of std_logic_vector(35 downto 0);
 type ram16x32 is array (0 to 15) of std_logic_vector(31 downto 0);
 type ram16x8 is array (0 to 15) of std_logic_vector(7 downto 0);
 type ram16x16 is array (0 to 15) of std_logic_vector(15 downto 0);

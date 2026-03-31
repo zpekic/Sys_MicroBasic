@@ -58,8 +58,9 @@ entity MicroBasic is
 			nWR : out STD_LOGIC;
 			ABUS: out STD_LOGIC_VECTOR(15 downto 0);
 			DBUS: inout STD_LOGIC_VECTOR(7 downto 0);
+			NMI: in STD_LOGIC;
 			INT: in STD_LOGIC;
-			INTACK: out STD_LOGIC;
+			INTACK: buffer STD_LOGIC;
 			-- output char
 			outchar: out STD_LOGIC_VECTOR(7 downto 0);
 			outchar_send: buffer STD_LOGIC;
@@ -90,9 +91,21 @@ alias IS_CPU32: std_logic is BITCNT(4);																		-- '0' / '1'
 constant STEPCNT: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(MSB + 1, 8)); -- X"10" / X"20"
 constant BCDDIGITS: positive := (MSB + 9) / 4; 	-- 6 / 10
 constant CP_OFF: positive := MSB_HALF + 1;		-- 8 / 16
-constant LINO_INT: std_logic_vector(MSB downto 0) := std_logic_vector(to_unsigned(32512, MSB + 1));
 type ram16xHalf is array (0 to 15) of std_logic_vector(MSB_HALF downto 0);
 type ram32xFull is array (0 to 31) of std_logic_vector(MSB downto 0);
+type ram8xFull is array(0 to 7) of std_logic_vector(MSB downto 0);
+constant INT_VECTORS: ram8xFull := (
+	-- Basic line numbers to GOSUB when interrupt levels 0 to 7 are serviced
+	std_logic_vector(to_unsigned(0, MSB + 1)),		-- IL = 0, no interrupt
+	std_logic_vector(to_unsigned(32100, MSB + 1)),	-- IL = 1, INT
+	std_logic_vector(to_unsigned(32200, MSB + 1)),	-- IL = 2, not used
+	std_logic_vector(to_unsigned(32300, MSB + 1)),	-- IL = 3, not used
+	std_logic_vector(to_unsigned(32400, MSB + 1)),	-- IL = 4, not used
+	std_logic_vector(to_unsigned(32500, MSB + 1)),	-- IL = 5, not used
+	std_logic_vector(to_unsigned(32600, MSB + 1)),	-- IL = 6, not used 
+	std_logic_vector(to_unsigned(32700, MSB + 1))	-- IL = 7, NMI
+);
+
 
 -- control unit
 signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
@@ -120,6 +133,7 @@ constant OP_GL: std_logic_vector(7 downto 0) := X"27";	-- Get Line
 constant OP_RT: std_logic_vector(7 downto 0) := X"2F";	-- ReTurn (pop from IL return stack)
 -- extended Tiny Basic specific opcode
 constant OP_FS: std_logic_vector(7 downto 0) := X"25";	-- For Start
+constant OP_SA: std_logic_vector(7 downto 0) := X"28";	-- Switch on Alpha character
 
 -- single char output
 signal CHAROUT: std_logic_vector(7 downto 0);
@@ -169,7 +183,7 @@ signal RetSP: std_logic_vector(3 downto 0);			-- stack pointer points to free wo
 signal rstack_is_empty, rstack_is_full: std_logic;
 
 -- Basic stack (GOSUB/RETURN)
-signal BasStack: ram16x32;
+signal BasStack: ram16x36;
 signal BasSP: std_logic_vector(3 downto 0);			-- stack pointer points to free entry
 signal bstack_is_empty, bstack_is_full: std_logic;
 
@@ -224,6 +238,8 @@ signal clk_perf, pulse_fetch, executing_nx, executing_nc: std_logic;
 
 -- interrupts 
 signal intreq, y_sign_alt_intreq: std_logic;
+signal il_new, il_previous, il_current: std_logic_vector(3 downto 0);
+signal lino_int: std_logic_vector(MSB downto 0); -- 32 or 16 bit to make it compatible with ExpStack width
 
 -- GOTO cache - 2-way, 32 entries
 signal cache_0, cache_1: ram32x32;
@@ -417,19 +433,41 @@ cu_mb: entity work.microbasic_control_unit
 			ui_address => ui_address
 		);
 
--- rudimentary interrupt reqest is only granted if not executing line numbers 32512 .. 32767
-on_int: process(reset, Lino, INT)
+-- priority encoder to get new external priority level
+il_new <= 	"0111" when NMI = '1' else
+				-- 5 additional priority layers possible here
+				"0001" when INT = '1' else
+				"0000";			-- no external signal means no interrupt
+
+-- only react to interrupts while running Basic and of higher priority than current	
+update_il: process(clk, reset, clk)
 begin
-	if ((reset = '1') or (Lino(15 downto 8) = X"7F")) then
+	if ((reset = '1') or (is_runmode = '0')) then
+		il_current <= (others => '0');
+		il_previous <= (others => '0');
 		intreq <= '0';
 	else
-		if (rising_edge(INT)) then
-			intreq <= is_runmode;
+		if (rising_edge(clk)) then
+			if (intreq = '0' and (unsigned(il_new) > unsigned(il_current))) then
+				intreq <= '1';
+				il_previous <= il_current;
+				il_current <= il_new;
+			else
+				if (INTACK = '1') then
+					intreq <= '0';
+				end if;
+			end if;
+			-- pick up previous level if returning from Basic subroutine
+			if (mb_BasStack = BasStack_pop) then
+				il_current <= BasStack(to_integer(unsigned(BasSP)))(35 downto 32);
+			end if;
 		end if;
 	end if;
 end process;
 
-INTACK <= '1' when (Lino = LINO_INT(15 downto 0)) else '0';
+-- GOSUB 32000+(100*il_current) to call interrupt handling Basic subroutine
+-- note that at this point il_current should have already captured the "new" level (see above)
+lino_int <= INT_VECTORS(to_integer(unsigned(il_current)));
 
 -- few condition codes come from two very different sources, but we can always (?) differentiate
 y_sign_alt_intreq <= intreq when (executing_nx = '1') else Y(MSB);
@@ -521,11 +559,21 @@ update_IL_PC: process(clk, mb_IL_PC)
 			when IL_PC_T =>
 				IL_PC <= T(10 downto 0);
 			when IL_PC_pc_plus_off6 =>
-				-- a bit bizarre offset
-				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP) - 96);
+				if (IL_OP = OP_SA) then
+					-- pc_plus_off8 is the alternative effect to jump to default case
+					IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(il_codeByte));
+				else
+					-- a bit bizarre offset
+					IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OP) - 96);
+				end if;
 			when IL_PC_pc_plus_off5 =>
-				-- can only jump forward
-				IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OFF5));
+				if (IL_OP = OP_SA) then
+					-- pc_plus_off2alpha is the alternative effect for case when MDR is alpha
+					IL_PC <= std_logic_vector(unsigned(IL_PC) + (unsigned(MDR) - 65) + (unsigned(MDR) - 65) + 1);
+				else
+					-- can only jump forward
+					IL_PC <= std_logic_vector(unsigned(IL_PC) + unsigned(IL_OFF5));
+				end if;
 			when IL_PC_direct11 =>
 				-- top 3 bits from IL_OP, lower 8 from code pointed by IL
 				IL_PC <= IL_OP(2 downto 0) & il_codeByte;
@@ -590,7 +638,8 @@ end process;
 			when BasStack_pop =>
 				BasSP <= std_logic_vector(unsigned(BasSP) - 1);
 			when BasStack_push_Lino_and_BP =>
-				BasStack(to_integer(unsigned(BasSP))) <= Lino & BP; 
+				-- push also the interrupt level to restore it with last RETURN in interrupt service routine
+				BasStack(to_integer(unsigned(BasSP))) <= il_previous & Lino & BP; 
 				BasSP <= std_logic_vector(unsigned(BasSP) + 1);
 			when others =>
 				null;
@@ -802,35 +851,43 @@ S2 <= (others => S(2));
 			when ExpStack_clear =>
 				ExpStack(0) <= (others => '0');
 				ExpSP <= (others => '0');
+				INTACK <= '0';
 			when ExpStack_push_TWord =>
-				if (executing_nx = '1') then
+				if ((executing_nx = '1') and (intreq = '1')) then
 					-- HACKHACK to push interrupt service Basic line number onto stack, to be picked up by GO
 					ExpStack(to_integer(unsigned(ExpSP) + 0)) <= LINO_INT(MSB downto (MSB_HALF + 1));
 					ExpStack(to_integer(unsigned(ExpSP) + 1)) <= LINO_INT(MSB_HALF downto 0);
+					INTACK <= '1';
 				else
 					-- T to next 2 free locations, MSB first
 					ExpStack(to_integer(unsigned(ExpSP) + 0)) <= T(MSB downto (MSB_HALF + 1));
 					ExpStack(to_integer(unsigned(ExpSP) + 1)) <= T(MSB_HALF downto 0);
+					INTACK <= '0';
 				end if;
 				ExpSP <= std_logic_vector(unsigned(ExpSP) + 2);
 			when ExpStack_push_TByte =>
 				-- T.LSB to next free location
 				ExpStack(to_integer(unsigned(ExpSP) + 0)) <= T(MSB_HALF downto 0);
 				ExpSP <= std_logic_vector(unsigned(ExpSP) + 1);
+				INTACK <= '0';
 			when ExpStack_startSwap =>
 				SwapS <= ExpStack(to_integer(unsigned(ExpSwapS)));
 				SwapR <= ExpStack(to_integer(unsigned(ExpSwapR)));
+				INTACK <= '0';
 			when ExpStack_endSwap =>
 				ExpStack(to_integer(unsigned(ExpSwapS))) <= SwapR;
 				ExpStack(to_integer(unsigned(ExpSwapR))) <= SwapS;
+				INTACK <= '0';
 			when ExpStack_pop1 => 
 				-- combine with assigment to some other 8-bit register
 				ExpSP <= std_logic_vector(unsigned(ExpSP) - 1);
+				INTACK <= '0';
 			when ExpStack_pop2 => 
 				-- combine with assigment to some other 16-bit register
 				ExpSP <= std_logic_vector(unsigned(ExpSP) - 2);
+				INTACK <= '0';
 			when others =>
-				null;
+				INTACK <= '0';
 		end case;
  end if;
  end process;
@@ -1372,6 +1429,12 @@ debug_uipc <= ui_address;		-- output microinstruction program counter to show mi
 		(X"1E" & LE) when "01",
 		(X"B5" & BP) when "10",
 		(X"5E" & PrgEnd) when others;
+
+--	with debug_sel select debug_bus(23 downto 0) <= 
+--		(BasSP & ExpSP(3 downto 0) & (intreq & "00" & INTACK) & il_new & il_current & il_previous) when "00",
+--		(X"1C000" & il_current) when "01",
+--		(X"15000" & il_previous) when "10",
+--		(X"11" & lino_int(15 downto 0)) when others;
 
 	debug_bus(31 downto 24) <= (traceEnable & is_runmode & "010000"); -- indicate "name.value" on LEDs
 
