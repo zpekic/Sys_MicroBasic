@@ -250,10 +250,11 @@ alias cache_tag0: std_logic_vector(10 downto 0) is cache_entry0(15 downto 5);
 alias cache_data0: std_logic_vector(15 downto 0) is cache_entry0(31 downto 16);
 alias cache_tag1: std_logic_vector(10 downto 0) is cache_entry1(15 downto 5); 
 alias cache_data1: std_logic_vector(15 downto 0) is cache_entry1(31 downto 16);
-signal cache_hit0, cache_valid0: std_logic;
-signal cache_hit1, cache_valid1: std_logic;
+signal cache_hit: std_logic_vector(1 downto 0);
+signal cache_valid: std_logic_vector(1 downto 0);
 signal cache_hit_alt_next_set, cache_valid_alt_for_set: std_logic;
 signal cache_empty0, cache_empty1, cache_full0, cache_full1: std_logic;
+signal cache_store_sel: std_logic;
 
 -- other
 signal T, T_saved: std_logic_vector(MSB downto 0);
@@ -274,15 +275,15 @@ begin
 cache_empty0 <= '1' when (cache_v0 = X"00000000") else '0';		-- all 32 entries free
 cache_full0 <= '1' when (cache_v0 = X"FFFFFFFF") else '0';		-- all 32 entries used
 cache_entry0 <= cache_0(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
-cache_valid0 <= cache_v0(to_integer(unsigned(Lino_index)));
-cache_hit0 <= '1' when (cache_tag0 = Lino_tag) else '0';
+cache_valid(0) <= cache_v0(to_integer(unsigned(Lino_index)));
+cache_hit(0) <= '1' when (cache_tag0 = Lino_tag) else '0';
 
 -- GOTO cache, way 1
 cache_empty1 <= '1' when (cache_v1 = X"00000000") else '0';		-- all 32 entries free
 cache_full1 <= '1' when (cache_v1 = X"FFFFFFFF") else '0';		-- all 32 entries used
 cache_entry1 <= cache_1(to_integer(unsigned(Lino_index)));		-- data/tag cache entry pointed to by Lino 
-cache_valid1 <= cache_v1(to_integer(unsigned(Lino_index)));
-cache_hit1 <= '1' when (cache_tag1 = Lino_tag) else '0';
+cache_valid(1) <= cache_v1(to_integer(unsigned(Lino_index)));
+cache_hit(1) <= '1' when (cache_tag1 = Lino_tag) else '0';
 
 -- GOTO cache outputs for fun
 cache_empty <= cache_empty0 and cache_empty1;
@@ -487,8 +488,8 @@ cp_skip <= (T(CP_OFF + 2) and s_gt_r) or (T(CP_OFF + 1) and s_equ_r) or (T(CP_OF
 y_zero_alt_cp_skip <= cp_skip when (IL_OP = OP_CP) else y_zero;
 
 -- GOTO cache and FOR/NEXT
-cache_valid_alt_for_set <= (cache_valid0 or cache_valid1) when (IL_OP = OP_GO) else for_set;
-cache_hit_alt_next_set <= ((cache_hit0 and cache_valid0) or (cache_hit1 and cache_valid1)) when (IL_OP = OP_GO) else next_set;
+cache_valid_alt_for_set <= (cache_valid(0) or cache_valid(1)) when (IL_OP = OP_GO) else for_set;
+cache_hit_alt_next_set <= ((cache_hit(0) and cache_valid(0)) or (cache_hit(1) and cache_valid(1))) when (IL_OP = OP_GO) else next_set;
 
 -- other conditional codes
 mdr_matches_ilcodebyte_alt_varname <= mdr_matches_varname when (IL_OP = OP_FS) else mdr_matches_ilcodebyte;
@@ -708,11 +709,11 @@ begin
 				T(15 downto 0) <= BasStack(to_integer(unsigned(BasSP) - 1))(15 downto 0);
 			when T_Cache_Data =>
 				T(MSB downto 16) <= (others => '0');
-				if ((cache_valid0 and cache_hit0) = '1') then
+				if ((cache_valid(0) and cache_hit(0)) = '1') then
 					-- HIT in way 0
 					T(15 downto 0) <= cache_data0;
 				else
-					if ((cache_valid1 and cache_hit1) = '1') then
+					if ((cache_valid(1) and cache_hit(1)) = '1') then
 						-- HIT in way 1
 						T(15 downto 0) <= cache_data1;
 					else
@@ -1300,16 +1301,13 @@ end process;
 			when alu_Y_recall => 
 				Y <= Y_saved;
 			when alu_cache_store =>
-				if (cache_valid0 = '0') then
-					-- first try to store to way 0
+				-- always write (or overwrite) - see cache_store_sel below for "strategy"
+				if (cache_store_sel = '0') then
 					cache_0(to_integer(unsigned(Lino_index))) <= BP & Lino;
 					cache_v0(to_integer(unsigned(Lino_index))) <= '1';
 				else
-					if (cache_valid1 = '0') then
-						-- and then to way 1
-						cache_1(to_integer(unsigned(Lino_index))) <= BP & Lino;
-						cache_v1(to_integer(unsigned(Lino_index))) <= '1';
-					end if;
+					cache_1(to_integer(unsigned(Lino_index))) <= BP & Lino;
+					cache_v1(to_integer(unsigned(Lino_index))) <= '1';
 				end if;
 			when alu_for_check =>
 				if (t_minus_s = ZERO) then
@@ -1329,6 +1327,11 @@ end process;
  end if;
  end process;
 
+with cache_valid select cache_store_sel <= 
+	'1' when "01",			-- store to 1 which is free
+	'0' when "10",			-- store to 0 which is free
+	lfsr(0) when others;	-- select random one to overwrite
+	
 -- 17 bit subtract for division step
 subc <= std_logic_vector(unsigned('0' & Y(MSB_DOUBLE downto (MSB + 1))) + unsigned('0' & R));
 
@@ -1430,12 +1433,6 @@ debug_uipc <= ui_address;		-- output microinstruction program counter to show mi
 		(X"B5" & BP) when "10",
 		(X"5E" & PrgEnd) when others;
 
---	with debug_sel select debug_bus(23 downto 0) <= 
---		(BasSP & ExpSP(3 downto 0) & (intreq & "00" & INTACK) & il_new & il_current & il_previous) when "00",
---		(X"1C000" & il_current) when "01",
---		(X"15000" & il_previous) when "10",
---		(X"11" & lino_int(15 downto 0)) when others;
-
 	debug_bus(31 downto 24) <= (traceEnable & is_runmode & "010000"); -- indicate "name.value" on LEDs
 
 -- 
@@ -1536,29 +1533,5 @@ begin
 	end if;
 end process;
 
--- 8 BCD digits adder
---eightdigadder: entity work.bcdadder 
---     Generic map (
---			DIGITS => 8
---     )
---     Port map ( 
---			carry_in => '0',
---			a => cnt_tick,
---			b => X"00000001",
---			sum => cnt_tick_inc
---		);
-		
--- 8 BCD digits frequency counter
---eightdigcnt: entity work.freqcounter port map ( 
---			reset => reset,
---			clk => clk_tick,
---			freq => clk,
---			bcd => '1',
---			add => X"00000002",
---			cin => '0',
---			cout => open,
---			value => cpu_freq
---		);
-		
 end Behavioral;
 
