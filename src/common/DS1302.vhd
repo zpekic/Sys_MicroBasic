@@ -89,7 +89,7 @@ begin
 	end if;
 end process;
 
-on_clk: process(clk, reset, nCE)
+on_clk: process(clk, reset, nCE, BUSY)
 begin
 	if (BUSY = '0') then
 		reg_ce <=	(others => '0');

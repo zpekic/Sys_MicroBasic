@@ -43,7 +43,7 @@ entity MicroBasic is
 			reset : in  STD_LOGIC;
 			clk : in  STD_LOGIC;
 			clk_tick: in STD_LOGIC;
-			-- GOTO cache state
+			-- GOTO / IL cache state
 			cache_empty : out STD_LOGIC;
 			cache_full : out STD_LOGIC;
 			-- Intermediate language (IL) read-only memory
@@ -106,12 +106,9 @@ constant INT_VECTORS: ram8xFull := (
 	std_logic_vector(to_unsigned(32700, MSB + 1))	-- IL = 7, NMI
 );
 
-
 -- control unit
 signal ui_address: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0);
 signal ui_nextinstr: std_logic_vector(CODE_ADDRESS_WIDTH -1  downto 0);
--- must match the location of the label of same name in the microcode for BUSREQ/BUSACK to work 
-constant CHKBUSREQ: std_logic_vector(CODE_ADDRESS_WIDTH - 1 downto 0) := "000001011";
 
 -- Intermediate language
 signal IL_PC, XQhere: std_logic_vector(10 downto 0);	-- 9 bits enough, but keep it compatible with other implementations
@@ -121,6 +118,7 @@ alias il_codeByte: std_logic_vector(7 downto 0) is IL_D;
 signal off_is_zero: std_logic;
 
 -- some IL opcodes that are useful to be known to hardware, not just the microcode
+constant OP_SS: std_logic_vector(7 downto 0) := X"00";	-- HACKHACK: SX 0 is used to mark statement start
 constant OP_GS: std_logic_vector(7 downto 0) := X"14";	-- Go Subroutine (push to Basic return stack)
 constant OP_RS: std_logic_vector(7 downto 0) := X"15";	-- ReStore (pop from Basic return stack)
 constant OP_GO: std_logic_vector(7 downto 0) := X"16";	-- GO (to)
@@ -256,6 +254,20 @@ signal cache_hit_alt_next_set, cache_valid_alt_for_set: std_logic;
 signal cache_empty0, cache_empty1, cache_full0, cache_full1: std_logic;
 signal cache_store_sel: std_logic;
 
+-- TBIL cache - 1-way, 32 entries
+signal il_cache: ram32x48;
+signal il_cache_v: std_logic_vector(31 downto 0) := (others => '0');
+signal il_cache_entry: std_logic_vector(47 downto 0);
+alias il_cache_tag: std_logic_vector(10 downto 0) is il_cache_entry(15 downto 5);	-- 11 MSB of Lino 
+alias il_cache_bp: std_logic_vector(15 downto 0) is il_cache_entry(31 downto 16);	-- cached BP 
+alias il_cache_pc: std_logic_vector(10 downto 0) is il_cache_entry(42 downto 32);	-- cached IL_PC 
+signal il_cache_hit: std_logic;
+signal il_cache_valid: std_logic;
+signal at_tab_alt_il_cache_hit: std_logic;
+signal cnt_statement: std_logic_vector(7 downto 0) := X"00";
+signal lino_sa: std_logic_vector(15 downto 0) := X"0000";
+signal il_cache_empty, il_cache_full : std_logic;
+
 -- other
 signal T, T_saved: std_logic_vector(MSB downto 0);
 signal lfsr: std_logic_vector(15 downto 0) := X"FFFF";
@@ -285,9 +297,12 @@ cache_entry1 <= cache_1(to_integer(unsigned(Lino_index)));		-- data/tag cache en
 cache_valid(1) <= cache_v1(to_integer(unsigned(Lino_index)));
 cache_hit(1) <= '1' when (cache_tag1 = Lino_tag) else '0';
 
--- GOTO cache outputs for fun
-cache_empty <= cache_empty0 and cache_empty1;
-cache_full <= cache_full0 and cache_full1;
+-- TBIL cache
+il_cache_entry <= il_cache(to_integer(unsigned(Lino_index)));		-- IL cache entry pointed to by Lino 
+il_cache_valid <= il_cache_v(to_integer(unsigned(Lino_index))) when (cnt_statement = X"00") else '0';
+il_cache_hit <= il_cache_valid when (il_cache_tag = Lino_tag) else '0';
+il_cache_empty <= '1' when (il_cache_v = X"00000000") else '0';
+il_cache_full <= '1' when (il_cache_v = X"FFFFFFFF") else '0';
 
 -- Basic variable store
 var_name <= X"7F" and std_logic_vector(unsigned(vars_index) + X"40");
@@ -305,7 +320,7 @@ nWR <= mb_nWR when (nBUSACK = '1') else 'Z';
 ABUS <= MAR when (nBUSACK = '1') else "ZZZZZZZZZZZZZZZZ";
 
 busack_clk <= mb_nRD and mb_nWR and (not nBUSREQ);
-on_busackclk: process(reset, busack_clk)
+on_busackclk: process(reset, busack_clk, nBUSREQ)
 begin
 	if ((reset = '1') or (nBUSREQ = '1')) then
 		nBUSACK <= '1';
@@ -422,7 +437,7 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_ALU_READY) => alu_ready,
 			cond(seq_cond_ALU_OVERFLOW) => (overflowEnable and is_notRnd and alu_overflow),
 			cond(seq_cond_ALU_SIGN) => alu_sign,
-			cond(seq_cond_AT_TAB) => at_tab,
+			cond(seq_cond_AT_TAB) => at_tab_alt_il_cache_hit,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
 			cond(seq_cond_S_EQU_DB_MOD32) => s_equ_db_mod32,	
@@ -472,6 +487,7 @@ lino_int <= INT_VECTORS(to_integer(unsigned(il_current)));
 
 -- few condition codes come from two very different sources, but we can always (?) differentiate
 y_sign_alt_intreq <= intreq when (executing_nx = '1') else Y(MSB);
+at_tab_alt_il_cache_hit <= (il_cache_hit and is_runmode) when (IL_OP = OP_SA) else at_tab;
 
 -- simply ignore CTRL/C while the trace output is ongoing
 ready_alt_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;
@@ -496,7 +512,6 @@ mdr_matches_ilcodebyte_alt_varname <= mdr_matches_varname when (IL_OP = OP_FS) e
 mdr_matches_ilcodebyte <= 	'1' when (MDR_UpperCase(6 downto 0) = il_codeByte(6 downto 0)) else '0';
 mdr_matches_varname <=		'1' when (MDR_UpperCase(6 downto 0) = var_name(6 downto 0)) else '0';
 mdr_matches_db <=				'1' when (MDR_UpperCase(6 downto 0) = mb_directByte) else '0';
---mdr_equ_db <=			'1' when (MDR(6 downto 0) = mb_directByte) else '0';
 mdr_is_num <=			'1' when ((unsigned(MDR) > 47) and (unsigned(MDR) < 58)) else '0';
 mdr_is_lowercase <=	'1' when ((unsigned(MDR) > 96) and (unsigned(MDR) < 123)) else '0';
 mdr_is_uppercase <=	'1' when ((unsigned(MDR) > 64) and (unsigned(MDR) < 91)) else '0';
@@ -547,14 +562,19 @@ mb_uinstruction <= mb_microcode(to_integer(unsigned(ui_address)));
 --------------------------------------------------------------------------------
 -- Basic CPU has a program counter, instruction register, internal return stack
 --------------------------------------------------------------------------------		
-update_IL_PC: process(clk, mb_IL_PC)
+update_IL_PC: process(clk, mb_IL_PC, IL_OP)
  begin
 	if (rising_edge(clk)) then
 		case mb_IL_PC is
 --			when IL_PC_same =>
 --				IL_PC <= IL_PC;
 			when IL_PC_XQhere =>
-				IL_PC <= XQhere;
+				if (IL_OP = OP_SA) then
+					-- alternative meaning: from_il_cache
+					IL_PC <= il_cache_pc;
+				else
+					IL_PC <= XQhere;
+				end if;
 			when IL_PC_inc =>
 				IL_PC <= std_logic_vector(unsigned(IL_PC) + 1);
 			when IL_PC_T =>
@@ -792,7 +812,12 @@ S2 <= (others => S(2));
 			when BP_T =>
 				BP <= T(15 downto 0);
 			when BP_LS =>
-				BP <= LS;
+				if (IL_OP = OP_SA) then
+					-- alternative meaning: from_il_cache
+					BP <= il_cache_bp;
+				else
+					BP <= LS;
+				end if;
 			when others =>
 				null;
 		end case;
@@ -1077,8 +1102,12 @@ end process;
 		-- clear cache valid bits at start of run (when Lino goes from 0 to some valid Basic line number)
 		lino_alu <= Lino;
 		if ((is_runmode = '1') and (lino_alu = X"0000")) then
+			-- invalidate run-time caches
 			cache_v0 <= (others => '0');
 			cache_v1 <= (others => '0');
+			il_cache_v <= (others => '0');
+			cnt_statement <= (others => '0');
+			lino_sa <= (others => '0');
 			-- pseudo-random number seed
 			if (PrgEnd = X"0000") then
 				lfsr <= X"FFFF"; 
@@ -1106,13 +1135,22 @@ end process;
 				alu_ready <= '0';
 				alu_overflow <= '0';
 			when alu_reset1 =>
-				R(MSB downto 16) <= (others => '0');
-				R(15 downto 0) <= (others => '1');
-				Y_saved <= (others => '0');
-				S <= (others => '0');
-				--Y <= (others => '0');
-				alu_ready <= '0';
-				alu_overflow <= '0';
+				if (IL_OP = OP_SA) then
+					-- alternative: il_cache_update_statementcount
+					if (lino_sa = Lino) then
+						cnt_statement <= std_logic_vector(unsigned(cnt_statement) + 1);
+					else
+						cnt_statement <= (others => '0');
+					end if;
+					lino_sa <= Lino;
+				else
+					R(MSB downto 16) <= (others => '0');
+					R(15 downto 0) <= (others => '1');
+					Y_saved <= (others => '0');
+					S <= (others => '0');
+					alu_ready <= '0';
+					alu_overflow <= '0';
+				end if;
 			when alu_R_fromStack =>
 				R <= ExpSTHi & ExpSTLo; 
 			when alu_S_fromStack =>
@@ -1301,13 +1339,21 @@ end process;
 			when alu_Y_recall => 
 				Y <= Y_saved;
 			when alu_cache_store =>
-				-- always write (or overwrite) - see cache_store_sel below for "strategy"
-				if (cache_store_sel = '0') then
-					cache_0(to_integer(unsigned(Lino_index))) <= BP & Lino;
-					cache_v0(to_integer(unsigned(Lino_index))) <= '1';
+				if (IL_OP = OP_SS) then
+					if (cnt_statement = X"00") then
+						-- store only the entry point to the first statement in the Basic line
+						il_cache(to_integer(unsigned(Lino_index))) <= ("00000" & IL_PC) & BP & Lino;
+						il_cache_v(to_integer(unsigned(Lino_index))) <= '1';
+					end if;
 				else
-					cache_1(to_integer(unsigned(Lino_index))) <= BP & Lino;
-					cache_v1(to_integer(unsigned(Lino_index))) <= '1';
+					-- always write (or overwrite) - see cache_store_sel below for "strategy"
+					if (cache_store_sel = '0') then
+						cache_0(to_integer(unsigned(Lino_index))) <= BP & Lino;
+						cache_v0(to_integer(unsigned(Lino_index))) <= '1';
+					else
+						cache_1(to_integer(unsigned(Lino_index))) <= BP & Lino;
+						cache_v1(to_integer(unsigned(Lino_index))) <= '1';
+					end if;
 				end if;
 			when alu_for_check =>
 				if (t_minus_s = ZERO) then
@@ -1426,6 +1472,19 @@ mul_overflow <= not(mul_pos16 or mul_neg16);
 debug_t <= T(15 downto 0);		-- output T to show memory pointer
 debug_uipc <= ui_address;		-- output microinstruction program counter to show microinstruction symbols
 
+-- state of caches based on debug_sel
+	with debug_sel select cache_empty <=
+		il_cache_empty						when "00",
+		cache_empty0 and cache_empty1	when "01",		-- GOTO cache, whole
+		cache_empty0						when "10",		-- GOTO cache, way 0
+		cache_empty1						when others;	-- GOTO cache, way 1
+
+	with debug_sel select cache_full <=
+		il_cache_full						when "00",
+		cache_full0 and cache_full1	when "01",		-- GOTO cache, whole
+		cache_full0							when "10",		-- GOTO cache, way 0
+		cache_full1							when others;	-- GOTO cache, way 1
+		
 -- paralled debug port
 	with debug_sel select debug_bus(23 downto 0) <= 
 		(X"15" & LS) when "00",
@@ -1468,6 +1527,7 @@ tracer: entity work.serialtracer2 Port map (
 		data(31 downto 28) => '0' & IL_OP(2 downto 0), -- interested in lower 3 bits only
 		--X"88"..X"89"
 		data(47 downto 32) => Lino_bcd(15 downto 0),
+--		data(47 downto 32) => (Lino_bcd(11 downto 0) & cnt_statement(3 downto 0)),
 		data(63 downto 48) => T(15 downto 0),
 		txd => debug_txd,
 		ready => DBG_READY

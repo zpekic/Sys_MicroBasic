@@ -40,7 +40,7 @@ seq_cond:		.if 5 values
 				ALU_READY		| LS_PARAMS_OK,
 				ALU_OVERFLOW 	| LS_PASSED_END,
 				ALU_SIGN		| LS_IN_RANGE,
-				AT_TAB,
+				AT_TAB			| IL_CACHE_HIT,
 				OFF_IS_ZERO,
 				IS_RUNMODE,
 				S_EQU_DB_MOD32,	
@@ -101,7 +101,7 @@ DBGINDEX		.regfield 2 values
 // 11-bit IL program counter
 IL_PC:			.regfield 3 values
 				same,
-				XQhere,
+				XQhere | from_il_cache,
 				inc,
 				T,
 				pc_plus_off6 | pc_plus_off8,
@@ -199,7 +199,7 @@ BP				.regfield 3 values
 				save,
 				recall,
 				T,
-				LS
+				LS	| from_il_cache
 				default same;
 
 // 16-bit saved basic pointer
@@ -231,7 +231,7 @@ Vars			.regfield 3 values
 alu				.regfield 5 values
 				nop, 
 				reset0,
-				reset1,
+				reset1 | il_cache_update_statementcount,
 				R_fromStack,
 				S_fromStack,
 				S_plus_R,
@@ -257,7 +257,7 @@ alu				.regfield 5 values
 				ls_check,
 				Y_save,
 				Y_recall,
-				cache_store,	// GOTO cache hooked up behind ALU to save microcode width bits
+				cache_store | il_cache_store,	// GOTO and IL cache hooked up behind ALU to save microcode width bits
 				for_step,
 				for_check,
 				S_swap32	// uniquely, this is a NOP in 16-bit CPU
@@ -339,7 +339,7 @@ scanProgram:	.sub;
 findNextCR:	.sub T;
 write2Nulls:	.sub T;
 readCore16:	.sub alu, T;
-traceALU:	.sub;
+//traceALU:	.sub;
 traceY:		.sub;
 traceBP:	.sub;
 outBeep:	.sub;
@@ -383,9 +383,9 @@ badop:		goto INTERNAL_ERR;
 			ExpStack <= startSwap, traceString 51;		// R <= ExpStack(0), S <= ExpStack(0 + param) 
 			ExpStack <= endSwap, goto fetch1;			// ExpStack(0) <= S, ExpStack(0 + param) <= R
 
-			.map 0x00;									// SX 0 does nothing, so map to just skip
+			.map 0x00;									// SX 0 used to mark statement start
 			traceString 15;								// trace mnemonic
-			goto fetch;
+			alu <= il_cache_store, goto fetch;			// write (or overwrite) entry to il_cache
 			
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x08;									// NOP (No operation)
@@ -511,8 +511,8 @@ findLino:	alu <= reset1, readCore(T);
 			traceString 22;								// Trace mnemonic
 			pullRS();
 			alu <= S_plus_R, if ALU_READY then next else repeat;
-alu_done:	traceALU();
-			T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
+//alu_done:	traceALU();
+alu_done:	T <= from_YLo, if ALU_OVERFLOW then OVERFLOW_ERR;
 u_done:		ExpStack <= push_TWord, goto fetch;		
 
 			////////////////////////////////////////////////////////////////////////////////
@@ -763,10 +763,12 @@ gl_tabloop:	if AT_TAB then gl_write0;
 			.map 0x28;									// SA (Switch on Alpha character)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 4;								// Trace mnemonic - TODO
-			skipSpaces();
-			MDR <= ToUpper, if MDR_IS_ALPHA then next else sa_exit;	// test covers lowercase too, so can execute conversion and check in parallel	
-			IL_PC <= pc_plus_off2alpha, goto fetch;
-sa_exit:	IL_PC <= pc_plus_off8, goto fetch;
+			alu <= il_cache_update_statementcount, skipSpaces();
+			MDR <= ToUpper, if MDR_IS_ALPHA then next else sa_default;		// test covers lowercase too, so can execute conversion and check in parallel	
+			if IL_CACHE_HIT then sa_cached;
+			IL_PC <= pc_plus_off2alpha, goto fetch;							// case when a..z was found
+sa_default:	IL_PC <= pc_plus_off8, goto fetch;								// not alpha, for example @ or ?
+sa_cached:	IL_PC <= from_il_cache, BP <= from_il_cache, goto fetch;		// start of statement found in IL cache entry
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x2A;									// IL (insert Basic line)
@@ -1146,13 +1148,13 @@ traceBP:	ExpStack <= push_TWord, T <= BP, traceString 33;
 traceY:		ExpStack <= push_TWord, T <= from_YLo, traceString 32;
 			T <= ExpStack, ExpStack <= pop2, back;
 			
-traceALU:	trace(crlf);
-			T <= save, traceT;
-			T <= from_S, traceString 52;
-			T <= from_R, traceString 52;
-			T <= from_YHi, traceString 53;		// this traces 32 bits, YHi and YLo
-			T <= from_YLo, traceString 52;		
-			T <= recall, DBGINDEX <= crlf;		
+//traceALU:	trace(crlf);
+//			T <= save, traceT;
+//			T <= from_S, traceString 52;
+//			T <= from_R, traceString 52;
+//			T <= from_YHi, traceString 53;		// this traces 32 bits, YHi and YLo
+//			T <= from_YLo, traceString 52;		
+//			T <= recall, DBGINDEX <= crlf;		
 trace:		if DBG_READY then next else repeat;	// sync with baudrate clock that drives UART
 			if DBG_READY then next else repeat;
 			DBGINDEX <= zero, back;				// clear the serial debug output register and return

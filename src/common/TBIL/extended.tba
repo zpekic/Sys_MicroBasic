@@ -35,7 +35,7 @@
 	J LETLP		//o
 	J P_BEG		//print, poke, push, pop
 	J LETLP		//q
-	J R_BEG		//return
+	J R_BEG		//return, run
 	J LETLP		//s
 	J LETLP	 	//t
 	J LETLP		//u
@@ -51,12 +51,13 @@
 
 // LET, LIST ---------------------------------------- 
 :L_BEG	BC LISTI, "LET"
-:LETLP	BV ARRAY
+:LETLP	SX 0		//CREATE CACHE ENTRY
+:LETLPN	BV ARRAY
 :LET	BC *, "="
 	JS EXPR         //GO GET EXPRESSION
 	BC LETDN, ","	//more assignments?
 	SV			//yes, then store result
-	BR LETLP		//and look for next variable
+	BR LETLPN		//and look for next variable
 :ARRAY	BC *, "@"		//wasn't A..Z, so must be @(index)		
 	LN 31			//POKE16/32, but with address = (2 or 4) * index + PrgEnd + 1
 	JS FUNC			//eval expression and make sure it is closed by )
@@ -65,7 +66,7 @@
 	US			//execute assignment
 	SP			//assigment was done so remove stack top to prevent stack overflow
 	BC LETEX, ","	//more assignments?
-	BR LETLP	//yes, back to loop	
+	BR LETLPN	//yes, back to loop	
 :LETDN	SV            	//IF STATEMENT END, store result
 	NC              //and check if another statement after
 :LISTI	BR LIST			//island to overcome branch extent limit
@@ -87,6 +88,7 @@
 
 // FOR ----------------------------------------
 :F_BEG	BC F_END, "FOR"
+	SX 0			//CREATE CACHE ENTRY
 	BV *			// pick up variable name
 	BC *, "="		// followed by =
 	JS EXPR			// start value
@@ -102,6 +104,7 @@
 
 // NEXT, NEW ----------------------------------
 :N_BEG	BC NEW, "NEXT"
+	SX 0			//CREATE CACHE ENTRY
 	BV *			// enforce variable name that must follow NEXT
 	FE			// do NEXT magic
 	GO			// FE will leave line number of its FOR statement on stack, so go there for next iteration 
@@ -113,12 +116,14 @@
 // GOTO, GOSUB --------------------------------
 :G_BEG 	BC G_END, "GO"
 	BC GOSB, "TO"
+	SX 0		//CREATE CACHE ENTRY
 	JS EXPR         //GET LINE NUMBER
 	BE *
 	SB              //(DO THIS FOR STARTING)
 	RB
 	GO              //GO THERE
 :GOSB 	BC *, "SUB"     //NO OTHER WORD BEGINS "GO//////"
+	SX 0		//CREATE CACHE ENTRY
 	JS EXPR
 	BE *
 	GS
@@ -126,7 +131,8 @@
 :G_END	J LETLP
 
 // IF <cond> THEN, INPUT ---------------------
-:I_BEG  BC INPT, "IF"
+:I_BEG  BC INPT, "IF"	
+	SX 0 		//CREATE CACHE ENTRY TO PREVENT RE-EXECUTION IN THEN CASE
 	JS EXPR
 	JS RELO
 	JS EXPR
@@ -140,6 +146,7 @@
 :THEN	J STMT          //TRUE// GO PROCESS STATEMENT
 
 :INPT 	BC I_END, "INPUT"
+	SX 0		//CREATE CACHE ENTRY
 	BC I2, '"'	//any prompt to print out first?
 	PQ
 	BC *, ","	//expect comma after the prompt
@@ -162,7 +169,8 @@
 // PRINT, POKE, PUSH, POP -----------------------
 :P_BEG 	BC SKIP, "PR"
 	BC P0, "INT"    //OPTIONALLY OMIT "INT"
-:P0   	BE P3
+:P0	SX 0		//CREATE CACHE ENTRY
+   	BE P3
 	BR P6           //IF DONE, GO TO END
 :P1   	BC P4, ";"
 :P2   	BE P3
@@ -170,7 +178,7 @@
 :P3   	BC P7, '"'
 	PQ              //QUOTE MARKS STRING
 	BR P1           //GO CHECK DELIMITER
-:SKIP 	BR POKE           //(ON THE WAY THRU)
+:SKIP 	BR POKE         //(ON THE WAY THRU)
 :P4   	BC P5, ","
 	PT              //COMMA SPACING
 	BR P2
@@ -184,6 +192,7 @@
 	BR P1
 
 :POKE	BC PUSH, "POKE"
+	SX 0		//CREATE CACHE ENTRY
 	LN 24		//POKE = usr(24, address, byte)
 	JS EXPR		//address
 	BC *, ","	//expect comma
@@ -193,12 +202,13 @@
 	NC
 		
 :PUSH	BC POP, "PUSH"
-:PUSHNX	JS EXPR	
-	BC PHEND, ","	//more assignments?
+	SX 0		//CREATE CACHE ENTRY
+:PUSHNX JS EXPR	
+	BC PPEND, ","	//more assignments?
 	BR PUSHNX	//yes, back to loop	
-:PHEND	NC
 
 :POP	BC P_END, "POP"
+	SX 0		//CREATE CACHE ENTRY
 :POPNX	BV *		//at least one variable name
 	SX 2
 	SX 1		//variable name under the value on stack
@@ -221,6 +231,7 @@
 
 // RETURN, RUN ----------------------------------------------
 :R_BEG 	BC RUN, "RETURN"
+	SX 0		//CREATE CACHE ENTRY
 	BE *
 	RS              //RECOVER SAVED LINE
 	NX
@@ -229,6 +240,7 @@
 	J XEC
 // REM
 :REM  	BC R_END, "REM"
+	SX 0		//CREATE CACHE ENTRY
 	NX		// just skip to next CR 
 :R_END	J LETLP
 

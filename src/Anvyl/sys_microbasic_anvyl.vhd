@@ -141,10 +141,11 @@ type memory is array (0 to 4095) of std_logic_vector(7 downto 0);
 signal ram: memory;
 signal nREADY, nBUSACK, nRD, nWR, RESET, INTACK: std_logic;
 signal A: std_logic_vector(15 downto 0);
-signal D: std_logic_vector(7 downto 0);
+signal D : std_logic_vector(7 downto 0);
 signal pattern, data: std_logic_vector(7 downto 0); 
 signal reset_delay: std_logic_vector(7 downto 0) := X"00"; 
 signal nSel_FFFX, nSel_FFFX_delayed: std_logic;
+signal nSel_ExtRam: std_logic;
 signal nSel_FFFX_sel: std_logic_vector(1 downto 0);
 
 -- Connect to PmodUSBUART 
@@ -383,7 +384,7 @@ cpu: entity work.MicroBasic
 		Generic map (
 		 --MSB => 15	-- 16-bit vars / arithmetic
 		 MSB => 31,		-- 32-bit vars / arithmetic
-		 Core_End => X"0FFF"	-- 4k, can be up to 64k
+		 Core_End => X"CFFF"	-- 52k, can be up to 64k
 		)
 		Port map (
 		reset => RESET,
@@ -455,12 +456,29 @@ il_rom: entity work.tbil port map (
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nREADY or nWR or A(15)) = '0') then 
+		if ((nREADY or nWR or A(15) or A(14) or A(13) or A(12)) = '0') then 
 			ram(to_integer(unsigned(A(11 downto 0)))) <= D;
 		end if;
 	end if;
 end process;
 
+-- external RAM
+SRAM_CS1 <= '1'; -- DISABEL 
+SRAM_CS2 <= nSel_ExtRam;
+SRAM_OE <= nRD;
+SRAM_WE <= nWR;
+SRAM_UPPER_B <= '0'; -- ENABLE 
+SRAM_LOWER_B <= '1'; -- DISABLE
+Memory_address <= ("000" & A);
+Memory_data(15 downto 8) <= D when ((nWR or nSel_ExtRam) = '0') else "ZZZZZZZZ";
+
+with A(15 downto 12) select nSel_ExtRam <= 
+	'1' when X"0",
+	'1' when X"D",
+	'1' when X"E",
+	'1' when X"F",
+	'0' when others;	-- 0x1000 ... 0xCFFF 
+	
 nSel_FFFX <= '0' when (A(15 downto 4) = X"FFF") else '1';
 ds1302_nsel <= '0' when (A(15 downto 12) = X"E") else '1';
 
@@ -470,14 +488,17 @@ with A(15 downto 12) select data <=
 	pattern when X"D",													-- CHARGEN
 	ds1302_data when X"E",												-- RTC
 	BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1 when X"F",	-- FPU
-	X"FF" when others;													-- future expansion
+	Memory_data(15 downto 8) when others;							-- future expansion
 
 D <= data when ((nREADY or nRD) = '0') else "ZZZZZZZZ";
 
 with A(15 downto 12) select nREADY <=
+	'0'					when X"0",										-- Video (dual port) RAM
+	'0'					when X"D",										-- CHARGEN
 	ds1302_busy			when X"E",										-- RTC
 	not FPU_nPause		when X"F",										-- FPU
-	'0'					when others;									-- RAM/CHARGEN 
+--	not(button(2))		when others;									-- External RAM 
+	'0'					when others;									
 
 -- Character generator ROM handy for the marquee demo
 chargen: entity work.chargen_rom port map (
@@ -501,10 +522,12 @@ with sw_cpuclk select cpu_clk <=
 leds: entity work.sixdigitsevensegled port map ( 
 			  -- inputs
 			  data => cpu_debug(23 downto 0),
---			  data => (X"0000" & std_logic_vector(to_unsigned(fill_count, 8))),
+--			  data => (D & A),
 			  digsel => cnt4096(6 downto 4),
-           showdigit => "111111",
+--         showdigit => (others => not nSel_ExtRam),
+           showdigit => (others => '1'),
 			  showdot => cpu_debug(29 downto 24),
+--			  showdot => (not nRD & not nWR & "0000"),
            showsegments => '1',
 			  -- outputs
            anode => AN,
@@ -525,21 +548,6 @@ leds: entity work.sixdigitsevensegled port map (
 --end process;
 
 -- UART connection to the host
---txdout: entity work.uart_par2ser_fifo
---		generic map (
---			ADDR_WIDTH => 4	-- 16 entry deep FIFO
---		)
---		Port map (
---			reset => reset,
---			clk => sys_clk,
---			txd_clk => baudrate_x1,
---			send => cpu_outchar_send,
---			mode => "000", -- no parity, extra stop bit
---			data => cpu_outchar,
---			ready => cpu_outchar_ready,
---			txd => PMOD_RXD0
---		);
-
 txdout: entity work.uart_par2ser
 			Port map (
 			reset => reset,
