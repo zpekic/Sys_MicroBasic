@@ -128,6 +128,7 @@ constant OP_NX: std_logic_vector(7 downto 0) := X"1D";	-- NeXt statement
 constant OP_NC: std_logic_vector(7 downto 0) := X"1E";	-- Next statement after Colon
 constant OP_PQ: std_logic_vector(7 downto 0) := X"21";	-- Print basic string (from RAM to output)
 constant OP_GL: std_logic_vector(7 downto 0) := X"27";	-- Get Line
+constant OP_US: std_logic_vector(7 downto 0) := X"2E";	-- USr function call
 constant OP_RT: std_logic_vector(7 downto 0) := X"2F";	-- ReTurn (pop from IL return stack)
 -- extended Tiny Basic specific opcode
 constant OP_FS: std_logic_vector(7 downto 0) := X"25";	-- For Start
@@ -263,7 +264,6 @@ alias il_cache_bp: std_logic_vector(15 downto 0) is il_cache_entry(31 downto 16)
 alias il_cache_pc: std_logic_vector(10 downto 0) is il_cache_entry(42 downto 32);	-- cached IL_PC 
 signal il_cache_hit: std_logic;
 signal il_cache_valid: std_logic;
-signal at_tab_alt_il_cache_hit: std_logic;
 signal cnt_statement: std_logic_vector(7 downto 0) := X"00";
 signal lino_sa: std_logic_vector(15 downto 0) := X"0000";
 signal il_cache_empty, il_cache_full : std_logic;
@@ -278,7 +278,7 @@ signal at_tab: std_logic;
 signal ready_alt_break: std_logic;
 signal last3Chars: std_logic_vector(23 downto 0);
 signal is_notRnd: std_logic;
-signal s_equ_db_mod32: std_logic;
+signal s_equ_db_mod32, s_equ_db_mod32_alt_il_cache_hit: std_logic;
 signal busack_clk: std_logic;
 
 begin
@@ -437,10 +437,10 @@ cu_mb: entity work.microbasic_control_unit
 			cond(seq_cond_ALU_READY) => alu_ready,
 			cond(seq_cond_ALU_OVERFLOW) => (overflowEnable and is_notRnd and alu_overflow),
 			cond(seq_cond_ALU_SIGN) => alu_sign,
-			cond(seq_cond_AT_TAB) => at_tab_alt_il_cache_hit,
+			cond(seq_cond_AT_TAB) => at_tab,
 			cond(seq_cond_OFF_IS_ZERO) => off_is_zero,
 			cond(seq_cond_IS_RUNMODE) => is_runmode,
-			cond(seq_cond_S_EQU_DB_MOD32) => s_equ_db_mod32,	
+			cond(seq_cond_S_EQU_DB_MOD32) => s_equ_db_mod32_alt_il_cache_hit,	
 			cond(seq_cond_CACHE_VALID) => cache_valid_alt_for_set,
 			cond(seq_cond_CACHE_HIT) => cache_hit_alt_next_set,
 			cond(seq_cond_false) => '0',
@@ -487,7 +487,7 @@ lino_int <= INT_VECTORS(to_integer(unsigned(il_current)));
 
 -- few condition codes come from two very different sources, but we can always (?) differentiate
 y_sign_alt_intreq <= intreq when (executing_nx = '1') else Y(MSB);
-at_tab_alt_il_cache_hit <= (il_cache_hit and is_runmode) when (IL_OP = OP_SA) else at_tab;
+s_equ_db_mod32_alt_il_cache_hit <= s_equ_db_mod32 when (IL_OP = OP_US) else (il_cache_hit and is_runmode);
 
 -- simply ignore CTRL/C while the trace output is ongoing
 ready_alt_break <= charin_is_break when (DBGINDEX = "000000") else DBG_READY;

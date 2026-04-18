@@ -40,10 +40,10 @@ seq_cond:		.if 5 values
 				ALU_READY		| LS_PARAMS_OK,
 				ALU_OVERFLOW 	| LS_PASSED_END,
 				ALU_SIGN		| LS_IN_RANGE,
-				AT_TAB			| IL_CACHE_HIT,
+				AT_TAB,
 				OFF_IS_ZERO,
 				IS_RUNMODE,
-				S_EQU_DB_MOD32,	
+				S_EQU_DB_MOD32	| IL_CACHE_HIT,	
 				CACHE_VALID		| FOR_SET,		
 				CACHE_HIT		| NEXT_SET,		
 				false					// hard-code to 0
@@ -477,14 +477,13 @@ push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 45;								// Trace mnemonic
 go:			IL_PC <= XQhere, if STACK_IS_EMPTY then ESTACK_ERR;	// IL_PC <= XQhere, check stack
-			alu <= R_fromStack, ExpStack <= pop2;
-			T <= from_R;
+			alu <= R_fromStack, T<= ExpStack, ExpStack <= pop2; // pick up target Lino from Expression Stack for assignment and check
 			Lino <= T, if R_IS_ZERO then NOPROG_ERR;			// once Lino is set, CACHE_HIT and CACHE_VALID are meaningful
 			// traceLino;
 			T <= Cache_Data, if CACHE_VALID then go_cvalid;		// load T with assumed "good" cached data
 			// INVALID: the cache entry is free, find target and store in cache (and stay there until end of run)
-go_cmiss:	findLino(Prog_start);
-			alu <= cache_store, goto fetch;	// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
+go_cmiss: 	findLino(Prog_start);
+			alu <= cache_store, goto fetch;						// cache[Lino(4:0)] <= Lino & BP, cache_valid[Lino(4:0)] <= 1 
 			
 go_cvalid:	BP <= T, if CACHE_HIT then fetch else go_cmiss;
 		

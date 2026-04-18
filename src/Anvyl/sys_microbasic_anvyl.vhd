@@ -147,6 +147,7 @@ signal reset_delay: std_logic_vector(7 downto 0) := X"00";
 signal nSel_FFFX, nSel_FFFX_delayed: std_logic;
 signal nSel_ExtRam: std_logic;
 signal nSel_FFFX_sel: std_logic_vector(1 downto 0);
+signal ExtMem_byte: std_logic_vector(7 downto 0);
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -290,7 +291,8 @@ LDT2G <= INTACK or (cpu_cache_empty);
 LDT2Y <= INTACK or (not (cpu_cache_empty or cpu_cache_full));
 
 PMOD_RXD1 <= debug_txd;
-LED <= RXD_CHAR when (button(2) = '0') else switch;
+--LED <= RXD_CHAR when (button(2) = '0') else switch;
+LED <= Memory_data(15 downto 8);
 
 -- divide internal clock   	
 on_mclk: process(CLK, cnt307200, cnt4096, cnt50MHz)
@@ -463,14 +465,16 @@ begin
 end process;
 
 -- external RAM
-SRAM_CS1 <= '1'; -- DISABEL 
-SRAM_CS2 <= nSel_ExtRam;
+SRAM_CS1 <= nSel_ExtRam;
+SRAM_CS2 <= '1';
 SRAM_OE <= nRD;
 SRAM_WE <= nWR;
-SRAM_UPPER_B <= '0'; -- ENABLE 
-SRAM_LOWER_B <= '1'; -- DISABLE
-Memory_address <= ("000" & A);
-Memory_data(15 downto 8) <= D when ((nWR or nSel_ExtRam) = '0') else "ZZZZZZZZ";
+SRAM_UPPER_B <= not A(0); 
+SRAM_LOWER_B <= A(0); 
+Memory_address <= ("0000" & A(15 downto 1));
+Memory_data(7 downto 0) <= D when ((nWR or A(0)) = '0') else "ZZZZZZZZ";
+Memory_data(15 downto 8) <= D when ((nWR or (not A(0))) = '0') else "ZZZZZZZZ";
+ExtMem_byte <= Memory_data(7 downto 0) when (A(0) = '0') else Memory_data(15 downto 8);
 
 with A(15 downto 12) select nSel_ExtRam <= 
 	'1' when X"0",
@@ -488,7 +492,7 @@ with A(15 downto 12) select data <=
 	pattern when X"D",													-- CHARGEN
 	ds1302_data when X"E",												-- RTC
 	BB8 & BB7 & BB6 & BB5 & BB4 & BB3 & BB2 & BB1 when X"F",	-- FPU
-	Memory_data(15 downto 8) when others;							-- future expansion
+	ExtMem_byte when others;											-- From external 16-bit wide RAM
 
 D <= data when ((nREADY or nRD) = '0') else "ZZZZZZZZ";
 
