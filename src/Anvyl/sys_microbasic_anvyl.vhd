@@ -472,8 +472,7 @@ SRAM_WE <= nWR;
 SRAM_UPPER_B <= not A(0); 
 SRAM_LOWER_B <= A(0); 
 Memory_address <= ("0000" & A(15 downto 1));
-Memory_data(7 downto 0) <= D when ((nWR or A(0)) = '0') else "ZZZZZZZZ";
-Memory_data(15 downto 8) <= D when ((nWR or (not A(0))) = '0') else "ZZZZZZZZ";
+Memory_data <= (D & D) when ((nWR or nSel_ExtRam) = '0') else "ZZZZZZZZZZZZZZZZ";
 ExtMem_byte <= Memory_data(7 downto 0) when (A(0) = '0') else Memory_data(15 downto 8);
 
 with A(15 downto 12) select nSel_ExtRam <= 
