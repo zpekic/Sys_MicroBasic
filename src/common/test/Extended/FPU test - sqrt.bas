@@ -1,4 +1,4 @@
-clear
+new
 100 print "i","status","sqrt(i)"
 110 for i=-10 to 200 step 5
 118 	rem push 32-bit signed integer and print it as decimal
@@ -7,10 +7,10 @@ clear
 140 	poke 65524, 1: rem SQRT (TOS <= SQRT(TOS))
 149 	rem check the status
 150 	let s=peek(65524) : if usr(3, s, 128) <> 0 then 150 : rem check for BUSY flag
-151 	if usr(3, s, 30) <> 0 then 170
-152 	if usr(3, s, 64) <> 0 then print "S";
-153 	if usr(3, s, 32) <> 0 then print "Z";
-154 	if usr(3, s, 1) <> 0 then print "C";
+151 	if usr(3, s, 30) then 170
+152 	if usr(3, s, 64) then print "S";
+153 	if usr(3, s, 32) then print "Z";
+154 	if usr(3, s, 1) then print "C";
 160	print " ";
 165 	goto 200
 170	print "ERROR"
@@ -58,7 +58,7 @@ clear
 9301 push t
 9302 let m=0, t=8388608
 9303 if t=0 then 9306
-9304 	if usr(3, t, v) <> 0 then let m=m+s
+9304 	if usr(3, t, v) then let m=m+s
 9305 	let t=t/2, s=s/2 : goto 9303
 9306 pop t
 9307 return

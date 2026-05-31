@@ -222,14 +222,14 @@
 	#NET "JF10"	LOC= AB6	|	IOSTANDARD=LVCMOS33;		#Bank = 2, pin name = IO_L64N_D9_2,			Sch name = JF10
 	
 ## JG
-	#NET "JG1"	LOC = V20	|	IOSTANDARD=LVCMOS33;		#Bank = 1, pin name = IO_L71N_1,						Sch name = JG1
-	#NET "JG2"	LOC = T18	|	IOSTANDARD=LVCMOS33;		#Bank = 1, pin name = IO_L72N_1,						Sch name = JG2
-	#NET "JG3"	LOC = D17	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L65P_SCP3_0,			Sch name = JG3
-	#NET "JG4"	LOC = B18	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L66P_SCP1_0,			Sch name = JG4
-	#NET "JG7"	LOC = T17	|	IOSTANDARD=LVCMOS33;		#Bank = 1, pin name = IO_L72P_1,						Sch name = JG7
-	#NET "JG8"	LOC = A17	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L64N_SCP4_0,			Sch name = JG8
-	#NET "JG9"	LOC = C16	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L65N_SCP2_0,			Sch name = JG9
-	#NET "JG10"	LOC= A18	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L66N_SCP0_0,			Sch name = JG10
+	NET "JG1"	LOC = V20	|	IOSTANDARD=LVCMOS33;		#Bank = 1, pin name = IO_L71N_1,						Sch name = JG1
+	NET "JG2"	LOC = T18	|	IOSTANDARD=LVCMOS33;		#Bank = 1, pin name = IO_L72N_1,						Sch name = JG2
+	NET "JG3"	LOC = D17	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L65P_SCP3_0,			Sch name = JG3
+	NET "JG4"	LOC = B18	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L66P_SCP1_0,			Sch name = JG4
+	NET "JG7"	LOC = T17	|	IOSTANDARD=LVCMOS33;		#Bank = 1, pin name = IO_L72P_1,						Sch name = JG7
+	NET "JG8"	LOC = A17	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L64N_SCP4_0,			Sch name = JG8
+	NET "JG9"	LOC = C16	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L65N_SCP2_0,			Sch name = JG9
+	NET "JG10"	LOC= A18	|	IOSTANDARD=LVCMOS33;		#Bank = 0, pin name = IO_L66N_SCP0_0,			Sch name = JG10
 	
 ## VGA
 	NET "RED_O[0]"	LOC = "T3"	|	IOSTANDARD=LVCMOS18;				#Bank = 3, pin name = IO_L26P_3,						Sch name = VGA-R1

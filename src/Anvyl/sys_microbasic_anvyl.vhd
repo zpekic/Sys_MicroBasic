@@ -78,6 +78,15 @@ entity sys_microbasic_anvyl is
 				JE2: inout std_logic;
 				JE3: inout std_logic;
 				JE4: inout std_logic;
+				--PMOD interface (TIM-011 graphics)
+				JG1: out std_logic;
+				JG2: out std_logic;
+				JG3: out std_logic;
+				JG4: out std_logic;
+				JG7: out std_logic;
+				JG8: out std_logic;
+				JG9: out std_logic;
+				JG10: out std_logic;
 				--DIP switches
 				DIP_B4, DIP_B3, DIP_B2, DIP_B1: in std_logic;
 				DIP_A4, DIP_A3, DIP_A2, DIP_A1: in std_logic;
@@ -187,18 +196,18 @@ signal debug_txd: std_logic;
 signal cpu_t: std_logic_vector(15 downto 0);
 signal cpu_cache_full, cpu_cache_empty: std_logic;
 signal cpu_uipc: std_logic_vector(8 downto 0);		-- microcode program counter value
-signal fill_count: integer range 255 downto 0;		-- match RAM_DEPTH for FIFO
 
-signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
+signal prescale_baud, prescale_power, prescale_ms, prescale_8MHz: integer range 0 to 65535;
 
 signal cnt50MHz: std_logic_vector(11 downto 0); -- 12 bit counter driven by 100MHz
+signal cnt8MHz: std_logic_vector(3 downto 0); 	-- 4 bit counter driven by 4MHz
 alias vga_clk: std_logic is cnt50MHz(1);
 alias Am9511_clk: std_logic is cnt50MHz(5);		-- 1.5625MHz
 alias ds1302_clk: std_logic is cnt50MHz(10);		-- 48.8kHz
-signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
+signal cnt307200: std_logic_vector(15 downto 0);	-- 16 bit counter driven by 2*307.2kHz
 alias freq19200: std_logic is cnt307200(4);
 
-signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
+signal cnt4096: std_logic_vector(11 downto 0); 		-- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
 signal cpu_clk, sys_clk, clk_sel1, clk_sel0: std_logic;
 signal freq1kHz: std_logic;
@@ -236,6 +245,13 @@ signal inp_active, prg_active, mcc_active, mcc_active_out, vga_window: std_logic
 -- 3 independent windows can overlap as they wish, but higher priority window will occluse the lower ones
 signal win_vector: std_logic_vector(2 downto 0);	-- 3 bits for 3 independent windows
 signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
+
+-- graphics
+signal gr_hsync, gr_vsync: std_logic;
+signal gr_color12: std_logic_vector(11 downto 0);
+alias gr_red: std_logic_vector(3 downto 0) is gr_color12(11 downto 8);
+alias gr_green: std_logic_vector(3 downto 0) is gr_color12(7 downto 4);
+alias gr_blue: std_logic_vector(3 downto 0) is gr_color12(3 downto 0);
 
 begin
 
@@ -327,6 +343,13 @@ begin
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
+			-- generate 8, 4, 2, 1 MHz
+			if (prescale_8MHz = 0) then
+				cnt8MHz <= std_logic_vector(unsigned(cnt8MHz) + 1);
+				prescale_8MHz <= (50000000 / 8000000);
+			else
+				prescale_8MHz <= prescale_8MHz - 1;
+			end if;
 			-- slow clock to get to 2Hz
 			if (prescale_power = 0) then
 				cnt4096 <= std_logic_vector(unsigned(cnt4096) + 1);
@@ -384,7 +407,7 @@ with sys_sel select sys_clk <=
 
 cpu: entity work.MicroBasic 
 		Generic map (
-		 --MSB => 15	-- 16-bit vars / arithmetic
+		 --MSB => 15,	-- 16-bit vars / arithmetic
 		 MSB => 31,		-- 32-bit vars / arithmetic
 		 Core_End => X"CFFF"	-- 52k, can be up to 64k
 		)
@@ -516,7 +539,7 @@ with sw_cpuclk select cpu_clk <=
 		cnt4096(6) when O"2",		-- 64Hz
 		cnt4096(0) when O"3",		-- 4.096kHz
 		cnt50MHz(3) when O"4",		-- 6.25MHz
-		cnt50MHz(2) when O"5",		-- 12.5MHz
+		cnt8MHz(2) when O"5",		-- 12.5MHz
 		cnt50MHz(1) when O"6",		-- 25MHz 
 --		cnt50MHz(0) when others; 	-- 50MHz
 		CLK when others;
@@ -592,11 +615,9 @@ vga: entity work.mwvga Port map (
 		cursor_enable => (freq2 and vga_cursor),
 		cursor_type => sw_traceDisable,	-- only visual change, not functional
 		-- VGA connections
-		color12(11 downto 8) => RED_O,
-		color12(7 downto 4) => GREEN_O,
-		color12(3 downto 0) => BLUE_O,
-		hsync => HSYNC_O,
-		vsync => VSYNC_O
+		color12 => gr_color12,
+		hsync => gr_hsync,
+		vsync => gr_vsync
 	);
 	
 inpwin: entity work.hwindow
@@ -724,4 +745,23 @@ sym_ram: entity work.symTracer port map (
 		char_addr => mcc_addr(8 downto 0),
 		char_out => sym_char		
 	);
+	
+-- VGA out
+RED_O <= gr_red;
+GREEN_O <= gr_green;
+BLUE_O <= gr_blue;
+HSYNC_O <= gr_hsync;
+VSYNC_O <= gr_vsync;
+
+-- alternate video out
+JG1 <= '0' when (gr_red = "0000") else '1';
+JG2 <= '0' when (gr_green = "0000") else '1';
+JG3 <= '0' when (gr_blue = "0000") else '1';
+JG4 <= (switch(1) xor gr_hsync) xnor (switch(0) xor gr_vsync);
+JG7 <= gr_vsync;
+JG8 <= gr_hsync;
+-- test points
+JG9 <= baudrate_x1;
+JG10 <= cpu_clk;
+
 end;

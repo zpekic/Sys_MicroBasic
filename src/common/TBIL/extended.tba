@@ -131,10 +131,15 @@
 :G_END	J LETLP
 
 // IF <cond> THEN, INPUT ---------------------
-:I_BEG  BC INPT, "IF"	
+:I_BEG  BC NOTIF, "IF"	
 	SX 0 		//CREATE CACHE ENTRY TO PREVENT RE-EXECUTION IN THEN CASE
 	JS EXPR
-	JS RELO
+	BC I7, "THEN"	//statement of form: IF expression THEN ...?
+	LB 5		//yes, means IF expression <> 0 THEN
+	LN 0		
+	BR I1
+:NOTIF	BR INPT		//jump island
+:I7	JS RELO
 	JS EXPR
 	BC I1, "THEN"   //OPTIONAL NOISEWORD
 :I1	CP              //COMPARE SKIPS NEXT IF TRUE

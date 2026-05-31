@@ -1,4 +1,4 @@
-clear
+new
 100 rem -- Demo to marqee string between brackets below
 110 rem [Hello World from Extended Tiny Basic! ]
 
