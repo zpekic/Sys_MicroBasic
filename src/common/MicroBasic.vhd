@@ -49,7 +49,7 @@ entity MicroBasic is
 			-- Intermediate language (IL) read-only memory
 			IL_A: out STD_LOGIC_VECTOR(10 downto 0);
 			IL_D: in STD_LOGIC_VECTOR(7 downto 0);
-			--TB_EXTENDED: in STD_LOGIC;
+			TB_EXTENDED: in STD_LOGIC;
 			-- Input line and Basic program memory (up to 64k)
 			nBUSREQ : in STD_LOGIC;
 			nBUSACK : buffer STD_LOGIC;

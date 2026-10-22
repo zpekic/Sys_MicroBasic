@@ -1,3 +1,5 @@
 @echo off
 @echo See https://github.com/zpekic/MicroCodeCompiler
-..\..\..\..\Sys9900\mcc\mcc\bin\Debug\mcc.exe microBasic.mcc
+C:\Users\zoltanp\Documents\HexCalc\Sys9900\mcc\mcc\bin\Debug\mcc.exe microBasic.mcc
+
+

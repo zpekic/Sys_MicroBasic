@@ -1,7 +1,9 @@
 100 REM See https://en.wikipedia.org/wiki/Rugg/Feldman_benchmarks#Sample_results
+101 REM https://hackaday.io/project/204482-cpu-running-basic
+102 REM Basic CPU, Extended TinyBasic, 1MHz clock: 27.124s
 300 PRINT"S"
 400 K=0
-430 rem DIM M(5)
+430 rem DIM M(5) - @(I) array is always defined, DIM is not supported
 500 K=K+1
 510 LET A=K/2*3+4-5
 520 GOSUB 820

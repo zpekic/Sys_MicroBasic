@@ -717,7 +717,7 @@ for_done:	Vars <= next_clear, findNx();
 			Vars <= next_fromBP, ExpStack <= push_TWord, goto fetch;					// push to stack the Line Number of corresponding FOR
 
 			////////////////////////////////////////////////////////////////////////////////
-			.map 0x27;									// GL (Get Input line)
+			.map 0x27;	// GL (Get Input line)
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 8;								// Trace mnemonic
 gl:			InlEnd <= InLine_start;
@@ -1133,11 +1133,11 @@ readCore:	nRD = 0;
 //	---------------------------------------------------------------------------		
 //dump_input: InlEnd <= InLine_start, trace(crlf);
 //dump_inlp:	readCore(InlEnd);
-//			directByte = 9, trace(from_microcode);		// display memory byte as Hex
-//			directByte = NULL, if MDR_MATCHES_DB then dump_inex;
-//			InlEnd <= inc, goto dump_inlp; 
+//		directByte = 9, trace(from_microcode);		// display memory byte as Hex
+//		directByte = NULL, if MDR_MATCHES_DB then dump_inex;
+//		InlEnd <= inc, goto dump_inlp; 
 //dump_inex:	trace(crlf);
-//			back;			
+//		back;			
 			
 traceBP:	ExpStack <= push_TWord, T <= BP, traceString 33;
 			T <= ExpStack, ExpStack <= pop2, back;
