@@ -3,7 +3,9 @@ new
 110 rem [Hello World from Extended Tiny Basic! ]
 
 150 gosub 1000
-160 print "Found marquee string at ";f;", press CTRL/C to end demo"
+160 print "Found marquee string at ";f
+161 gosub 1100
+162 print "Found chargen at ";g;", press CTRL/C to end demo"
 165 let a=1536 
 170 let c=f+1
 175 let z=peek(c) : if z = 93 then 170
@@ -18,7 +20,7 @@ new
 
 3000 rem paint screen for character c and mask m/2
 3010 for y= 7 to 0 step -1
-3015 	let b=a+(64*y), p=peek(8*z+y+53248): rem chargen at 0xD000 
+3015 	let b=a+(64*y), p=peek(8*z+y+g): rem chargen at address g
 3020 	let x=0
 3030 	if x<63 then goto 3040
 3032 	let d=z : if usr(3, p, m)=0 then let d=32
@@ -35,5 +37,17 @@ new
 1040 if peek(f) = 13 then 1050
 1041 let f=f+1 : goto 1030
 1050 let f=f+1 : goto 1020
+
+1100 rem -- find chargen and return start position in G
+1110 for i=1 to 31
+1115    rem look for chargen in every 2k block except lowest which must be RAM
+1120    let g=i*2048
+1130    if peek(g+127*8+0) <> 85 then 1150
+1131    if peek(g+127*8+1) <> 170 then 1150 
+1140    rem found signature of 0x55, 0xAA for ASCII code 127
+1141    return
+1150 next i
+1160 print "^GChargen not found."
+1170 end
 
 
