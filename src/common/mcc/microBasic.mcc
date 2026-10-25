@@ -415,7 +415,7 @@ lb_push:	traceILByte, T <= codeByte;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 38;
 			if STACK_IS_EMPTY then ESTACK_ERR;
-			T <= ExpStack, if STACK_IS_FULL then ESTACK_ERR else push_T;
+			T <= ExpStack, if STACK_IS_FULL then ESTACK_ERR else u_done;
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x0C;									// SP (Stack Pop)
@@ -444,8 +444,8 @@ ptr_exc:	SvPt <= BP, BP <= SvPt, goto bp_done;
 			////////////////////////////////////////////////////////////////////////////////
 			traceString 36;								// trace mnemonic
 			Vars <= indexFromExpStack, if STACK_IS_EMPTY then ESTACK_ERR; 	// get index (variable name A-Z)
-			T <= from_vars, ExpStack <= pop1;								// T <= Vars(index)
-push_T:		ExpStack <= push_TWord, goto fetch;								// push onto stack
+			T <= from_vars, ExpStack <= pop1, traceLino;					// T <= Vars(index)
+            ExpStack <= push_TWord, goto fetch1;							// push onto stack
 
 			////////////////////////////////////////////////////////////////////////////////
 			.map 0x13;									// SV (Store Variable)
@@ -492,7 +492,7 @@ findLino:	alu <= reset1, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
 			alu <= S_fromLino, readCore(T);
 			alu <= Rx256_plus_MDR, T <= inc;
-			alu <= S_minus_R, if R_IS_ZERO then nx_err;		// TODO: "line xxx not found in yyy" message? (reached end of code without finding the target)
+			alu <= S_minus_R, if R_IS_ZERO then NOPROG_ERR;		// TODO: "line xxx not found in yyy" message? (reached end of code without finding the target)
 			//traceALU();
 			BP <= T, if Y_ZERO then return;					// target line number (S) is same as line number of inspected line (R), so bail (success)
 			findNextCR(same);
@@ -572,10 +572,7 @@ findNx:		findNextCR(BP);
 			T <= inc;
 			BP <= T;										// BP at start of next statement, which is 2 bytes containing the line number
 			readCore16(reset1, BP);
-			BP <= T, T <= from_R, if R_IS_ZERO then next else return; // BP at start of statement text, load T with new line number, check if at the end of program			 
-
-nx_err:		directByte = BEEP, outChar(from_microcode);		// TODO - write some error that we ran out of code?
-			goto stop_run;
+			BP <= T, T <= from_R, if R_IS_ZERO then stop_run else return; // BP at start of statement text, load T with new line number, check if at the end of program			 
 
 			///////////////////////////* EXTENDED INSTRUCTION */////////////////////////////
 			.map 0x1E;									// NC (Next Basic statement after colon)

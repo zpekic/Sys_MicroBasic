@@ -1,1 +1,4 @@
 *.xml
+src/Mercury/Mercury2.cache/wt/synthesis.wdf
+src/Mercury/Mercury2.runs/impl_1/.vivado.begin.rst
+src/Mercury/Mercury2.srcs/utils_1/imports/synth_1/sys_microbasic_mercury.dcp

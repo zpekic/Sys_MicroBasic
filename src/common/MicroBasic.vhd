@@ -82,9 +82,9 @@ end MicroBasic;
 architecture Behavioral of MicroBasic is
 
 -- generics
-constant MSB_DOUBLE: positive := (MSB + 1) * 2 - 1;							-- 31 / 63
-constant MSB_HALF: positive := (MSB + 1) / 2 - 1;								-- 7 / 15
-constant ZERO: std_logic_vector(MSB downto 0) := (others => '0');			-- X"0000" / X"00000000"
+constant MSB_DOUBLE: positive := (MSB + 1) * 2 - 1;						-- 31 / 63
+constant MSB_HALF: positive := (MSB + 1) / 2 - 1;						-- 7 / 15
+constant ZERO: std_logic_vector(MSB downto 0) := (others => '0');		-- X"0000" / X"00000000"
 constant MINUS_ONE: std_logic_vector(MSB downto 0) := (others => '1');	-- X"FFFF" / X"FFFFFFFF"
 constant BITCNT: std_logic_vector(4 downto 0) := std_logic_vector(to_unsigned(MSB, 5));		-- 15 / 31
 alias IS_CPU32: std_logic is BITCNT(4);																		-- '0' / '1'
@@ -124,13 +124,13 @@ constant OP_RS: std_logic_vector(7 downto 0) := X"15";	-- ReStore (pop from Basi
 constant OP_GO: std_logic_vector(7 downto 0) := X"16";	-- GO (to)
 constant OP_DV: std_logic_vector(7 downto 0) := X"1B";	-- DiVide
 constant OP_CP: std_logic_vector(7 downto 0) := X"1C";	-- ComPare
-constant OP_NX: std_logic_vector(7 downto 0) := X"1D";	-- NeXt statement
-constant OP_NC: std_logic_vector(7 downto 0) := X"1E";	-- Next statement after Colon
 constant OP_PQ: std_logic_vector(7 downto 0) := X"21";	-- Print basic string (from RAM to output)
 constant OP_GL: std_logic_vector(7 downto 0) := X"27";	-- Get Line
 constant OP_US: std_logic_vector(7 downto 0) := X"2E";	-- USr function call
 constant OP_RT: std_logic_vector(7 downto 0) := X"2F";	-- ReTurn (pop from IL return stack)
 -- extended Tiny Basic specific opcode
+constant OP_NX: std_logic_vector(7 downto 0) := X"1D";	-- NeXt statement
+constant OP_NC: std_logic_vector(7 downto 0) := X"1E";	-- Next statement after Colon
 constant OP_FS: std_logic_vector(7 downto 0) := X"25";	-- For Start
 constant OP_SA: std_logic_vector(7 downto 0) := X"28";	-- Switch on Alpha character
 
@@ -1474,16 +1474,16 @@ debug_uipc <= ui_address;		-- output microinstruction program counter to show mi
 
 -- state of caches based on debug_sel
 	with debug_sel select cache_empty <=
-		il_cache_empty						when "00",
+		il_cache_empty					when "00",
 		cache_empty0 and cache_empty1	when "01",		-- GOTO cache, whole
-		cache_empty0						when "10",		-- GOTO cache, way 0
-		cache_empty1						when others;	-- GOTO cache, way 1
+		cache_empty0					when "10",		-- GOTO cache, way 0
+		cache_empty1					when others;	-- GOTO cache, way 1
 
 	with debug_sel select cache_full <=
-		il_cache_full						when "00",
-		cache_full0 and cache_full1	when "01",		-- GOTO cache, whole
-		cache_full0							when "10",		-- GOTO cache, way 0
-		cache_full1							when others;	-- GOTO cache, way 1
+		il_cache_full				     when "00",
+		cache_full0 and cache_full1      when "01",		-- GOTO cache, whole
+		cache_full0					     when "10",		-- GOTO cache, way 0
+		cache_full1					     when others;	-- GOTO cache, way 1
 		
 -- paralled debug port
 	with debug_sel select debug_bus(23 downto 0) <= 

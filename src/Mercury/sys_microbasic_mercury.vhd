@@ -49,7 +49,7 @@ entity sys_microbasic_mercury is
 				ag_seg: out std_logic_vector(6 downto 0); 
 				an_7seg: out std_logic_vector(3 downto 0); 
 				seg_dot: out std_logic; 
-				-- 4 LEDs on Mercury board
+				-- 3 LEDs on Mercury board
 				led: out std_logic_vector(2 downto 0);
 				-- ADC interface
 				-- channel	input
@@ -77,18 +77,21 @@ end sys_microbasic_mercury;
 
 architecture Structural of sys_microbasic_mercury is
 
+constant FREQ_CLK: positive := 50000000;		-- 50MHz on Mercury2 FPGA board
+constant FREQ_EXT_CLK: positive := 16000000;	-- 16MHz on Mercury baseboard socket
+
 -- IL Code
 signal il_a: std_logic_vector(10 downto 0); -- up to 2k supported
 signal il_d: std_logic_vector(7 downto 0);
 
 -- stores Basic program and input line, everything else is custom registers inside CPU!
-type memory is array (0 to 65535) of std_logic_vector(7 downto 0);
+type memory is array (0 to 32767) of std_logic_vector(7 downto 0);
 signal ram: memory;
 signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
 signal pattern, memData: std_logic_vector(7 downto 0); 
-signal sel_lo4k: std_logic;
+signal sel_hi4k: std_logic;
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -101,7 +104,10 @@ alias PMOD_RXD1: std_logic is PMOD(5);
 alias PMOD_TXD1: std_logic is PMOD(6);
 alias PMOD_CTS1: std_logic is PMOD(7);
 
-alias RESET: std_logic is btn(3); --USR_BTN;
+alias RESET: std_logic is btn(3); 
+alias LED_RED: std_logic is led(2);
+alias LED_GREEN: std_logic is led(1);
+alias LED_BLUE: std_logic is led(0);
 
 -- debug
 signal T, freqcnt_value: std_logic_vector(31 downto 0);
@@ -158,49 +164,56 @@ signal win_sel: std_logic_vector(1 downto 0);		-- 4 input MUX
 
 begin
 
-LED(0) <= not nWR;
-LED(1) <= not nRD;
-LED(2) <= not nBUSREQ;
+LED_GREEN <= cpu_cache_empty;
+LED_RED <= cpu_cache_full;
+LED_BLUE <= cpu_clk;
 
 PMOD_RXD1 <= debug_txd;
---LED <= RXD_CHAR when (button(2) = '0') else switch;
 
 -- divide external clock
-on_ext_clk: process(ext_clk)
+on_ext_clk: process(RESET, ext_clk, cnt8Mhz, cnt307200)
 begin
- if (rising_edge(ext_clk)) then
-    cnt8MHz <= std_logic_vector (unsigned (cnt8MHz) + 1);
- end if;
-end process;
-
--- divide internal clock   	
-on_clk: process(RESET, CLK, cnt307200, cnt4096, cnt25MHz)
-begin
-	if (RESET = '1') then
+    if (RESET = '1') then
 		prescale_baud <= 0;
-		prescale_power <= 0;
 		cnt307200 <= (others => '0');
-		cnt4096 <= (others => '0');
-	else
-		if (rising_edge(CLK)) then
-			cnt25MHz <= std_logic_vector(unsigned(cnt25MHz) + 1);
+        cnt8MHz <= (others => '0');
+    else
+        if (rising_edge(ext_clk)) then
+            -- derive CPU clock
+            cnt8MHz <= std_logic_vector (unsigned (cnt8MHz) + 1);
 			-- baudrate clock generation
 			if (prescale_baud = 0) then
 				cnt307200 <= std_logic_vector(unsigned(cnt307200) + 1);
-				prescale_baud <= (25000000 / 307200) - 1;
+				prescale_baud <= ((FREQ_EXT_CLK / 2) / 307200);
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
+        end if;
+    end if;
+end process;
+
+-- divide internal clock   	
+on_clk: process(RESET, CLK, cnt4096, cnt25MHz)
+begin
+	if (RESET = '1') then
+        prescale_ms <= 0;
+        prescale_power <= 0;
+        cnt4096 <= (others => '0');
+        cnt25MHz <= (others => '0');
+    else
+		if (rising_edge(CLK)) then
+            -- derive VGA clock
+			cnt25MHz <= std_logic_vector(unsigned(cnt25MHz) + 1);
 			-- slow clock to get to 2Hz
 			if (prescale_power = 0) then
 				cnt4096 <= std_logic_vector(unsigned(cnt4096) + 1);
-				prescale_power <= (25000000 / 4096);
+				prescale_power <= ((FREQ_CLK / 2 ) / 4096);
 			else
 				prescale_power <= prescale_power - 1;
 			end if;
 			-- 1000Hz for CPU ticks (to measure elapsed time in milliseconds)
 			if (prescale_ms = 0) then
-				prescale_ms <= (25000000 / 1000);
+				prescale_ms <= ((FREQ_CLK / 2) / 1000);
 				freq1kHz <= not freq1kHz;
 			else
 				prescale_ms <= prescale_ms - 1;
@@ -233,7 +246,7 @@ cpu: entity work.MicroBasic
 		Generic map (
 		 --MSB => 15	-- 16-bit vars / arithmetic
 		 MSB => 31,	-- 32-bit vars / arithmetic
-		 Core_End => X"FFFF"
+		 Core_End => X"7FFF"
 		)
 		Port map (
 		reset => RESET,
@@ -265,7 +278,7 @@ cpu: entity work.MicroBasic
 		inchar => RXD_CHAR,
 		inchar_ready => RXD_READY,
 		-- debug / trace
-		overflowEnable => '1', --dip_overflowEnable,
+		overflowEnable => '1', 
 		traceEnable => (not sw_traceDisable),
 		baudrate => baudrate_x1,
 		debug_txd => debug_txd, 
@@ -277,23 +290,23 @@ cpu: entity work.MicroBasic
 
 -- ROM containing the IL language instructions (2 versions of Tiny Basic interpreter)
 il_rom: entity work.tbil port map ( 
-		extended => '1', --dip_extended,
+		extended => '1', 
 		a => il_a,
 		d => il_d 
 	);
 
--- infer simple 4k RAM
+-- infer simple 32k RAM
 on_cpuclk: process(cpu_clk)
 begin
 	if (rising_edge(cpu_clk)) then
-		if ((nBUSACK or nWR or sel_lo4k) = '0') then 
-			ram(to_integer(unsigned(A(11 downto 0)))) <= D;
+		if ((nBUSACK or nWR or A(15)) = '0') then 
+			ram(to_integer(unsigned(A(14 downto 0)))) <= D;
 		end if;
 	end if;
 end process;
 
-sel_lo4k <= '0' when (A(15 downto 12) = X"0") else '1';
-memData <= pattern when (sel_lo4k = '1') else ram(to_integer(unsigned(A(11 downto 0))));
+sel_hi4k <= '1' when (A(15 downto 12) = X"F") else '0';
+memData <= pattern when (sel_hi4k = '1') else ram(to_integer(unsigned(A(14 downto 0))));
 D <= memData when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 
 -- Character generator ROM handy for the marquee demo
@@ -311,7 +324,7 @@ with sw_cpuclk select cpu_clk <=
 		cnt8MHz(3) when O"4",		-- 1MHz (approx 6502)
 		cnt8MHz(1) when O"5",		-- 4MHz (approx Z80)
 		cnt8MHz(0) when O"6",		-- 8MHz (approx 68000)
-		CLK when others;            -- 50MHz
+		ext_clk when others;        -- 16MHz
 			 
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.fourdigitsevensegled port map (  
@@ -341,24 +354,24 @@ end process;
 	
 -- UART connection to the host
 txdout: entity work.uart_par2ser Port map (
-			reset => reset,
-			txd_clk => baudrate_x1,
-			send => cpu_outchar_send,
-			mode => "000", -- no parity, extra stop bit
-			data => cpu_outchar,
-         ready => cpu_outchar_ready,
-         txd => PMOD_RXD0
-		);
+		reset => reset,
+		txd_clk => baudrate_x1,
+		send => cpu_outchar_send,
+		mode => "000", -- no parity, extra stop bit
+		data => cpu_outchar,
+        ready => cpu_outchar_ready,
+        txd => PMOD_RXD0
+	);
 
 rxdinp: entity work.uart_ser2par Port map (
-			reset => reset,
-			rxd_clk => baudrate_x4,
-			mode => "000",	-- no parity, extra stop bit
-			char => RXD_CHAR,
-         ready => RXD_READY,
-			valid => RXD_VALID,
-         rxd => PMOD_TXD0
-		);
+		reset => reset,
+		rxd_clk => baudrate_x4,
+		mode => "000",	-- no parity, extra stop bit
+		char => RXD_CHAR,
+        ready => RXD_READY,
+		valid => RXD_VALID,
+        rxd => PMOD_TXD0
+	);
 		
 -- UART baudrate selection
 baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
@@ -527,6 +540,23 @@ sym_ram: entity work.symTracer port map (
 		char_addr => mcc_addr(8 downto 0),
 		char_out => sym_char		
 	);
+
+-- ADC 
+--adc: entity work.MercuryADC port map (
+--      -- command input
+--      clock    => CLK,              -- 50MHz onboard oscillator
+--      trigger  => '0',              -- assert to sample ADC
+--      diffn    => '0',              -- single/differential inputs
+--      channel => A(2 downto 0),     -- channel to sample
+--      -- data output
+--      Dout     => open,         -- data from ADC
+--      OutVal   => open,         -- pulsed when data sampled
+--      -- ADC connection
+--      adc_miso => ADC_MISO,     -- ADC SPI MISO
+--      adc_mosi => ADC_MOSI,     -- ADC SPI MOSI
+--      adc_cs   => ADC_CSN,      -- ADC SPI CHIP SELECT
+--      adc_clk  => ADC_SCK       -- ADC SPI CLOCK
+--      );
 
 end;
 
