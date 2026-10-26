@@ -142,7 +142,6 @@
       </File>
       <File Path="$PPRDIR/MercuryADC.vhd">
         <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>

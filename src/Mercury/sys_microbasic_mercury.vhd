@@ -61,10 +61,10 @@ entity sys_microbasic_mercury is
 				-- 5			Channel 5 (free)
 				-- 6			Channel 6 (free)
 				-- 7			Channel 7 (free)
-				--ADC_MISO: in std_logic;
-				--ADC_MOSI: out std_logic;
-				--ADC_SCK: out std_logic;
-				--ADC_CSN: out std_logic;
+				adc_miso: in std_logic;
+				adc_mosi: out std_logic;
+				adc_sck: out std_logic;
+				adc_csn: out std_logic;
 				-- VGA interface
 				hsync, vsync: out std_logic;
 				red: out std_logic_vector(2 downto 0);
@@ -87,11 +87,11 @@ signal il_d: std_logic_vector(7 downto 0);
 -- stores Basic program and input line, everything else is custom registers inside CPU!
 type memory is array (0 to 32767) of std_logic_vector(7 downto 0);
 signal ram: memory;
-signal nBUSREQ, nBUSACK, nRD, nWR: std_logic;
+signal nBUSREQ, nBUSACK, nREADY, nRD, nWR: std_logic;
 signal A: std_logic_vector(15 downto 0);
 signal D: std_logic_vector(7 downto 0);
-signal pattern, memData: std_logic_vector(7 downto 0); 
-signal sel_hi4k: std_logic;
+signal pattern, memData, rom_adc: std_logic_vector(7 downto 0); 
+signal sel_hi4k, sel_FFXX: std_logic;
 
 -- Connect to PmodUSBUART 
 -- https://digilent.com/reference/pmod/pmodusbuart/reference-manual
@@ -150,6 +150,10 @@ signal button: std_logic_vector(7 downto 0);
 ---- UART
 signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
 
+-- ADC
+signal adc_data: std_logic_vector(7 downto 0);
+signal adc_start, adc_done: std_logic;
+
 -- VGA
 signal x80, y60: std_logic_vector(7 downto 0);
 signal vga_fgcolor, vga_bgcolor: std_logic_vector(3 downto 0);
@@ -166,7 +170,7 @@ begin
 
 LED_GREEN <= cpu_cache_empty;
 LED_RED <= cpu_cache_full;
-LED_BLUE <= cpu_clk;
+LED_BLUE <= nREADY;
 
 PMOD_RXD1 <= debug_txd;
 
@@ -262,7 +266,7 @@ cpu: entity work.MicroBasic
 		-- Basic code and command line memory
 		nBUSREQ => nBUSREQ,
 		nBUSACK => open,
-		nREADY => '0',
+		nREADY => nREADY,
 		nRD => nRD,
 		nWR => nWR,
 		ABUS => A,
@@ -306,7 +310,9 @@ begin
 end process;
 
 sel_hi4k <= '1' when (A(15 downto 12) = X"F") else '0';
-memData <= pattern when (sel_hi4k = '1') else ram(to_integer(unsigned(A(14 downto 0))));
+sel_FFXX <= '1' when (A(15 downto 8) = X"FF") else '0';
+rom_adc <= adc_data when (sel_FFXX = '1') else pattern;
+memData <= rom_adc when (sel_hi4k = '1') else ram(to_integer(unsigned(A(14 downto 0))));
 D <= memData when ((nBUSACK or nRD) = '0') else "ZZZZZZZZ";
 
 -- Character generator ROM handy for the marquee demo
@@ -542,21 +548,34 @@ sym_ram: entity work.symTracer port map (
 	);
 
 -- ADC 
---adc: entity work.MercuryADC port map (
---      -- command input
---      clock    => CLK,              -- 50MHz onboard oscillator
---      trigger  => '0',              -- assert to sample ADC
---      diffn    => '0',              -- single/differential inputs
---      channel => A(2 downto 0),     -- channel to sample
---      -- data output
---      Dout     => open,         -- data from ADC
---      OutVal   => open,         -- pulsed when data sampled
---      -- ADC connection
---      adc_miso => ADC_MISO,     -- ADC SPI MISO
---      adc_mosi => ADC_MOSI,     -- ADC SPI MOSI
---      adc_cs   => ADC_CSN,      -- ADC SPI CHIP SELECT
---      adc_clk  => ADC_SCK       -- ADC SPI CLOCK
---      );
+adc_start <= (not nRD) and sel_FFXX;
+adc: entity work.MercuryADC port map (
+      -- command input
+      clock    => CLK,              -- 50MHz onboard oscillator
+      trigger  => adc_start,         -- assert to sample ADC
+      diffn    => '1',              -- single inputs
+      channel => A(2 downto 0),     -- channel to sample
+      -- data output
+      Dout(9 downto 2) => adc_data,   -- data from ADC
+      Dout(1 downto 0) => open,       -- data from ADC, ingnore 2 LSBs
+      OutVal   => adc_done,           -- pulsed when data sampled
+      -- ADC connection
+      adc_miso => ADC_MISO,     -- ADC SPI MISO
+      adc_mosi => ADC_MOSI,     -- ADC SPI MOSI
+      adc_cs   => ADC_CSN,      -- ADC SPI CHIP SELECT
+      adc_clk  => ADC_SCK       -- ADC SPI CLOCK
+      );
+
+on_adc: process(RESET, nREADY)
+begin
+    if ((RESET or adc_done) = '1') then 
+        nREADY <= '0';
+    else
+        if (rising_edge(adc_start)) then
+            nREADY <= '1';
+        end if;
+    end if;
+end process;
 
 end;
 
