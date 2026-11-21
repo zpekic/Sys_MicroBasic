@@ -44,7 +44,7 @@ entity sys_microbasic_mercury is
 				-- Push buttons on baseboard
 				btn: in std_logic_vector(3 downto 0); 
 				-- Stereo audio output on baseboard
-				--AUDIO_OUT_L, AUDIO_OUT_R: out std_logic;
+				audio_out_l, audio_out_r: out std_logic;
 				-- 7seg LED on baseboard 
 				ag_seg: out std_logic_vector(6 downto 0); 
 				an_7seg: out std_logic_vector(3 downto 0); 
@@ -52,6 +52,7 @@ entity sys_microbasic_mercury is
 				-- 3 LEDs on Mercury board
 				led: out std_logic_vector(2 downto 0);
 				-- ADC interface
+				-- https://ww1.microchip.com/downloads/en/DeviceDoc/21295d.pdf
 				-- channel	input
 				-- 0			Audio Left
 				-- 1 			Audio Right
@@ -118,26 +119,38 @@ signal debug_txd: std_logic;
 signal cpu_t: std_logic_vector(15 downto 0);
 signal cpu_cache_full, cpu_cache_empty: std_logic;
 signal cpu_uipc: std_logic_vector(8 downto 0);		-- microcode program counter value
+signal leds_segment: std_logic_vector(7 downto 0);
+signal leds_anode: std_logic_vector(3 downto 0);
 
 signal prescale_baud, prescale_power, prescale_ms: integer range 0 to 65535;
 
 signal cnt25MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 50MHz
-signal cnt8MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 16MHz (EXT_CLK)
 alias vga_clk: std_logic is cnt25MHz(0);
+signal cnt8MHz: std_logic_vector(7 downto 0); -- 8 bit counter driven by 16MHz (EXT_CLK)
+alias freq1MHz: std_logic is cnt8MHz(3);
 signal cnt307200: std_logic_vector(15 downto 0); -- 16 bit counter driven by 2*307.2kHz
+alias freq38400: std_logic is cnt307200(3);
 alias freq19200: std_logic is cnt307200(4);
+alias freq9600: std_logic is cnt307200(5);
+alias freq4800: std_logic is cnt307200(6);
+alias freq2400: std_logic is cnt307200(7);
+alias freq1200: std_logic is cnt307200(8);
+alias freq600: std_logic is cnt307200(9);
 
 signal cnt4096: std_logic_vector(11 downto 0); -- 12 bit counter driven by 2*4.096kHz
 alias freq2: std_logic is cnt4096(11); 
 signal cpu_clk: std_logic;
 signal freq1kHz: std_logic;
 
+---- UART
+signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
+signal tty_in, tty_out: std_logic;
 -- single char UART output
 signal cpu_outchar_ready, cpu_outchar_send: std_logic;
 signal cpu_outchar: std_logic_vector(7 downto 0);
 -- single char UART input
-signal RXD_READY, RXD_VALID: std_logic;
-signal RXD_CHAR: std_logic_vector(7 downto 0);
+signal rxd_ready, rxd_valid: std_logic;
+signal rxd_char: std_logic_vector(7 downto 0);
 
 -- debounced inputs
 signal switch: std_logic_vector(7 downto 0);
@@ -147,12 +160,20 @@ alias sw_traceRegSel: std_logic_vector(1 downto 0) is switch(1 downto 0);
 alias sw_traceDisable: std_logic is switch(4);
 signal button: std_logic_vector(7 downto 0);
 
----- UART
-signal baudrate_x1, baudrate_x2, baudrate_x4: std_logic;
-
 -- ADC
-signal adc_data: std_logic_vector(7 downto 0);
-signal adc_start, adc_done: std_logic;
+signal adc_data, audio_in: std_logic_vector(7 downto 0);
+signal adc_trigger, adc_start, adc_done: std_logic;
+signal adc_channel: std_logic_vector(2 downto 0);
+signal sd: std_logic;
+signal audio_out: std_logic;
+--signal f1200, f1200_0, f1200_1: std_logic;
+signal f2400, f2400_0, f2400_1: std_logic;
+signal f4800, f4800_0, f4800_1: std_logic;
+signal pulse_width: std_logic_vector(15 downto 0);
+--signal audio_bit: std_logic;
+alias cas_save: std_logic is button(2);
+alias cas_load: std_logic is button(1);
+signal cas_io: std_logic;
 
 -- VGA
 signal x80, y60: std_logic_vector(7 downto 0);
@@ -170,7 +191,7 @@ begin
 
 LED_GREEN <= cpu_cache_empty;
 LED_RED <= cpu_cache_full;
-LED_BLUE <= nREADY;
+LED_BLUE <= cas_io and (f2400 or f4800); --RXD_VALID;
 
 PMOD_RXD1 <= debug_txd;
 
@@ -188,7 +209,7 @@ begin
 			-- baudrate clock generation
 			if (prescale_baud = 0) then
 				cnt307200 <= std_logic_vector(unsigned(cnt307200) + 1);
-				prescale_baud <= ((FREQ_EXT_CLK / 2) / 307200);
+				prescale_baud <= ((FREQ_EXT_CLK / 2) / 307200 - 1);
 			else
 				prescale_baud <= prescale_baud - 1;
 			end if;
@@ -271,8 +292,8 @@ cpu: entity work.MicroBasic
 		nWR => nWR,
 		ABUS => A,
 		DBUS => D,		
-		NMI => '0',
-		INT => '0',
+		NMI => button(2),
+		INT => button(1),
 		INTACK => open,
 		-- output char
 		outchar => cpu_outchar,
@@ -329,35 +350,22 @@ with sw_cpuclk select cpu_clk <=
 		cnt4096(0) when O"3",		-- 4.096kHz
 		cnt8MHz(3) when O"4",		-- 1MHz (approx 6502)
 		cnt8MHz(1) when O"5",		-- 4MHz (approx Z80)
-		cnt8MHz(0) when O"6",		-- 8MHz (approx 68000)
+		cnt8MHz(0) when O"6",		-- 8MHz (approx 68008)
 		ext_clk when others;        -- 16MHz
 			 
 -- display some debug data of 6-digit 7-seg display	
 leds: entity work.fourdigitsevensegled port map (  
           -- inputs
         data => cpu_debug(15 downto 0),
-        digsel => cnt4096(5 downto 4),
+        digsel => cnt4096(4 downto 3),
         showdigit => "1111",
         showdot => cpu_debug(27 downto 24),
         showsegments => '1',
         -- outputs
-        anode => an_7seg,
-        segment(7) => seg_dot,
-        segment(6 downto 0) => ag_seg
+        anode => leds_anode,
+        segment => leds_segment
         );	 		
 
--- simple character echo / loopback
-on_rxd_ready: process(RXD_READY, RXD_CHAR, reset)
-begin
-	if (reset = '1') then
-		T <= (others => '0');
-	else
-		if (rising_edge(RXD_READY)) then
-			T <= T(23 downto 0) & RXD_CHAR; 
-		end if;
-	end if;
-end process;
-	
 -- UART connection to the host
 txdout: entity work.uart_par2ser Port map (
 		reset => reset,
@@ -366,17 +374,19 @@ txdout: entity work.uart_par2ser Port map (
 		mode => "000", -- no parity, extra stop bit
 		data => cpu_outchar,
         ready => cpu_outchar_ready,
-        txd => PMOD_RXD0
+        delay => cas_save,
+        txd => TTY_OUT
 	);
 
-rxdinp: entity work.uart_ser2par Port map (
+rxdinp: entity work.uart_ser2parEx Port map (
 		reset => reset,
 		rxd_clk => baudrate_x4,
 		mode => "000",	-- no parity, extra stop bit
+--		mode => switch(2 downto 0),	
 		char => RXD_CHAR,
         ready => RXD_READY,
 		valid => RXD_VALID,
-        rxd => PMOD_TXD0
+        rxd => TTY_IN
 	);
 		
 -- UART baudrate selection
@@ -384,18 +394,6 @@ baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
 baudrate_x2 <= cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
 baudrate_x4 <= cnt307200(to_integer(8 - unsigned('0' & sw_baudrate)));
 							
--- count signal frequencies
---freqcnt: entity work.freqcounter Port map ( 
---		reset => RESET,
---		clk => freq2,
---		freq => baudrate_x1,
---		bcd => '1',
---		add => X"00000004",
---		cin => '0',
---		cout => open,
---		value => freqcnt_value
---	);		
-
 -- VGA to visualize Basic memory and microcode execution
 -- 32 rows by 64 chars are displayed, so whole 2k RAM fits into display
 vga: entity work.mwvga Port map ( 
@@ -547,14 +545,15 @@ sym_ram: entity work.symTracer port map (
 		char_out => sym_char		
 	);
 
--- ADC 
-adc_start <= (not nRD) and sel_FFXX;
+-- ADC is used both as CPU read-only peripheral and for cassette audio input sampling
+nREADY <= '0'; --adc_start; -- TODO: combine with other I/O ready signals if available
+
 adc: entity work.MercuryADC port map (
       -- command input
-      clock    => CLK,              -- 50MHz onboard oscillator
-      trigger  => adc_start,         -- assert to sample ADC
-      diffn    => '1',              -- single inputs
-      channel => A(2 downto 0),     -- channel to sample
+      clock    => clk,    
+      trigger  => adc_start,    -- assert to sample ADC
+      diffn    => '1',          -- single inputs
+      channel => adc_channel,         -- channel to sample
       -- data output
       Dout(9 downto 2) => adc_data,   -- data from ADC
       Dout(1 downto 0) => open,       -- data from ADC, ingnore 2 LSBs
@@ -566,16 +565,93 @@ adc: entity work.MercuryADC port map (
       adc_clk  => ADC_SCK       -- ADC SPI CLOCK
       );
 
-on_adc: process(RESET, nREADY)
+adc_trigger <= cnt307200(TO_INTEGER(unsigned(switch(1 downto 0)))) when (cas_io = '1') else ((not nRD) and sel_FFXX);
+adc_channel <= "000" when (cas_io = '1') else A(2 downto 0);
+
+on_trigger: process(RESET, adc_trigger, adc_done)
 begin
-    if ((RESET or adc_done) = '1') then 
-        nREADY <= '0';
+    if ((RESET or adc_done) = '1') then
+        adc_start <= '0';
     else
-        if (rising_edge(adc_start)) then
-            nREADY <= '1';
+        if (rising_edge(adc_trigger)) then
+            adc_start <= '1';
         end if;
     end if;
 end process;
 
-end;
+on_adc_done: process(RESET, adc_done, adc_data)
+begin
+    if (rising_edge(adc_done)) then
+       audio_in <= adc_data;
+    end if;
+end process;
 
+on_adc_sample: process(RESET, freq38400, audio_in)
+begin
+    if (RESET = '1') then
+        sd <= '1';
+    else
+        if (rising_edge(freq38400)) then
+            case audio_in(7 downto 4) is
+                when X"0" | X"1" | X"2" | X"3" | X"4" | X"5" | X"6" =>
+                    sd <= '0';
+                when X"9" | X"A" | X"B" | X"C" | X"D" | X"E" | X"F" =>
+                    sd <= '1';
+                when others =>
+                    sd <= sd;
+            end case;
+        end if;
+    end if;
+end process;
+
+st: entity work.signaltimer port map (
+    reset => reset,
+    clk => cnt8MHz(3),  -- 1MHz (1us time tick)
+    pulse => sd,
+    width => pulse_width
+    );
+
+-- 1200 Hz = 833us
+--f1200_0 <= '1' when (unsigned(pulse_width) > to_unsigned(833 - 83, pulse_width'length)) else '0';--(sd = X"CCCC") else '0';
+--f1200_1 <= '1' when (unsigned(pulse_width) < to_unsigned(833 + 83, pulse_width'length)) else '0';--(sd = X"6666") else '0';
+--f1200 <= f1200_0 and f1200_1;
+
+-- 2400 Hz = 416us
+f2400_0 <= '1' when (unsigned(pulse_width) > to_unsigned(416 - 42 , pulse_width'length)) else '0';--(sd = X"0F0F") else '0';
+f2400_1 <= '1' when (unsigned(pulse_width) < to_unsigned(416 + 42, pulse_width'length)) else '0';--(sd = X"1E1E") else '0';
+f2400 <= f2400_0 and f2400_1;
+
+-- 4800 Hz = 208us
+f4800_0 <= '1' when (unsigned(pulse_width) > to_unsigned(208 - 21, pulse_width'length)) else '0';--(sd = X"CCCC") else '0';
+f4800_1 <= '1' when (unsigned(pulse_width) < to_unsigned(208 + 21, pulse_width'length)) else '0';--(sd = X"6666") else '0';
+f4800 <= f4800_0 and f4800_1;
+
+-- Cassette interface
+cas_io <= cas_save or cas_load;
+
+-- Cassette output
+audio_out_l <= audio_out;
+audio_out_r <= audio_out;
+audio_out <= freq4800 when (TTY_OUT = '1') else freq2400;
+--with button(2 downto 1) select audio_out <= 
+--    '0' when "00",
+--    freq1200 when "01",
+--    freq2400 when "10",
+--    freq4800 when others;
+
+-- Casette input
+PMOD_RXD0 <= TTY_OUT;
+TTY_IN <= PMOD_TXD0 when (cas_load = '0') else (not f2400);
+
+-- reuse 7seg led display for debug signals to external oscilloscope
+ag_seg(0) <= leds_segment(0) when (cas_io = '0') else adc_trigger;
+ag_seg(1) <= leds_segment(1) when (cas_io = '0') else adc_start;
+ag_seg(2) <= leds_segment(2) when (cas_io = '0') else adc_done;
+ag_seg(3) <= leds_segment(3) when (cas_io = '0') else audio_out;
+ag_seg(4) <= leds_segment(4) when (cas_io = '0') else baudrate_x1;
+ag_seg(5) <= leds_segment(5) when (cas_io = '0') else sd;
+ag_seg(6) <= leds_segment(6) when (cas_io = '0') else f2400;
+seg_dot <= leds_segment(7) when (cas_io = '0') else f4800;
+an_7seg <= leds_anode when (cas_io = '0') else "1111";
+
+end;

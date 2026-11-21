@@ -37,12 +37,13 @@ entity uart_par2ser is
 			  mode: in STD_LOGIC_VECTOR(2 downto 0);
 			  data: in STD_LOGIC_VECTOR(7 downto 0);
            ready : buffer STD_LOGIC;
+           delay : in STD_LOGIC;
            txd : out  STD_LOGIC);
 end uart_par2ser;
 
 architecture Behavioral of uart_par2ser is
 
-signal bitSel, lastBit: std_logic_vector(3 downto 0);
+signal bitSel, lastBit: std_logic_vector(5 downto 0); -- from 10 to 63 clock cycles
 signal bitClk, p_bit, parity: std_logic;
 signal char: std_logic_vector(7 downto 0);
 
@@ -60,23 +61,23 @@ with mode select p_bit <=
 
 -- drive simple UART data output with mux
 with bitSel select txd <= 		
-			'1'     when X"0", -- high while not busy
-			'1'	  when X"1", -- delay 1 (to sync with txd_clk)
-			'0' 	  when X"2", -- start bit
-			char(0) when X"3",   -- data
-			char(1) when X"4",
-			char(2) when X"5",
-			char(3) when X"6",
-			char(4) when X"7",
-			char(5) when X"8",
-			char(6) when X"9",
-			char(7) when X"A",
-			p_bit   when X"B",	-- parity or stop
-			'1' 	  when X"C",	-- stop
-			'1' when others;		-- delay
+			'1'      when O"00", -- high while not busy
+			'1'      when O"01", -- delay 1 (to sync with txd_clk)
+			'0'      when O"02", -- start bit
+			char(0) when O"03",  -- data
+			char(1) when O"04",
+			char(2) when O"05",
+			char(3) when O"06",
+			char(4) when O"07",
+			char(5) when O"10",
+			char(6) when O"11",
+			char(7) when O"12",
+			p_bit   when O"13",	-- parity or stop
+			'1' 	when O"14",	-- stop
+			'1' when others;    -- delay
 
 -- drive high when any are being bits transmitted	
-ready <= '1' when (bitSel = "0000") else '0'; 					
+ready <= '1' when (bitSel = O"00") else '0'; 					
 
 -- when ready, listen to rising edge of send signal to start
 bitClk <= send when (ready = '1') else txd_clk;
@@ -91,8 +92,8 @@ begin
 	--end if;
 end process;
 
--- small optimization: wrap around at 12 when no parity, 13 when parity is used
-lastBit <= X"D";-- when (mode(2) = '1') else X"C";
+-- append time after character sent if delay input is high
+lastBit <= O"14" when (delay = '0') else O"77";
 
 -- note that when going from 1111 to 0000 this counter shuts itself off, waits for send pulse
 on_bitclk: process(reset, bitClk)

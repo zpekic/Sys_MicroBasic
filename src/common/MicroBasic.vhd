@@ -91,7 +91,7 @@ alias IS_CPU32: std_logic is BITCNT(4);																		-- '0' / '1'
 constant STEPCNT: std_logic_vector(7 downto 0) := std_logic_vector(to_unsigned(MSB + 1, 8)); -- X"10" / X"20"
 constant BCDDIGITS: positive := (MSB + 9) / 4; 	-- 6 / 10
 constant CP_OFF: positive := MSB_HALF + 1;		-- 8 / 16
-type ram16xHalf is array (0 to 15) of std_logic_vector(MSB_HALF downto 0);
+type ram32xHalf is array (0 to 31) of std_logic_vector(MSB_HALF downto 0);
 type ram32xFull is array (0 to 31) of std_logic_vector(MSB downto 0);
 type ram8xFull is array(0 to 7) of std_logic_vector(MSB downto 0);
 constant INT_VECTORS: ram8xFull := (
@@ -169,7 +169,7 @@ signal inlend_max_alt_basline_found, inlend_min_alt_impline_empty, basline_found
 signal nbusreq_alt_nready: std_logic;
 
 -- expression stack, 32 half-words / 16 words
-signal ExpStack: ram16xHalf;
+signal ExpStack: ram32xHalf;
 signal ExpSP: std_logic_vector(4 downto 0);			-- stack pointer points to free byte
 signal ExpSwapR, ExpSwapS: std_logic_vector(4 downto 0);	-- pointers used in SX IL instruction
 signal estack_is_full, estack_is_empty: std_logic;
@@ -211,9 +211,9 @@ alias YLo: std_logic_vector(MSB downto 0) is Y(MSB downto 0);
 signal R, S: std_logic_vector(MSB downto 0);			-- ALU input arguments are 16 bit
 signal s_plus_r, s_minus_r, neg_r, neg_s, neg_ylo, neg_yhi: std_logic_vector(MSB downto 0);
 signal t_plus_r, t_minus_s: std_logic_vector(MSB downto 0);
-signal s_mul_r: std_logic_vector(MSB_DOUBLE downto 0);		-- output of combinatorial multiplier
+signal s_mul_r: std_logic_vector(MSB_DOUBLE downto 0);          -- output of combinatorial multiplier
 signal subc: std_logic_vector((MSB + 1) downto 0);				-- 17 bits, MSB is carry out which is needed in division step 
-signal y_zero, r_is_zero: std_logic;								-- combinatorial state of Y and R
+signal y_zero, r_is_zero: std_logic;							-- combinatorial state of Y and R
 signal r_is_zero_full, r_is_zero_16: std_logic;
 signal y_zero_alt_cp_skip, cp_skip: std_logic;					-- compare flags
 signal alu_sign, alu_overflow, alu_ready, alu_s15: std_logic;	-- state needed for BCD, signed division
@@ -1077,7 +1077,6 @@ outchar <= CHAROUT and X"7F";
 on_inchar_ready: process(reset, inchar_ready, mb_gotChar)
 begin
 	if ((reset or mb_gotChar) = '1') then
-		--CHARIN <= (others => '0');
 		charin_ready <= '0';
 		charin_is_break <= '0';
 	else
@@ -1109,10 +1108,10 @@ end process;
 			cnt_statement <= (others => '0');
 			lino_sa <= (others => '0');
 			-- pseudo-random number seed
-			if (PrgEnd = X"0000") then
+			if ((PrgEnd xor cnt_perf) = X"0000") then
 				lfsr <= X"FFFF"; 
 			else
-				lfsr <= PrgEnd;	-- PrgEnd value changes at each Basic program edit 
+				lfsr <= (PrgEnd xor cnt_perf);	-- PrgEnd value changes at each Basic program edit and random timing 
 			end if;
 		else
 			-- generate another pseudo-random 16-bit value
