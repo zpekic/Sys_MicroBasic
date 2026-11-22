@@ -173,7 +173,8 @@ signal pulse_width: std_logic_vector(15 downto 0);
 --signal audio_bit: std_logic;
 alias cas_save: std_logic is button(2);
 alias cas_load: std_logic is button(1);
-signal cas_io: std_logic;
+-- could actually drive cassette motor if connected to REM input pin
+signal cas_motor: std_logic;
 
 -- VGA
 signal x80, y60: std_logic_vector(7 downto 0);
@@ -191,7 +192,7 @@ begin
 
 LED_GREEN <= cpu_cache_empty;
 LED_RED <= cpu_cache_full;
-LED_BLUE <= cas_io and (f2400 or f4800); --RXD_VALID;
+LED_BLUE <= cas_motor and (f2400 or f4800); --RXD_VALID;
 
 PMOD_RXD1 <= debug_txd;
 
@@ -389,10 +390,10 @@ rxdinp: entity work.uart_ser2parEx Port map (
         rxd => TTY_IN
 	);
 		
--- UART baudrate selection
-baudrate_x1 <= cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
-baudrate_x2 <= cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
-baudrate_x4 <= cnt307200(to_integer(8 - unsigned('0' & sw_baudrate)));
+-- UART baudrate selection (600 baud for cassette, otherwise from switches)
+baudrate_x1 <= freq600 when (cas_motor = '1') else cnt307200(to_integer(10 - unsigned('0' & sw_baudrate)));
+baudrate_x2 <= freq1200 when (cas_motor = '1') else cnt307200(to_integer(9 - unsigned('0' & sw_baudrate)));
+baudrate_x4 <= freq2400 when (cas_motor = '1') else cnt307200(to_integer(8 - unsigned('0' & sw_baudrate)));
 							
 -- VGA to visualize Basic memory and microcode execution
 -- 32 rows by 64 chars are displayed, so whole 2k RAM fits into display
@@ -546,7 +547,7 @@ sym_ram: entity work.symTracer port map (
 	);
 
 -- ADC is used both as CPU read-only peripheral and for cassette audio input sampling
-nREADY <= '0'; --adc_start; -- TODO: combine with other I/O ready signals if available
+nREADY <= adc_start; -- TODO: combine with other I/O ready signals if available
 
 adc: entity work.MercuryADC port map (
       -- command input
@@ -565,8 +566,8 @@ adc: entity work.MercuryADC port map (
       adc_clk  => ADC_SCK       -- ADC SPI CLOCK
       );
 
-adc_trigger <= cnt307200(TO_INTEGER(unsigned(switch(1 downto 0)))) when (cas_io = '1') else ((not nRD) and sel_FFXX);
-adc_channel <= "000" when (cas_io = '1') else A(2 downto 0);
+adc_trigger <= cnt307200(TO_INTEGER(unsigned(switch(1 downto 0)))) when (cas_motor = '1') else ((not nRD) and sel_FFXX);
+adc_channel <= "000" when (cas_motor = '1') else A(2 downto 0);
 
 on_trigger: process(RESET, adc_trigger, adc_done)
 begin
@@ -627,7 +628,7 @@ f4800_1 <= '1' when (unsigned(pulse_width) < to_unsigned(208 + 21, pulse_width'l
 f4800 <= f4800_0 and f4800_1;
 
 -- Cassette interface
-cas_io <= cas_save or cas_load;
+cas_motor <= cas_save or cas_load;
 
 -- Cassette output
 audio_out_l <= audio_out;
@@ -644,14 +645,8 @@ PMOD_RXD0 <= TTY_OUT;
 TTY_IN <= PMOD_TXD0 when (cas_load = '0') else (not f2400);
 
 -- reuse 7seg led display for debug signals to external oscilloscope
-ag_seg(0) <= leds_segment(0) when (cas_io = '0') else adc_trigger;
-ag_seg(1) <= leds_segment(1) when (cas_io = '0') else adc_start;
-ag_seg(2) <= leds_segment(2) when (cas_io = '0') else adc_done;
-ag_seg(3) <= leds_segment(3) when (cas_io = '0') else audio_out;
-ag_seg(4) <= leds_segment(4) when (cas_io = '0') else baudrate_x1;
-ag_seg(5) <= leds_segment(5) when (cas_io = '0') else sd;
-ag_seg(6) <= leds_segment(6) when (cas_io = '0') else f2400;
-seg_dot <= leds_segment(7) when (cas_io = '0') else f4800;
-an_7seg <= leds_anode when (cas_io = '0') else "1111";
+ag_seg <= leds_segment(6 downto 0) when (cas_motor = '0') else (f2400 & sd & baudrate_x1 & audio_out & adc_done & adc_start & adc_trigger);
+seg_dot <= leds_segment(7) when (cas_motor = '0') else f4800;
+an_7seg <= leds_anode when (cas_motor = '0') else "1111";
 
 end;

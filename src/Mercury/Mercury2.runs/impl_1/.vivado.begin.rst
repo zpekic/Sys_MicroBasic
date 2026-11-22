@@ -113,3 +113,18 @@
     <Process Command="vivado.bat" Owner="zpeki" Host="DESKTOP-AIDLOSE" Pid="20516" HostCore="8" HostMemory="034024419328">
     </Process>
 </ProcessHandle>
+<?xml version="1.0"?>
+<ProcessHandle Version="1" Minor="0">
+    <Process Command="vivado.bat" Owner="zpeki" Host="DESKTOP-AIDLOSE" Pid="34944" HostCore="8" HostMemory="034024419328">
+    </Process>
+</ProcessHandle>
+<?xml version="1.0"?>
+<ProcessHandle Version="1" Minor="0">
+    <Process Command="vivado.bat" Owner="zpeki" Host="DESKTOP-AIDLOSE" Pid="35908" HostCore="8" HostMemory="034024419328">
+    </Process>
+</ProcessHandle>
+<?xml version="1.0"?>
+<ProcessHandle Version="1" Minor="0">
+    <Process Command="vivado.bat" Owner="zpeki" Host="DESKTOP-AIDLOSE" Pid="21112" HostCore="8" HostMemory="034024419328">
+    </Process>
+</ProcessHandle>
