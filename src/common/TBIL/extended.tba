@@ -29,14 +29,14 @@
 	J I_BEG		//if, input
 	J LETLP		//j
 	J LETLP		//k
-	J L_BEG		//let, list
+	J L_BEG		//let, list, load
 	J LETLP		//m
 	J N_BEG		//next, new
 	J LETLP		//o
 	J P_BEG		//print, poke, push, pop
 	J LETLP		//q
 	J R_BEG		//return, run
-	J LETLP		//s
+	J S_BEG		//save
 	J LETLP	 	//t
 	J LETLP		//u
 	J LETLP		//v
@@ -72,9 +72,9 @@
 :LISTI	BR LIST			//island to overcome branch extent limit
 :LETEX	NC			//check if another statement after
 
-:LIST 	BC L_END, "LIST"
-	BE L2
-:L1   	PC "@^J^@^"	 	//PUNCH LEADER
+:LIST   BC LOAD, "LIST"
+:LIST0  BE L2
+:L1     PC "@^J^@^"	 	//PUNCH LEADER
 	LS              	//LIST
 	PC "S^"         	//PUNCH X-OFF
 	NL
@@ -84,6 +84,27 @@
 	BR L1
 :L3   	BC *, ","        	//SEPARATED BY COMMAS
 	BR L2
+ 
+:LOAD   BC L_END, "LOAD"
+        SX 0
+        JS P_REW
+        JS P_PLAY
+        JS P_ENT
+:LOAD0  JS WAIT
+        DS          // duplicate stack because we will do 2 compares
+        LB 2        // code for =
+        LN 3        // ASCII for CTRL/C
+        CP          // char = CTRL/C?
+        BR LOAD1    // No
+        SP          // yes, pop stack
+        WS          // stop
+:LOAD1  LB 2        // code for =
+        LN 13       // ASCII for ENTER
+        CP          // char = ENTER?
+        BR LOAD0    // No, go get another character
+        // TODO add code to load
+        NX
+       
 :L_END	J LETLP
 
 // FOR ----------------------------------------
@@ -214,10 +235,10 @@
 
 :POP	BC P_END, "POP"
 	SX 0		//CREATE CACHE ENTRY
-:POPNX	BV *		//at least one variable name
+:POPNX	BV *	//at least one variable name
 	SX 2
 	SX 1		//variable name under the value on stack
-	SV		//pick value to variable
+	SV		    //pick value to variable
 	BC PPEND, ","	//more to pop?
 	BR POPNX
 :PPEND	NC
@@ -238,7 +259,7 @@
 :R_BEG 	BC RUN, "RETURN"
 	SX 0		//CREATE CACHE ENTRY
 	BE *
-	RS              //RECOVER SAVED LINE
+	RS          //RECOVER SAVED LINE
 	NX
 
 :RUN  	BC REM, "RUN"
@@ -248,6 +269,27 @@
 	SX 0		//CREATE CACHE ENTRY
 	NX		// just skip to next CR 
 :R_END	J LETLP
+
+:S_BEG  BC S_END, "SAVE"
+        SX 0
+        JS P_REW
+        JS P_REC
+        JS P_ENT
+:SAVE0  JS WAIT
+        DS          // duplicate stack because we will do 2 compares
+        LB 2        // code for =
+        LN 3        // ASCII for CTRL/C
+        CP          // char = CTRL/C?
+        BR SAVE1    // No
+        SP          // yes, pop stack
+        WS          // stop
+:S_END  J LETLP
+:SAVE1  LB 2        // code for =
+        LN 13       // ASCII for ENTER
+        CP          // char = ENTER?
+        BR SAVE0    // No, go get another character
+        // TODO add code to save
+        J LIST0
 
 //
 //  SUBROUTINES
@@ -389,3 +431,16 @@
 		
 :R6   	LB 4             //>
 	RT
+    
+:P_REW  NL
+        PC "M^G^REWIND tape , then press "
+        RT
+:P_PLAY PC "PLAY "
+        RT
+:P_REC  PC "RECORD "
+        RT
+:P_ENT  PC "and ENTER (to continue) or CTRL/C (to cancel)M^"
+        RT 
+:WAIT   LN 23       // u_charin function in microcode
+        LN 0        // dummy
+        J F2CONT    // won't return unless character is in the buffer
